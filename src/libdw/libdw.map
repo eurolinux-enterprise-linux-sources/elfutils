@@ -49,7 +49,6 @@ ELFUTILS_0.122 {
     dwarf_getlocation_addr;
     dwarf_getmacros;
     dwarf_getpubnames;
-    dwarf_getscn_info;
     dwarf_getscopes;
     dwarf_getscopes_die;
     dwarf_getscopevar;
@@ -352,3 +351,13 @@ ELFUTILS_0.171 {
     dwarf_getabbrevattr_data;
     dwarf_cu_info;
 } ELFUTILS_0.170;
+
+ELFUTILS_0.173 {
+  global:
+    dwarf_next_lines;
+} ELFUTILS_0.171;
+
+ELFUTILS_0.175 {
+  global:
+    dwelf_elf_begin;
+} ELFUTILS_0.173;

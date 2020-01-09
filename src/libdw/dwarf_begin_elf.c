@@ -71,7 +71,7 @@ static const char dwarf_scnnames[IDX_last][19] =
 #define ndwarf_scnnames (sizeof (dwarf_scnnames) / sizeof (dwarf_scnnames[0]))
 
 static Dwarf *
-check_section (Dwarf *result, GElf_Ehdr *ehdr, Elf_Scn *scn, bool inscngrp)
+check_section (Dwarf *result, size_t shstrndx, Elf_Scn *scn, bool inscngrp)
 {
   GElf_Shdr shdr_mem;
   GElf_Shdr *shdr;
@@ -101,7 +101,7 @@ check_section (Dwarf *result, GElf_Ehdr *ehdr, Elf_Scn *scn, bool inscngrp)
 
   /* We recognize the DWARF section by their names.  This is not very
      safe and stable but the best we can do.  */
-  const char *scnname = elf_strptr (result->elf, ehdr->e_shstrndx,
+  const char *scnname = elf_strptr (result->elf, shstrndx,
 				    shdr->sh_name);
   if (scnname == NULL)
     {
@@ -156,17 +156,9 @@ check_section (Dwarf *result, GElf_Ehdr *ehdr, Elf_Scn *scn, bool inscngrp)
     {
       if (elf_compress (scn, 0, 0) < 0)
 	{
-	  /* If we failed to decompress the section and it's the
-	     debug_info section, then fail with specific error rather
-	     than the generic NO_DWARF. Without debug_info we can't do
-	     anything (see also valid_p()). */
-	  if (cnt == IDX_debug_info)
-	    {
-	      Dwarf_Sig8_Hash_free (&result->sig8_hash);
-	      __libdw_seterrno (DWARF_E_COMPRESSED_ERROR);
-	      free (result);
-	      return NULL;
-	    }
+	  /* It would be nice if we could fail with a specific error.
+	     But we don't know if this was an essential section or not.
+	     So just continue for now. See also valid_p().  */
 	  return result;
 	}
     }
@@ -214,11 +206,11 @@ valid_p (Dwarf *result)
   /* We looked at all the sections.  Now determine whether all the
      sections with debugging information we need are there.
 
-     XXX Which sections are absolutely necessary?  Add tests if
-     necessary.  For now we require only .debug_info.  Hopefully this
-     is correct.  */
+     Require at least one section that can be read "standalone".  */
   if (likely (result != NULL)
-      && unlikely (result->sectiondata[IDX_debug_info] == NULL))
+      && unlikely (result->sectiondata[IDX_debug_info] == NULL
+		   && result->sectiondata[IDX_debug_line] == NULL
+		   && result->sectiondata[IDX_debug_frame] == NULL))
     {
       Dwarf_Sig8_Hash_free (&result->sig8_hash);
       __libdw_seterrno (DWARF_E_NO_DWARF);
@@ -310,19 +302,19 @@ valid_p (Dwarf *result)
 
 
 static Dwarf *
-global_read (Dwarf *result, Elf *elf, GElf_Ehdr *ehdr)
+global_read (Dwarf *result, Elf *elf, size_t shstrndx)
 {
   Elf_Scn *scn = NULL;
 
   while (result != NULL && (scn = elf_nextscn (elf, scn)) != NULL)
-    result = check_section (result, ehdr, scn, false);
+    result = check_section (result, shstrndx, scn, false);
 
   return valid_p (result);
 }
 
 
 static Dwarf *
-scngrp_read (Dwarf *result, Elf *elf, GElf_Ehdr *ehdr, Elf_Scn *scngrp)
+scngrp_read (Dwarf *result, Elf *elf, size_t shstrndx, Elf_Scn *scngrp)
 {
   GElf_Shdr shdr_mem;
   GElf_Shdr *shdr = gelf_getshdr (scngrp, &shdr_mem);
@@ -371,7 +363,7 @@ scngrp_read (Dwarf *result, Elf *elf, GElf_Ehdr *ehdr, Elf_Scn *scngrp)
 	  return NULL;
 	}
 
-      result = check_section (result, ehdr, scn, true);
+      result = check_section (result, shstrndx, scn, true);
       if (result == NULL)
 	break;
     }
@@ -433,15 +425,26 @@ dwarf_begin_elf (Elf *elf, Dwarf_Cmd cmd, Elf_Scn *scngrp)
 
   if (cmd == DWARF_C_READ || cmd == DWARF_C_RDWR)
     {
+      /* All sections are recognized by name, so pass the section header
+	 string index along to easily get the section names.  */
+      size_t shstrndx;
+      if (elf_getshdrstrndx (elf, &shstrndx) != 0)
+	{
+	  Dwarf_Sig8_Hash_free (&result->sig8_hash);
+	  __libdw_seterrno (DWARF_E_INVALID_ELF);
+	  free (result);
+	  return NULL;
+	}
+
       /* If the caller provides a section group we get the DWARF
 	 sections only from this setion group.  Otherwise we search
 	 for the first section with the required name.  Further
 	 sections with the name are ignored.  The DWARF specification
 	 does not really say this is allowed.  */
       if (scngrp == NULL)
-	return global_read (result, elf, ehdr);
+	return global_read (result, elf, shstrndx);
       else
-	return scngrp_read (result, elf, ehdr, scngrp);
+	return scngrp_read (result, elf, shstrndx, scngrp);
     }
   else if (cmd == DWARF_C_WRITE)
     {

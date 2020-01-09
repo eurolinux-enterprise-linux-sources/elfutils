@@ -1,6 +1,6 @@
 Name: elfutils
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
-Version: 0.172
+Version: 0.176
 %global baserelease 2
 URL: http://elfutils.org/
 %global source_url ftp://sourceware.org/pub/elfutils/%{version}/
@@ -20,8 +20,7 @@ Release: %{baserelease}%{?dist}
 Source: %{?source_url}%{name}-%{version}.tar.bz2
 
 # Patches
-Patch1: elfutils-0.171-new-notes-hack.patch
-Patch2: elfutils-0.172-robustify.patch
+Patch1: elfutils-0.176-xlate-note.patch
 
 Requires: elfutils-libelf%{depsuffix} = %{version}-%{release}
 Requires: elfutils-libs%{depsuffix} = %{version}-%{release}
@@ -175,8 +174,7 @@ profiling) of processes.
 %setup -q
 
 # Apply patches
-%patch1 -p1 -b .notes_hack
-%patch2 -p1 -b .robustify
+%patch1 -p1 -b .xlate-note
 
 # In case the above patches added any new test scripts, make sure they
 # are executable.
@@ -316,6 +314,15 @@ fi
 %endif
 
 %changelog
+* Wed May  1 2019 Mark Wielaard <mjw@fedoraproject.org> - 0.176-2
+- Add elfutils-0.176-xlate-note.patch (#1704754)
+
+* Wed Mar  6 2019 Mark Wielaard <mjw@redhat.com> - 0.176-1
+- New upstream release (#1676504)
+  CVE-2019-7146, CVE-2019-7148, CVE-2019-7149, CVE-2019-7150,
+  CVE-2019-7664, CVE-2019-7665, CVE-2018-16062, CVE-2018-16402,
+  CVE-2018-16403, CVE-2018-18310, CVE-2018-18521, CVE-2018-18520.
+
 * Wed Jun 20 2018 Mark Wielaard <mjw@redhat.com> - 0.172-2
 - Add elfutils-0.172-robustify.patch. (#1593328)
 

@@ -85,6 +85,7 @@ __libdw_next_unit (Dwarf *dwarf, bool v4_debug_types, Dwarf_Off off,
      beginning of the CU entry.  */
   const unsigned char *data = dwarf->sectiondata[sec_idx]->d_buf;
   const unsigned char *bytes = data + off;
+  const unsigned char *bytes_end = data + dwarf->sectiondata[sec_idx]->d_size;
 
   /* The format of the CU header is described in dwarf2p1 7.5.1 and
      changed in DWARFv5 (to include unit type, switch location of some
@@ -164,17 +165,27 @@ __libdw_next_unit (Dwarf *dwarf, bool v4_debug_types, Dwarf_Off off,
     }
 
   if (length == DWARF3_LENGTH_64_BIT)
-    /* This is a 64-bit DWARF format.  */
-    length = read_8ubyte_unaligned_inc (dwarf, bytes);
+    {
+      /* This is a 64-bit DWARF format.  */
+      if (bytes_end - bytes < 8)
+	goto invalid;
+      length = read_8ubyte_unaligned_inc (dwarf, bytes);
+    }
 
   /* Read the version stamp.  Always a 16-bit value.  */
+  if (bytes_end - bytes < 2)
+    goto invalid;
   uint_fast16_t version = read_2ubyte_unaligned_inc (dwarf, bytes);
 
   /* We keep unit_type at zero for older DWARF since we cannot
      easily guess whether it is a compile or partial unit.  */
   uint8_t unit_type = 0;
   if (version >= 5)
-    unit_type = *bytes++;
+    {
+      if (bytes_end - bytes < 1)
+	goto invalid;
+      unit_type = *bytes++;
+    }
 
   /* All these are optional.  */
   Dwarf_Off subdie_off = 0;
@@ -277,6 +288,11 @@ __libdw_next_unit (Dwarf *dwarf, bool v4_debug_types, Dwarf_Off off,
      The length field is either, with offset == 4: 2 * 4 - 4 == 4,
      or with offset == 8: 2 * 8 - 4 == 12.  */
   *next_off = off + 2 * offset_size - 4 + length;
+
+  /* This means that the length field is bogus, but return the CU anyway.
+     We just won't return anything after this.  */
+  if (*next_off <= off)
+    *next_off = (Dwarf_Off) -1;
 
   return 0;
 }

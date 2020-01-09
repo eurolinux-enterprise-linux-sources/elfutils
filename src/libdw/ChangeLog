@@ -1,3 +1,120 @@
+2019-02-02  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_nextcu.c (__libdw_next_unit): Define bytes_end.
+	Check there are enough bytes to read extended lenght, version
+	and unit.
+
+2019-01-20  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_getsrclines.c (read_srclines): Check terminating NUL byte
+	for dir and file lists.
+
+2018-10-23  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_child.c (__libdw_find_attr): Initialize readp to NULL.
+	* dwarf_getattrs.c (dwarf_getattrs): Initialize die_addr to NULL.
+
+2018-10-20  Mark Wielaard  <mark@klomp.org>
+
+	* libdw.map (ELFUTILS_0.175): New section. Add dwelf_elf_begin.
+
+2018-10-29  Milian Wolff  <milian.wolff@kdab.com>
+
+	* dwarf_getcfi_elf.c (getcfi_shdr): Check sh_type != SHT_NOBITS.
+
+2018-09-13  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_begin_elf.c (check_section): Drop ehdr argument, add and
+	use shstrndx argument.
+	(global_read): Likewise.
+	(scngrp_read): Likewise.
+	(dwarf_begin_elf): Call elf_getshdrstrndx. Pass shstrndx to
+	global_read or scngrp_read.
+
+2018-08-18  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_getabbrev.c (__libdw_getabbrev): Continue until both name
+	and form are zero.
+	* dwarf_hasattr.c (dwarf_hasattr): Stop when both name and form
+	are zero.
+
+2018-08-18  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_getaranges.c (dwarf_getaranges.c): Make sure there is enough
+	data to read the address and segment size.
+
+2018-07-04  Ross Burton <ross.burton@intel.com>
+
+	* libdw_alloc.c: Remove error.h include.
+
+2018-06-28  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_next_cfi.c (dwarf_next_cfi): Check whether length is zero.
+
+2018-06-27  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_begin_elf.c (check_section): Allow a single .debug_frame
+	section.
+
+2018-06-26  Mark Wielaard  <mark@klomp.org>
+
+	* libdw.h (dwarf_getscn_info): Remove.
+	* libdw.map (ELFUTILS_0.122): Remove dwarf_getscn_info.
+
+2018-06-25  Mark Wielaard  <mark@klomp.org>
+
+	* Makefile.am (libdw_a_SOURCES): Add dwarf_next_lines.c.
+	* libdw.h (dwarf_next_lines): New function declaration.
+	* libdw.map (ELFUTILS_0.173): New section.
+	* dwarf_next_lines.c: New files.
+	* dwarf_begin_elf.c (check_section): Don't error out when elf
+	decompression fails.
+	(valid_p): Allow just a single .debug_line section.
+	* dwarf_getsrclines.c (read_srclines): Keep files relative if comp_dir
+	is missing.
+
+2018-06-22  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_nextcu.c (__libdw_next_unit): Set next_off to -1 when it would
+	wrap around.
+
+2018-06-18  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_aggregate_size.c (array_size): New depth argument. Use
+	aggregate_size instead of dwarf_aggregate_size and pass depth.
+	(aggregate_size): New depth argument. Check depth isn't bigger
+	than MAX_DEPTH (256). Pass depth to recursive calls.
+	(dwarf_aggregate_size): ass zero as depth to aggregate_size.
+
+2018-06-18  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_peel_type.c (dwarf_peel_type): Limit modifier chain to 64.
+
+2018-06-18  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_aggregate_size.c (aggregate_size): Check die is not NULL.
+
+2018-06-17  Luiz Angelo Daros de Luca  <luizluca@gmail.com>
+
+	* dwarf_getsrclines.c (read_srclines): Intialize filelist early.
+
+2018-06-15  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf_getlocation.c (check_constant_offset): Clarify DW_FORM_data16
+	isn't really a constant.
+	(dwarf_getlocation): Don't handle DW_FORM_data16 as block.
+	(dwarf_getlocation_addr): Likewise.
+	(dwarf_getlocations): Likewise.
+
+2018-06-12  Mark Wielaard  <mark@klomp.org>
+
+	* memory-access.h (read_3ubyte_unaligned_inc): New define.
+
+2018-06-12  Mark Wielaard  <mark@klomp.org>
+
+	* libdw.h (__libdw_dieabbrev): Set die->abbrev to DWARF_END_ABBREV
+	on failure.
+
 2018-06-10  Mark Wielaard  <mark@klomp.org>
 
 	* dwarf_attr_integrate.c (dwarf_attr_integrate): Stop after 16 DIE

@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.0.5.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.0.4"
+#define YYBISON_VERSION "3.0.5"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -70,7 +70,7 @@
 #define yychar          i386_char
 
 /* Copy the first part of user declarations.  */
-#line 1 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:339  */
+#line 1 "i386_parse.y" /* yacc.c:339  */
 
 /* Parser for i386 CPU description.
    Copyright (C) 2004, 2005, 2007, 2008, 2009 Red Hat, Inc.
@@ -107,7 +107,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <error.h>
 #include <inttypes.h>
 #include <libintl.h>
 #include <math.h>
@@ -286,7 +285,7 @@ extern FILE *outfile;
 static size_t best_mnemonic_bits;
 #endif
 
-#line 290 "i386_parse.c" /* yacc.c:339  */
+#line 289 "i386_parse.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -350,7 +349,7 @@ extern int i386_debug;
 
 union YYSTYPE
 {
-#line 217 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:355  */
+#line 216 "i386_parse.y" /* yacc.c:355  */
 
   unsigned long int num;
   char *str;
@@ -360,7 +359,7 @@ union YYSTYPE
   struct argname *name;
   struct argument *arg;
 
-#line 364 "i386_parse.c" /* yacc.c:355  */
+#line 363 "i386_parse.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -377,7 +376,7 @@ int i386_parse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 381 "i386_parse.c" /* yacc.c:358  */
+#line 380 "i386_parse.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -675,10 +674,10 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   247,   247,   257,   258,   261,   263,   265,   267,   279,
-     282,   283,   286,   369,   372,   388,   391,   401,   408,   416,
-     420,   427,   434,   456,   459,   462,   472,   480,   488,   491,
-     523,   532,   539
+       0,   246,   246,   256,   257,   260,   262,   264,   266,   278,
+     281,   282,   285,   368,   371,   387,   390,   400,   407,   415,
+     419,   426,   433,   455,   458,   461,   471,   479,   487,   490,
+     522,   531,   538
 };
 #endif
 
@@ -1158,6 +1157,7 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
       case N:                               \
         yyformat = S;                       \
       break
+    default: /* Avoid compiler warnings. */
       YYCASE_(0, YY_("syntax error"));
       YYCASE_(1, YY_("syntax error, unexpected %s"));
       YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
@@ -1474,7 +1474,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 248 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 247 "i386_parse.y" /* yacc.c:1648  */
     {
 		      if (error_message_count != 0)
 			error (EXIT_FAILURE, 0,
@@ -1482,29 +1482,29 @@ yyreduce:
 
 		      instrtable_out ();
 		    }
-#line 1486 "i386_parse.c" /* yacc.c:1646  */
+#line 1486 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 5:
-#line 262 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 261 "i386_parse.y" /* yacc.c:1648  */
     { new_bitfield ((yyvsp[-1].str), (yyvsp[0].num)); }
-#line 1492 "i386_parse.c" /* yacc.c:1646  */
+#line 1492 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 6:
-#line 264 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 263 "i386_parse.y" /* yacc.c:1648  */
     { new_bitfield ((yyvsp[0].str), -1); }
-#line 1498 "i386_parse.c" /* yacc.c:1646  */
+#line 1498 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 7:
-#line 266 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 265 "i386_parse.y" /* yacc.c:1648  */
     { new_bitfield ((yyvsp[0].str), -2); }
-#line 1504 "i386_parse.c" /* yacc.c:1646  */
+#line 1504 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 8:
-#line 268 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 267 "i386_parse.y" /* yacc.c:1648  */
     {
 		      struct synonym *newp = xmalloc (sizeof (*newp));
 		      newp->from = (yyvsp[-1].str);
@@ -1516,11 +1516,11 @@ yyreduce:
 		      else if (tsearch ( newp, &synonyms, compare_syn) == NULL)
 			error (EXIT_FAILURE, 0, "tsearch");
 		    }
-#line 1520 "i386_parse.c" /* yacc.c:1646  */
+#line 1520 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 12:
-#line 287 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 286 "i386_parse.y" /* yacc.c:1648  */
     {
 		      if ((yyvsp[-3].field) != NULL && strcmp ((yyvsp[-3].field)->name, "RE") != 0
 			  && strcmp ((yyvsp[-3].field)->name, "R") != 0)
@@ -1603,11 +1603,11 @@ yyreduce:
 			  ++ninstructions;
 			}
 		    }
-#line 1607 "i386_parse.c" /* yacc.c:1646  */
+#line 1607 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 14:
-#line 373 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 372 "i386_parse.y" /* yacc.c:1648  */
     {
 		      struct known_bitfield search;
 		      search.name = (yyvsp[0].str);
@@ -1622,17 +1622,17 @@ yyreduce:
 		      else
 			(yyval.field) = *res;
 		    }
-#line 1626 "i386_parse.c" /* yacc.c:1646  */
+#line 1626 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 15:
-#line 388 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 387 "i386_parse.y" /* yacc.c:1648  */
     { (yyval.field) = NULL; }
-#line 1632 "i386_parse.c" /* yacc.c:1646  */
+#line 1632 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 16:
-#line 392 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 391 "i386_parse.y" /* yacc.c:1648  */
     {
 		      check_bits ((yyvsp[0].bit));
 
@@ -1642,20 +1642,20 @@ yyreduce:
 		      runp->next = (yyvsp[0].bit);
 		      (yyval.bit) = (yyvsp[-2].bit);
 		    }
-#line 1646 "i386_parse.c" /* yacc.c:1646  */
+#line 1646 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 17:
-#line 402 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 401 "i386_parse.y" /* yacc.c:1648  */
     {
 		      check_bits ((yyvsp[0].bit));
 		      (yyval.bit) = (yyvsp[0].bit);
 		    }
-#line 1655 "i386_parse.c" /* yacc.c:1646  */
+#line 1655 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 18:
-#line 409 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 408 "i386_parse.y" /* yacc.c:1648  */
     {
 		      struct bitvalue *runp = (yyvsp[-1].bit);
 		      while (runp->next != NULL)
@@ -1663,39 +1663,39 @@ yyreduce:
 		      runp->next = (yyvsp[0].bit);
 		      (yyval.bit) = (yyvsp[-1].bit);
 		    }
-#line 1667 "i386_parse.c" /* yacc.c:1646  */
+#line 1667 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 19:
-#line 417 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 416 "i386_parse.y" /* yacc.c:1648  */
     { (yyval.bit) = (yyvsp[0].bit); }
-#line 1673 "i386_parse.c" /* yacc.c:1646  */
+#line 1673 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 20:
-#line 421 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 420 "i386_parse.y" /* yacc.c:1648  */
     {
 		      (yyval.bit) = xmalloc (sizeof (struct bitvalue));
 		      (yyval.bit)->type = zeroone;
 		      (yyval.bit)->value = 0;
 		      (yyval.bit)->next = NULL;
 		    }
-#line 1684 "i386_parse.c" /* yacc.c:1646  */
+#line 1684 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 21:
-#line 428 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 427 "i386_parse.y" /* yacc.c:1648  */
     {
 		      (yyval.bit) = xmalloc (sizeof (struct bitvalue));
 		      (yyval.bit)->type = zeroone;
 		      (yyval.bit)->value = 1;
 		      (yyval.bit)->next = NULL;
 		    }
-#line 1695 "i386_parse.c" /* yacc.c:1646  */
+#line 1695 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 22:
-#line 435 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 434 "i386_parse.y" /* yacc.c:1648  */
     {
 		      (yyval.bit) = xmalloc (sizeof (struct bitvalue));
 		      struct known_bitfield search;
@@ -1715,23 +1715,23 @@ yyreduce:
 			}
 		      (yyval.bit)->next = NULL;
 		    }
-#line 1719 "i386_parse.c" /* yacc.c:1646  */
+#line 1719 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 23:
-#line 457 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 456 "i386_parse.y" /* yacc.c:1648  */
     { (yyval.arg) = (yyvsp[0].arg); }
-#line 1725 "i386_parse.c" /* yacc.c:1646  */
+#line 1725 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 24:
-#line 459 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 458 "i386_parse.y" /* yacc.c:1648  */
     { (yyval.arg) = NULL; }
-#line 1731 "i386_parse.c" /* yacc.c:1646  */
+#line 1731 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 25:
-#line 463 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 462 "i386_parse.y" /* yacc.c:1648  */
     {
 		      struct argument *runp = (yyvsp[-2].arg);
 		      while (runp->next != NULL)
@@ -1741,21 +1741,21 @@ yyreduce:
 		      runp->next->next = NULL;
 		      (yyval.arg) = (yyvsp[-2].arg);
 		    }
-#line 1745 "i386_parse.c" /* yacc.c:1646  */
+#line 1745 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 26:
-#line 473 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 472 "i386_parse.y" /* yacc.c:1648  */
     {
 		      (yyval.arg) = xmalloc (sizeof (struct argument));
 		      (yyval.arg)->name = combine ((yyvsp[0].name));
 		      (yyval.arg)->next = NULL;
 		    }
-#line 1755 "i386_parse.c" /* yacc.c:1646  */
+#line 1755 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 27:
-#line 481 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 480 "i386_parse.y" /* yacc.c:1648  */
     {
 		      struct argname *runp = (yyvsp[-1].name);
 		      while (runp->next != NULL)
@@ -1763,17 +1763,17 @@ yyreduce:
 		      runp->next = (yyvsp[0].name);
 		      (yyval.name) = (yyvsp[-1].name);
 		    }
-#line 1767 "i386_parse.c" /* yacc.c:1646  */
+#line 1767 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 28:
-#line 489 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 488 "i386_parse.y" /* yacc.c:1648  */
     { (yyval.name) = (yyvsp[0].name); }
-#line 1773 "i386_parse.c" /* yacc.c:1646  */
+#line 1773 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 29:
-#line 492 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 491 "i386_parse.y" /* yacc.c:1648  */
     {
 		      (yyval.name) = xmalloc (sizeof (struct argname));
 		      (yyval.name)->type = nfield;
@@ -1805,11 +1805,11 @@ yyreduce:
 		      else
 			(yyval.name)->field = *res;
 		    }
-#line 1809 "i386_parse.c" /* yacc.c:1646  */
+#line 1809 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 30:
-#line 524 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 523 "i386_parse.y" /* yacc.c:1648  */
     {
 		      (yyval.name) = xmalloc (sizeof (struct argname));
 		      (yyval.name)->type = string;
@@ -1818,22 +1818,22 @@ yyreduce:
 		      (yyval.name)->str[0] = (yyvsp[0].ch);
 		      (yyval.name)->str[1] = '\0';
 		    }
-#line 1822 "i386_parse.c" /* yacc.c:1646  */
+#line 1822 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 31:
-#line 533 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 532 "i386_parse.y" /* yacc.c:1648  */
     {
 		      (yyval.name) = xmalloc (sizeof (struct argname));
 		      (yyval.name)->type = string;
 		      (yyval.name)->next = NULL;
 		      (yyval.name)->str = (yyvsp[0].str);
 		    }
-#line 1833 "i386_parse.c" /* yacc.c:1646  */
+#line 1833 "i386_parse.c" /* yacc.c:1648  */
     break;
 
   case 32:
-#line 540 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1646  */
+#line 539 "i386_parse.y" /* yacc.c:1648  */
     {
 		      (yyval.name) = xmalloc (sizeof (struct argname));
 		      (yyval.name)->type = string;
@@ -1842,11 +1842,11 @@ yyreduce:
 		      (yyval.name)->str[0] = ':';
 		      (yyval.name)->str[1] = '\0';
 		    }
-#line 1846 "i386_parse.c" /* yacc.c:1646  */
+#line 1846 "i386_parse.c" /* yacc.c:1648  */
     break;
 
 
-#line 1850 "i386_parse.c" /* yacc.c:1646  */
+#line 1850 "i386_parse.c" /* yacc.c:1648  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2074,7 +2074,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 550 "/home/mark/src/elfutils/libcpu/i386_parse.y" /* yacc.c:1906  */
+#line 549 "i386_parse.y" /* yacc.c:1907  */
 
 
 static void

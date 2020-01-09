@@ -26,8 +26,8 @@
 
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
-#define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 37
+#define YY_FLEX_MINOR_VERSION 6
+#define YY_FLEX_SUBMINOR_VERSION 1
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -106,25 +106,13 @@ typedef unsigned int flex_uint32_t;
 
 #endif /* ! FLEXINT_H */
 
-#ifdef __cplusplus
-
-/* The "const" storage-class-modifier is valid. */
-#define YY_USE_CONST
-
-#else	/* ! __cplusplus */
-
-/* C99 requires __STDC__ to be defined as 1. */
-#if defined (__STDC__)
-
-#define YY_USE_CONST
-
-#endif	/* defined (__STDC__) */
-#endif	/* ! __cplusplus */
-
-#ifdef YY_USE_CONST
+/* TODO: this is always defined, so inline it */
 #define yyconst const
+
+#if defined(__GNUC__) && __GNUC__ >= 3
+#define yynoreturn __attribute__((__noreturn__))
 #else
-#define yyconst
+#define yynoreturn
 #endif
 
 /* Returned upon end-of-file. */
@@ -160,7 +148,15 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -177,7 +173,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 typedef size_t yy_size_t;
 #endif
 
-extern yy_size_t i386_leng;
+extern int i386_leng;
 
 extern FILE *i386_in, *i386_out;
 
@@ -194,9 +190,16 @@ extern FILE *i386_in, *i386_out;
      */
     #define  YY_LESS_LINENO(n) \
             do { \
-                int yyl;\
+                yy_size_t yyl;\
                 for ( yyl = n; yyl < i386_leng; ++yyl )\
                     if ( i386_text[yyl] == '\n' )\
+                        --i386_lineno;\
+            }while(0)
+    #define YY_LINENO_REWIND_TO(dst) \
+            do {\
+                const char *p;\
+                for ( p = yy_cp-1; p >= (dst); --p)\
+                    if ( *p == '\n' )\
                         --i386_lineno;\
             }while(0)
     
@@ -205,7 +208,7 @@ extern FILE *i386_in, *i386_out;
 	do \
 		{ \
 		/* Undo effects of setting up i386_text. */ \
-        int yyless_macro_arg = (n); \
+        yy_size_t yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
 		*yy_cp = (yy_hold_char); \
 		YY_RESTORE_YY_MORE_OFFSET \
@@ -228,12 +231,12 @@ struct yy_buffer_state
 	/* Size of input buffer in bytes, not including room for EOB
 	 * characters.
 	 */
-	yy_size_t yy_buf_size;
+	int yy_buf_size;
 
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	yy_size_t yy_n_chars;
+	int yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -284,7 +287,7 @@ struct yy_buffer_state
 /* Stack of input buffers. */
 static size_t yy_buffer_stack_top = 0; /**< index of top of stack. */
 static size_t yy_buffer_stack_max = 0; /**< capacity of stack. */
-static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
+static YY_BUFFER_STATE * yy_buffer_stack = NULL; /**< Stack as an array. */
 
 /* We provide macros for accessing buffer states in case in the
  * future we want to put the buffer states in a more general
@@ -303,11 +306,11 @@ static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
 
 /* yy_hold_char holds the character lost when i386_text is formed. */
 static char yy_hold_char;
-static yy_size_t yy_n_chars;		/* number of characters read into yy_ch_buf */
-yy_size_t i386_leng;
+static int yy_n_chars;		/* number of characters read into yy_ch_buf */
+int i386_leng;
 
 /* Points to current character in buffer. */
-static char *yy_c_buf_p = (char *) 0;
+static char *yy_c_buf_p = NULL;
 static int yy_init = 0;		/* whether we need to initialize */
 static int yy_start = 0;	/* start state number */
 
@@ -332,7 +335,7 @@ static void i386__init_buffer (YY_BUFFER_STATE b,FILE *file  );
 
 YY_BUFFER_STATE i386__scan_buffer (char *base,yy_size_t size  );
 YY_BUFFER_STATE i386__scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE i386__scan_bytes (yyconst char *bytes,yy_size_t len  );
+YY_BUFFER_STATE i386__scan_bytes (yyconst char *bytes,int len  );
 
 void *i386_alloc (yy_size_t  );
 void *i386_realloc (void *,yy_size_t  );
@@ -364,12 +367,12 @@ void i386_free (void *  );
 
 /* Begin user sect3 */
 
-#define i386_wrap() 1
+#define i386_wrap() (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
 
 typedef unsigned char YY_CHAR;
 
-FILE *i386_in = (FILE *) 0, *i386_out = (FILE *) 0;
+FILE *i386_in = NULL, *i386_out = NULL;
 
 typedef int yy_state_type;
 
@@ -378,19 +381,22 @@ extern int i386_lineno;
 int i386_lineno = 1;
 
 extern char *i386_text;
+#ifdef yytext_ptr
+#undef yytext_ptr
+#endif
 #define yytext_ptr i386_text
 
 static yy_state_type yy_get_previous_state (void );
 static yy_state_type yy_try_NUL_trans (yy_state_type current_state  );
 static int yy_get_next_buffer (void );
-static void yy_fatal_error (yyconst char msg[]  );
+static void yynoreturn yy_fatal_error (yyconst char* msg  );
 
 /* Done after the current pattern has been matched and before the
  * corresponding action - sets up i386_text.
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	i386_leng = (size_t) (yy_cp - yy_bp); \
+	i386_leng = (int) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
@@ -415,7 +421,7 @@ static yyconst flex_int16_t yy_accept[62] =
         0
     } ;
 
-static yyconst flex_int32_t yy_ec[256] =
+static yyconst YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         2,    2,    2,    1,    1,    1,    1,    1,    1,    1,
@@ -447,7 +453,7 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[35] =
+static yyconst YY_CHAR yy_meta[35] =
     {   0,
         1,    1,    1,    1,    1,    1,    2,    2,    2,    2,
         3,    2,    2,    2,    2,    2,    2,    2,    2,    2,
@@ -455,7 +461,7 @@ static yyconst flex_int32_t yy_meta[35] =
         2,    2,    1,    3
     } ;
 
-static yyconst flex_int16_t yy_base[65] =
+static yyconst flex_uint16_t yy_base[65] =
     {   0,
         0,   32,   65,    3,  113,  114,    9,   11,   19,    7,
        78,   16,  114,  114,   18,   20,  114,  114,  114,  114,
@@ -477,7 +483,7 @@ static yyconst flex_int16_t yy_def[65] =
         0,   61,   61,   61
     } ;
 
-static yyconst flex_int16_t yy_nxt[149] =
+static yyconst flex_uint16_t yy_nxt[149] =
     {   0,
        61,    7,    8,   35,    9,   24,   25,   10,   10,   10,
        26,   26,   26,   26,   31,   31,   31,   26,   26,   34,
@@ -537,8 +543,8 @@ int i386__flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *i386_text;
-#line 1 "/home/mark/src/elfutils/libcpu/i386_lex.l"
-#line 2 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 1 "i386_lex.l"
+#line 2 "i386_lex.l"
 /* Copyright (C) 2004, 2005, 2007, 2008 Red Hat, Inc.
    Written by Ulrich Drepper <drepper@redhat.com>, 2004.
 
@@ -571,17 +577,17 @@ char *i386_text;
 #endif
 
 #include <ctype.h>
-#include <error.h>
 #include <libintl.h>
 
 #include <libeu.h>
+#include "system.h"
 #include "i386_parse.h"
 
 
 static void eat_to_eol (void);
 static void invalid_char (int ch);
 
-#line 585 "i386_lex.c"
+#line 591 "i386_lex.c"
 
 #define INITIAL 0
 #define MAIN 1
@@ -615,19 +621,19 @@ void i386_set_extra (YY_EXTRA_TYPE user_defined  );
 
 FILE *i386_get_in (void );
 
-void i386_set_in  (FILE * in_str  );
+void i386_set_in  (FILE * _in_str  );
 
 FILE *i386_get_out (void );
 
-void i386_set_out  (FILE * out_str  );
+void i386_set_out  (FILE * _out_str  );
 
-yy_size_t i386_get_leng (void );
+			int i386_get_leng (void );
 
 char *i386_get_text (void );
 
 int i386_get_lineno (void );
 
-void i386_set_lineno (int line_number  );
+void i386_set_lineno (int _line_number  );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -641,8 +647,12 @@ extern int i386_wrap (void );
 #endif
 #endif
 
+#ifndef YY_NO_UNPUT
+    
     static void yyunput (int c,char *buf_ptr  );
     
+#endif
+
 #ifndef yytext_ptr
 static void yy_flex_strncpy (char *,yyconst char *,int );
 #endif
@@ -663,7 +673,12 @@ static int input (void );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -671,7 +686,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( i386_text, i386_leng, 1, i386_out )) {} } while (0)
+#define ECHO do { if (fwrite( i386_text, (size_t) i386_leng, 1, i386_out )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -682,7 +697,7 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( i386_in )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -695,7 +710,7 @@ static int input (void );
 	else \
 		{ \
 		errno=0; \
-		while ( (result = fread(buf, 1, max_size, i386_in))==0 && ferror(i386_in)) \
+		while ( (result = (int) fread(buf, 1, (yy_size_t) max_size, i386_in)) == 0 && ferror(i386_in)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
@@ -750,7 +765,7 @@ extern int i386_lex (void);
 
 /* Code executed at the end of each rule. */
 #ifndef YY_BREAK
-#define YY_BREAK break;
+#define YY_BREAK /*LINTED*/break;
 #endif
 
 #define YY_RULE_SETUP \
@@ -763,15 +778,10 @@ extern int i386_lex (void);
  */
 YY_DECL
 {
-	register yy_state_type yy_current_state;
-	register char *yy_cp, *yy_bp;
-	register int yy_act;
+	yy_state_type yy_current_state;
+	char *yy_cp, *yy_bp;
+	int yy_act;
     
-#line 57 "/home/mark/src/elfutils/libcpu/i386_lex.l"
-
-
-#line 774 "i386_lex.c"
-
 	if ( !(yy_init) )
 		{
 		(yy_init) = 1;
@@ -798,7 +808,13 @@ YY_DECL
 		i386__load_buffer_state( );
 		}
 
-	while ( 1 )		/* loops until end-of-file is reached */
+	{
+#line 57 "i386_lex.l"
+
+
+#line 816 "i386_lex.c"
+
+	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
 		yy_cp = (yy_c_buf_p);
 
@@ -815,7 +831,7 @@ YY_DECL
 yy_match:
 		do
 			{
-			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+			YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)] ;
 			if ( yy_accept[yy_current_state] )
 				{
 				(yy_last_accepting_state) = yy_current_state;
@@ -827,7 +843,7 @@ yy_match:
 				if ( yy_current_state >= 62 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
-			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+			yy_current_state = yy_nxt[yy_base[yy_current_state] + (flex_int16_t) yy_c];
 			++yy_cp;
 			}
 		while ( yy_current_state != 61 );
@@ -841,7 +857,7 @@ yy_find_action:
 
 		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
 			{
-			int yyl;
+			yy_size_t yyl;
 			for ( yyl = 0; yyl < i386_leng; ++yyl )
 				if ( i386_text[yyl] == '\n' )
 					   
@@ -862,119 +878,119 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 59 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 59 "i386_lex.l"
 { return kMASK; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 61 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 61 "i386_lex.l"
 { return kPREFIX; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 62 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 62 "i386_lex.l"
 { return kSUFFIX; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 64 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 64 "i386_lex.l"
 { return kSYNONYM; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 66 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 66 "i386_lex.l"
 { i386_lval.num = strtoul (i386_text, NULL, 10);
 				  return kNUMBER; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 69 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 69 "i386_lex.l"
 { BEGIN (MAIN); return kPERCPERC; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 72 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 72 "i386_lex.l"
 { return '0'; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 73 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 73 "i386_lex.l"
 { return '1'; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 75 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 75 "i386_lex.l"
 { i386_lval.str = xstrndup (i386_text + 1,
 							    i386_leng - 2);
 				  return kBITFIELD; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 79 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 79 "i386_lex.l"
 { i386_lval.str = (void *) -1l;
 				  return kID; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 82 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 82 "i386_lex.l"
 { i386_lval.str = xstrndup (i386_text, i386_leng);
 				  return kID; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 85 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 85 "i386_lex.l"
 { return ','; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 87 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 87 "i386_lex.l"
 { return ':'; }
 	YY_BREAK
 case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
-#line 89 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 89 "i386_lex.l"
 { /* IGNORE */ }
 	YY_BREAK
 case 15:
 /* rule 15 can match eol */
 YY_RULE_SETUP
-#line 91 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 91 "i386_lex.l"
 { return '\n'; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 93 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 93 "i386_lex.l"
 { eat_to_eol (); }
 	YY_BREAK
 case 17:
 /* rule 17 can match eol */
 YY_RULE_SETUP
-#line 95 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 95 "i386_lex.l"
 { /* IGNORE */ }
 	YY_BREAK
 case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
-#line 97 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 97 "i386_lex.l"
 { return kSPACE; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 99 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 99 "i386_lex.l"
 { i386_lval.ch = *i386_text; return kCHAR; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 101 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 101 "i386_lex.l"
 { invalid_char (*i386_text); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 104 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 104 "i386_lex.l"
 ECHO;
 	YY_BREAK
-#line 978 "i386_lex.c"
+#line 994 "i386_lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(MAIN):
 	yyterminate();
@@ -1107,6 +1123,7 @@ case YY_STATE_EOF(MAIN):
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
+	} /* end of user's declarations */
 } /* end of i386_lex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -1118,9 +1135,9 @@ case YY_STATE_EOF(MAIN):
  */
 static int yy_get_next_buffer (void)
 {
-    	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
-	register char *source = (yytext_ptr);
-	register int number_to_move, i;
+    	char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
+	char *source = (yytext_ptr);
+	yy_size_t number_to_move, i;
 	int ret_val;
 
 	if ( (yy_c_buf_p) > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1] )
@@ -1149,7 +1166,7 @@ static int yy_get_next_buffer (void)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr)) - 1;
+	number_to_move = (yy_size_t) ((yy_c_buf_p) - (yytext_ptr)) - 1;
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
@@ -1162,7 +1179,7 @@ static int yy_get_next_buffer (void)
 
 	else
 		{
-			yy_size_t num_to_read =
+			int num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
@@ -1176,7 +1193,7 @@ static int yy_get_next_buffer (void)
 
 			if ( b->yy_is_our_buffer )
 				{
-				yy_size_t new_size = b->yy_buf_size * 2;
+				int new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -1185,11 +1202,11 @@ static int yy_get_next_buffer (void)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					i386_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
+					i386_realloc((void *) b->yy_ch_buf,(yy_size_t) (b->yy_buf_size + 2)  );
 				}
 			else
 				/* Can't grow it, we don't own it. */
-				b->yy_ch_buf = 0;
+				b->yy_ch_buf = NULL;
 
 			if ( ! b->yy_ch_buf )
 				YY_FATAL_ERROR(
@@ -1231,10 +1248,10 @@ static int yy_get_next_buffer (void)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+	if ((int) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
-		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) i386_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		int new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) i386_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,(yy_size_t) new_size  );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
 	}
@@ -1252,15 +1269,15 @@ static int yy_get_next_buffer (void)
 
     static yy_state_type yy_get_previous_state (void)
 {
-	register yy_state_type yy_current_state;
-	register char *yy_cp;
+	yy_state_type yy_current_state;
+	char *yy_cp;
     
 	yy_current_state = (yy_start);
 	yy_current_state += YY_AT_BOL();
 
 	for ( yy_cp = (yytext_ptr) + YY_MORE_ADJ; yy_cp < (yy_c_buf_p); ++yy_cp )
 		{
-		register YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
+		YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
 		if ( yy_accept[yy_current_state] )
 			{
 			(yy_last_accepting_state) = yy_current_state;
@@ -1272,7 +1289,7 @@ static int yy_get_next_buffer (void)
 			if ( yy_current_state >= 62 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
-		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+		yy_current_state = yy_nxt[yy_base[yy_current_state] + (flex_int16_t) yy_c];
 		}
 
 	return yy_current_state;
@@ -1285,10 +1302,10 @@ static int yy_get_next_buffer (void)
  */
     static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state )
 {
-	register int yy_is_jam;
-    	register char *yy_cp = (yy_c_buf_p);
+	int yy_is_jam;
+    	char *yy_cp = (yy_c_buf_p);
 
-	register YY_CHAR yy_c = 1;
+	YY_CHAR yy_c = 1;
 	if ( yy_accept[yy_current_state] )
 		{
 		(yy_last_accepting_state) = yy_current_state;
@@ -1300,15 +1317,17 @@ static int yy_get_next_buffer (void)
 		if ( yy_current_state >= 62 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
-	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
+	yy_current_state = yy_nxt[yy_base[yy_current_state] + (flex_int16_t) yy_c];
 	yy_is_jam = (yy_current_state == 61);
 
 		return yy_is_jam ? 0 : yy_current_state;
 }
 
-    static void yyunput (int c, register char * yy_bp )
+#ifndef YY_NO_UNPUT
+
+    static void yyunput (int c, char * yy_bp )
 {
-	register char *yy_cp;
+	char *yy_cp;
     
     yy_cp = (yy_c_buf_p);
 
@@ -1318,10 +1337,10 @@ static int yy_get_next_buffer (void)
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 		{ /* need to shift things up to make room */
 		/* +2 for EOB chars. */
-		register yy_size_t number_to_move = (yy_n_chars) + 2;
-		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
+		int number_to_move = (yy_n_chars) + 2;
+		char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
 					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
-		register char *source =
+		char *source =
 				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move];
 
 		while ( source > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
@@ -1330,7 +1349,7 @@ static int yy_get_next_buffer (void)
 		yy_cp += (int) (dest - source);
 		yy_bp += (int) (dest - source);
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
+			(yy_n_chars) = (int) YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
 
 		if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 			YY_FATAL_ERROR( "flex scanner push-back overflow" );
@@ -1346,6 +1365,8 @@ static int yy_get_next_buffer (void)
 	(yy_hold_char) = *yy_cp;
 	(yy_c_buf_p) = yy_cp;
 }
+
+#endif
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus
@@ -1371,7 +1392,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			yy_size_t offset = (yy_c_buf_p) - (yytext_ptr);
+			int offset = (yy_c_buf_p) - (yytext_ptr);
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -1395,7 +1416,7 @@ static int yy_get_next_buffer (void)
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( i386_wrap( ) )
-						return EOF;
+						return 0;
 
 					if ( ! (yy_did_buffer_switch_on_eof) )
 						YY_NEW_FILE;
@@ -1507,7 +1528,7 @@ static void i386__load_buffer_state  (void)
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) i386_alloc(b->yy_buf_size + 2  );
+	b->yy_ch_buf = (char *) i386_alloc((yy_size_t) (b->yy_buf_size + 2)  );
 	if ( ! b->yy_ch_buf )
 		YY_FATAL_ERROR( "out of dynamic memory in i386__create_buffer()" );
 
@@ -1649,7 +1670,7 @@ void i386_pop_buffer_state (void)
  */
 static void i386_ensure_buffer_stack (void)
 {
-	yy_size_t num_to_alloc;
+	int num_to_alloc;
     
 	if (!(yy_buffer_stack)) {
 
@@ -1657,7 +1678,7 @@ static void i386_ensure_buffer_stack (void)
 		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
 		 * immediate realloc on the next call.
          */
-		num_to_alloc = 1;
+      num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
 		(yy_buffer_stack) = (struct yy_buffer_state**)i386_alloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
@@ -1674,7 +1695,7 @@ static void i386_ensure_buffer_stack (void)
 	if ((yy_buffer_stack_top) >= ((yy_buffer_stack_max)) - 1){
 
 		/* Increase the buffer to prepare for a possible push. */
-		int grow_size = 8 /* arbitrary grow size */;
+		yy_size_t grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = (yy_buffer_stack_max) + grow_size;
 		(yy_buffer_stack) = (struct yy_buffer_state**)i386_realloc
@@ -1704,16 +1725,16 @@ YY_BUFFER_STATE i386__scan_buffer  (char * base, yy_size_t  size )
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
-		return 0;
+		return NULL;
 
 	b = (YY_BUFFER_STATE) i386_alloc(sizeof( struct yy_buffer_state )  );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in i386__scan_buffer()" );
 
-	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
+	b->yy_buf_size = (int) (size - 2);	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
-	b->yy_input_file = 0;
+	b->yy_input_file = NULL;
 	b->yy_n_chars = b->yy_buf_size;
 	b->yy_is_interactive = 0;
 	b->yy_at_bol = 1;
@@ -1736,7 +1757,7 @@ YY_BUFFER_STATE i386__scan_buffer  (char * base, yy_size_t  size )
 YY_BUFFER_STATE i386__scan_string (yyconst char * yystr )
 {
     
-	return i386__scan_bytes(yystr,strlen(yystr) );
+	return i386__scan_bytes(yystr,(int) strlen(yystr) );
 }
 
 /** Setup the input buffer state to scan the given bytes. The next call to i386_lex() will
@@ -1746,7 +1767,7 @@ YY_BUFFER_STATE i386__scan_string (yyconst char * yystr )
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE i386__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len )
+YY_BUFFER_STATE i386__scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
@@ -1754,7 +1775,7 @@ YY_BUFFER_STATE i386__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_l
 	int i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
-	n = _yybytes_len + 2;
+	n = (yy_size_t) (_yybytes_len + 2);
 	buf = (char *) i386_alloc(n  );
 	if ( ! buf )
 		YY_FATAL_ERROR( "out of dynamic memory in i386__scan_bytes()" );
@@ -1780,9 +1801,9 @@ YY_BUFFER_STATE i386__scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_l
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg )
+static void yynoreturn yy_fatal_error (yyconst char* msg )
 {
-    	(void) fprintf( stderr, "%s\n", msg );
+			(void) fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
 }
 
@@ -1793,7 +1814,7 @@ static void yy_fatal_error (yyconst char* msg )
 	do \
 		{ \
 		/* Undo effects of setting up i386_text. */ \
-        int yyless_macro_arg = (n); \
+        yy_size_t yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
 		i386_text[i386_leng] = (yy_hold_char); \
 		(yy_c_buf_p) = i386_text + yyless_macro_arg; \
@@ -1833,7 +1854,7 @@ FILE *i386_get_out  (void)
 /** Get the length of the current token.
  * 
  */
-yy_size_t i386_get_leng  (void)
+int i386_get_leng  (void)
 {
         return i386_leng;
 }
@@ -1848,29 +1869,29 @@ char *i386_get_text  (void)
 }
 
 /** Set the current line number.
- * @param line_number
+ * @param _line_number line number
  * 
  */
-void i386_set_lineno (int  line_number )
+void i386_set_lineno (int  _line_number )
 {
     
-    i386_lineno = line_number;
+    i386_lineno = _line_number;
 }
 
 /** Set the input stream. This does not discard the current
  * input buffer.
- * @param in_str A readable stream.
+ * @param _in_str A readable stream.
  * 
  * @see i386__switch_to_buffer
  */
-void i386_set_in (FILE *  in_str )
+void i386_set_in (FILE *  _in_str )
 {
-        i386_in = in_str ;
+        i386_in = _in_str ;
 }
 
-void i386_set_out (FILE *  out_str )
+void i386_set_out (FILE *  _out_str )
 {
-        i386_out = out_str ;
+        i386_out = _out_str ;
 }
 
 int i386_get_debug  (void)
@@ -1878,9 +1899,9 @@ int i386_get_debug  (void)
         return i386__flex_debug;
 }
 
-void i386_set_debug (int  bdebug )
+void i386_set_debug (int  _bdebug )
 {
-        i386__flex_debug = bdebug ;
+        i386__flex_debug = _bdebug ;
 }
 
 static int yy_init_globals (void)
@@ -1892,10 +1913,10 @@ static int yy_init_globals (void)
     /* We do not touch i386_lineno unless the option is enabled. */
     i386_lineno =  1;
     
-    (yy_buffer_stack) = 0;
+    (yy_buffer_stack) = NULL;
     (yy_buffer_stack_top) = 0;
     (yy_buffer_stack_max) = 0;
-    (yy_c_buf_p) = (char *) 0;
+    (yy_c_buf_p) = NULL;
     (yy_init) = 0;
     (yy_start) = 0;
 
@@ -1904,8 +1925,8 @@ static int yy_init_globals (void)
     i386_in = stdin;
     i386_out = stdout;
 #else
-    i386_in = (FILE *) 0;
-    i386_out = (FILE *) 0;
+    i386_in = NULL;
+    i386_out = NULL;
 #endif
 
     /* For future reference: Set errno on error, since we are called by
@@ -1943,7 +1964,8 @@ int i386_lex_destroy  (void)
 #ifndef yytext_ptr
 static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 {
-	register int i;
+		
+	int i;
 	for ( i = 0; i < n; ++i )
 		s1[i] = s2[i];
 }
@@ -1952,7 +1974,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 #ifdef YY_NEED_STRLEN
 static int yy_flex_strlen (yyconst char * s )
 {
-	register int n;
+	int n;
 	for ( n = 0; s[n]; ++n )
 		;
 
@@ -1962,11 +1984,12 @@ static int yy_flex_strlen (yyconst char * s )
 
 void *i386_alloc (yy_size_t  size )
 {
-	return (void *) malloc( size );
+			return malloc(size);
 }
 
 void *i386_realloc  (void * ptr, yy_size_t  size )
 {
+		
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
 	 * that use void* generic pointers.  It works with the latter
@@ -1974,17 +1997,17 @@ void *i386_realloc  (void * ptr, yy_size_t  size )
 	 * any pointer type to void*, and deal with argument conversions
 	 * as though doing an assignment.
 	 */
-	return (void *) realloc( (char *) ptr, size );
+	return realloc(ptr, size);
 }
 
 void i386_free (void * ptr )
 {
-	free( (char *) ptr );	/* see i386_realloc() for (char *) cast */
+			free( (char *) ptr );	/* see i386_realloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
 
-#line 104 "/home/mark/src/elfutils/libcpu/i386_lex.l"
+#line 104 "i386_lex.l"
 
 
 

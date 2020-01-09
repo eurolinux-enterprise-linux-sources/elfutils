@@ -227,6 +227,53 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_sysctldir}/10-default-yama-scope.conf
 
 %changelog
+* Thu Feb 14 2019 Mark Wielaard <mark@klomp.org> 0.176-1
+- build: Add new --enable-install-elfh option.
+  Do NOT use this for system installs (it overrides glibc elf.h).
+- backends: riscv improved core file and return value location support.
+- Fixes CVE-2019-7146, CVE-2019-7148, CVE-2019-7149, CVE-2019-7150,
+        CVE-2019-7664, CVE-2019-7665.
+
+* Wed Nov 14 2018 Mark Wielaard <mark@klomp.org> 0.175-1
+- readelf: Handle mutliple .debug_macro sections.
+  Recognize and parse GNU Property notes, NT_VERSION notes and
+  GNU Build Attribute ELF Notes.
+- strip: Handle SHT_GROUP correctly.
+  Add strip --reloc-debug-sections-only option.
+  Handle relocations against GNU compressed sections.
+- libdwelf: New function dwelf_elf_begin.
+- libcpu: Recognize bpf jump variants BPF_JLT, BPF_JLE, BPF_JSLT
+  and BPF_JSLE.
+- backends: RISCV handles ADD/SUB relocations.
+  Handle SHT_X86_64_UNWIND.
+- Fixes CVE-2018-18310, CVE-2018-18520 and CVE-2018-18521.
+
+* Fri Sep 14 2018 Mark Wielaard <mark@klomp> 0.174-1
+- libelf, libdw and all tools now handle extended shnum and shstrndx
+  correctly.
+- elfcompress: Don't rewrite input file if no section data needs
+  updating.  Try harder to keep same file mode bits (suid) on rewrite.
+- strip: Handle mixed (out of order) allocated/non-allocated sections.
+- unstrip: Handle SHT_GROUP sections.
+- backends: RISCV and M68K now have backend implementations to
+  generate CFI based backtraces.
+- Fixes CVE-2018-16062, CVE-2018-16402 and CVE-2018-16403.
+
+* Fri Jun 29 2018 Mark Wielaard,,, <mark@klomp.org> 0.173-1
+- More fixes for crashes and hangs found by afl-fuzz. In particular
+  various functions now detect and break infinite loops caused by bad
+  DIE tree cycles.
+- readelf: Will now lookup the size and signedness of constant value
+  types to display them correctly (and not just how they were encoded).
+- libdw: New function dwarf_next_lines to read CU-less .debug_line data.
+  dwarf_begin_elf now accepts ELF files containing just .debug_line
+  or .debug_frame sections (which can be read without needing a DIE
+  tree from the .debug_info section).
+  Removed dwarf_getscn_info, which was never implemented.
+- backends: Handle BPF simple relocations.
+  The RISCV backends now handles ABI specific CFI and knows about
+  RISCV register types and names.
+
 * Mon Jun 11 2018 Mark Wielaard <mark@klomp.org> 0.172-1
 - No functional changes compared to 0.171.
 - Various bug fixes in libdw and eu-readelf dealing with bad DWARF5
