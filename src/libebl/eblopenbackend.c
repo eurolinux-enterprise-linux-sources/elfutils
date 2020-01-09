@@ -134,6 +134,8 @@ static const struct
   { "xtensa", "elf_xtensa", "xtensa", 6, EM_XTENSA, 0, 0 },
   { "aarch64", "elf_aarch64", "aarch64", 7, EM_AARCH64, ELFCLASS64, 0 },
   { "bpf", "elf_bpf", "bpf", 3, EM_BPF, 0, 0 },
+  { "riscv", "elf_riscv", "riscv", 5, EM_RISCV, ELFCLASS64, ELFDATA2LSB },
+  { "riscv", "elf_riscv", "riscv", 5, EM_RISCV, ELFCLASS32, ELFDATA2LSB },
 };
 #define nmachines (sizeof (machines) / sizeof (machines[0]))
 
@@ -638,6 +640,13 @@ default_debugscn_p (const char *name)
       ".gdb_index",
       /* GNU/DWARF 5 extension/proposal */
       ".debug_macro",
+      /* DWARF 5 */
+      ".debug_addr",
+      ".debug_line_str",
+      ".debug_loclists",
+      ".debug_names",
+      ".debug_rnglists",
+      ".debug_str_offsets",
       /* SGI/MIPS DWARF 2 extensions */
       ".debug_weaknames",
       ".debug_funcnames",

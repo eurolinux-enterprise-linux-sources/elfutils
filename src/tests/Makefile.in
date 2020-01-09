@@ -105,11 +105,11 @@ check_PROGRAMS = arextract$(EXEEXT) arsymtest$(EXEEXT) \
 	dwarf-getmacros$(EXEEXT) dwarf-ranges$(EXEEXT) \
 	addrcfi$(EXEEXT) test-flag-nobits$(EXEEXT) \
 	dwarf-getstring$(EXEEXT) rerequest_tag$(EXEEXT) \
-	alldts$(EXEEXT) md5-sha1-test$(EXEEXT) typeiter$(EXEEXT) \
-	typeiter2$(EXEEXT) low_high_pc$(EXEEXT) \
-	test-elf_cntl_gelf_getshdr$(EXEEXT) dwflsyms$(EXEEXT) \
-	dwfllines$(EXEEXT) dwfl-report-elf-align$(EXEEXT) \
-	varlocs$(EXEEXT) backtrace$(EXEEXT) backtrace-child$(EXEEXT) \
+	alldts$(EXEEXT) typeiter$(EXEEXT) typeiter2$(EXEEXT) \
+	low_high_pc$(EXEEXT) test-elf_cntl_gelf_getshdr$(EXEEXT) \
+	dwflsyms$(EXEEXT) dwfllines$(EXEEXT) \
+	dwfl-report-elf-align$(EXEEXT) varlocs$(EXEEXT) \
+	backtrace$(EXEEXT) backtrace-child$(EXEEXT) \
 	backtrace-data$(EXEEXT) backtrace-dwarf$(EXEEXT) \
 	debuglink$(EXEEXT) debugaltlink$(EXEEXT) buildid$(EXEEXT) \
 	deleted$(EXEEXT) deleted-lib.so$(EXEEXT) \
@@ -120,10 +120,13 @@ check_PROGRAMS = arextract$(EXEEXT) arsymtest$(EXEEXT) \
 	dwelfgnucompressed$(EXEEXT) elfgetchdr$(EXEEXT) \
 	elfgetzdata$(EXEEXT) elfputzdata$(EXEEXT) zstrptr$(EXEEXT) \
 	emptyfile$(EXEEXT) vendorelf$(EXEEXT) fillfile$(EXEEXT) \
-	dwarf_default_lower_bound$(EXEEXT) $(am__EXEEXT_1) \
-	$(am__EXEEXT_2) $(am__EXEEXT_4)
+	dwarf_default_lower_bound$(EXEEXT) dwarf-die-addr-die$(EXEEXT) \
+	get-units-invalid$(EXEEXT) get-units-split$(EXEEXT) \
+	attr-integrate-skel$(EXEEXT) all-dwarf-ranges$(EXEEXT) \
+	unit-info$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
+	$(am__EXEEXT_4)
 @BIARCH_TRUE@am__append_5 = backtrace-child-biarch
-TESTS = run-arextract.sh run-arsymtest.sh newfile$(EXEEXT) \
+TESTS = run-arextract.sh run-arsymtest.sh run-ar.sh newfile$(EXEEXT) \
 	test-nlist$(EXEEXT) update1$(EXEEXT) update2$(EXEEXT) \
 	update3$(EXEEXT) update4$(EXEEXT) run-show-die-info.sh \
 	run-get-files.sh run-get-lines.sh run-get-pubnames.sh \
@@ -143,12 +146,14 @@ TESTS = run-arextract.sh run-arsymtest.sh newfile$(EXEEXT) \
 	run-ranlib-test3.sh run-ranlib-test4.sh run-addrscopes.sh \
 	run-strings-test.sh run-funcscopes.sh run-find-prologues.sh \
 	run-allregs.sh run-addrcfi.sh run-nm-self.sh \
-	run-readelf-self.sh run-readelf-test1.sh run-readelf-test2.sh \
-	run-readelf-test3.sh run-readelf-test4.sh \
+	run-readelf-self.sh run-readelf-info-plus.sh \
+	run-varlocs-self.sh run-exprlocs-self.sh run-readelf-test1.sh \
+	run-readelf-test2.sh run-readelf-test3.sh run-readelf-test4.sh \
 	run-readelf-twofiles.sh run-readelf-macro.sh \
-	run-readelf-loc.sh run-readelf-aranges.sh run-readelf-line.sh \
-	run-readelf-z.sh run-native-test.sh run-bug1-test.sh \
-	run-debuglink.sh run-debugaltlink.sh run-buildid.sh \
+	run-readelf-loc.sh run-readelf-ranges.sh \
+	run-readelf-aranges.sh run-readelf-line.sh run-readelf-z.sh \
+	run-native-test.sh run-bug1-test.sh run-debuglink.sh \
+	run-debugaltlink.sh run-buildid.sh \
 	dwfl-bug-addr-overflow$(EXEEXT) run-addrname-test.sh \
 	dwfl-bug-fd-leak$(EXEEXT) dwfl-bug-report$(EXEEXT) \
 	run-dwfl-bug-offline-rel.sh run-dwfl-addr-sect.sh \
@@ -160,10 +165,11 @@ TESTS = run-arextract.sh run-arsymtest.sh newfile$(EXEEXT) \
 	run-low_high_pc.sh run-macro-test.sh \
 	run-elf_cntl_gelf_getshdr.sh run-test-archive64.sh \
 	run-readelf-vmcoreinfo.sh run-readelf-mixed-corenote.sh \
-	run-dwfllines.sh run-dwfl-report-elf-align.sh \
-	run-addr2line-test.sh run-addr2line-i-test.sh \
-	run-addr2line-i-lex-test.sh run-addr2line-i-demangle-test.sh \
-	run-addr2line-alt-debugpath.sh run-varlocs.sh \
+	run-dwfllines.sh run-readelf-variant.sh \
+	run-dwfl-report-elf-align.sh run-addr2line-test.sh \
+	run-addr2line-i-test.sh run-addr2line-i-lex-test.sh \
+	run-addr2line-i-demangle-test.sh \
+	run-addr2line-alt-debugpath.sh run-varlocs.sh run-exprlocs.sh \
 	run-funcretval.sh run-backtrace-native.sh \
 	run-backtrace-data.sh run-backtrace-dwarf.sh \
 	run-backtrace-native-biarch.sh run-backtrace-native-core.sh \
@@ -177,7 +183,8 @@ TESTS = run-arextract.sh run-arsymtest.sh newfile$(EXEEXT) \
 	run-backtrace-core-sparc.sh run-backtrace-demangle.sh \
 	run-stack-d-test.sh run-stack-i-test.sh \
 	run-stack-demangled-test.sh run-readelf-zx.sh \
-	run-readelf-zp.sh run-readelf-dwz-multi.sh \
+	run-readelf-zp.sh run-readelf-addr.sh run-readelf-str.sh \
+	run-readelf-types.sh run-readelf-dwz-multi.sh \
 	run-allfcts-multi.sh run-deleted.sh run-linkmap-cut.sh \
 	run-aggregate-size.sh run-peel-type.sh vdsosyms$(EXEEXT) \
 	run-readelf-A.sh run-getsrc-die.sh run-strptr.sh \
@@ -187,10 +194,13 @@ TESTS = run-arextract.sh run-arsymtest.sh newfile$(EXEEXT) \
 	run-elfputzdata.sh run-zstrptr.sh run-compress-test.sh \
 	run-readelf-zdebug.sh run-readelf-zdebug-rel.sh \
 	emptyfile$(EXEEXT) vendorelf$(EXEEXT) fillfile$(EXEEXT) \
-	dwarf_default_lower_bound$(EXEEXT) $(am__EXEEXT_2) \
-	$(am__append_8) $(am__EXEEXT_5)
-@STANDALONE_FALSE@am__append_6 = msg_tst md5-sha1-test system-elf-libelf-test
-@STANDALONE_FALSE@am__append_7 = msg_tst md5-sha1-test system-elf-libelf-test
+	dwarf_default_lower_bound$(EXEEXT) run-dwarf-die-addr-die.sh \
+	run-get-units-invalid.sh run-get-units-split.sh \
+	run-attr-integrate-skel.sh run-all-dwarf-ranges.sh \
+	run-unit-info.sh $(am__EXEEXT_2) $(am__append_8) \
+	$(am__EXEEXT_5)
+@STANDALONE_FALSE@am__append_6 = msg_tst system-elf-libelf-test
+@STANDALONE_FALSE@am__append_7 = msg_tst system-elf-libelf-test
 @LZMA_TRUE@am__append_8 = run-readelf-s.sh run-dwflsyms.sh
 @HAVE_LIBASM_TRUE@am__append_9 = $(asm_TESTS)
 @HAVE_LIBASM_TRUE@am__append_10 = $(asm_TESTS) run-disasm-bpf.sh
@@ -208,7 +218,6 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BIARCH_TRUE@am__EXEEXT_1 = backtrace-child-biarch$(EXEEXT)
 @STANDALONE_FALSE@am__EXEEXT_2 = msg_tst$(EXEEXT) \
-@STANDALONE_FALSE@	md5-sha1-test$(EXEEXT) \
 @STANDALONE_FALSE@	system-elf-libelf-test$(EXEEXT)
 am__EXEEXT_3 = asm-tst1$(EXEEXT) asm-tst2$(EXEEXT) asm-tst3$(EXEEXT) \
 	asm-tst4$(EXEEXT) asm-tst5$(EXEEXT) asm-tst6$(EXEEXT) \
@@ -238,6 +247,9 @@ aggregate_size_SOURCES = aggregate_size.c
 aggregate_size_OBJECTS = aggregate_size.$(OBJEXT)
 aggregate_size_DEPENDENCIES = $(am__DEPENDENCIES_4) \
 	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1)
+all_dwarf_ranges_SOURCES = all-dwarf-ranges.c
+all_dwarf_ranges_OBJECTS = all-dwarf-ranges.$(OBJEXT)
+all_dwarf_ranges_DEPENDENCIES = $(am__DEPENDENCIES_4)
 alldts_SOURCES = alldts.c
 alldts_OBJECTS = alldts.$(OBJEXT)
 alldts_DEPENDENCIES = $(am__DEPENDENCIES_4) $(am__DEPENDENCIES_2)
@@ -296,6 +308,9 @@ asm_tst9_SOURCES = asm-tst9.c
 asm_tst9_OBJECTS = asm-tst9.$(OBJEXT)
 asm_tst9_DEPENDENCIES = $(am__DEPENDENCIES_5) $(am__DEPENDENCIES_3) \
 	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_4)
+attr_integrate_skel_SOURCES = attr-integrate-skel.c
+attr_integrate_skel_OBJECTS = attr-integrate-skel.$(OBJEXT)
+attr_integrate_skel_DEPENDENCIES = $(am__DEPENDENCIES_4)
 backtrace_SOURCES = backtrace.c
 backtrace_OBJECTS = backtrace.$(OBJEXT)
 backtrace_DEPENDENCIES = $(am__DEPENDENCIES_4) $(am__DEPENDENCIES_2) \
@@ -336,6 +351,9 @@ deleted_lib_so_OBJECTS = deleted_lib_so-deleted-lib.$(OBJEXT)
 deleted_lib_so_LDADD = $(LDADD)
 deleted_lib_so_LINK = $(CCLD) $(deleted_lib_so_CFLAGS) $(CFLAGS) \
 	$(deleted_lib_so_LDFLAGS) $(LDFLAGS) -o $@
+dwarf_die_addr_die_SOURCES = dwarf-die-addr-die.c
+dwarf_die_addr_die_OBJECTS = dwarf-die-addr-die.$(OBJEXT)
+dwarf_die_addr_die_DEPENDENCIES = $(am__DEPENDENCIES_4)
 dwarf_getmacros_SOURCES = dwarf-getmacros.c
 dwarf_getmacros_OBJECTS = dwarf-getmacros.$(OBJEXT)
 dwarf_getmacros_DEPENDENCIES = $(am__DEPENDENCIES_4)
@@ -447,6 +465,12 @@ get_pubnames_SOURCES = get-pubnames.c
 get_pubnames_OBJECTS = get-pubnames.$(OBJEXT)
 get_pubnames_DEPENDENCIES = $(am__DEPENDENCIES_4) \
 	$(am__DEPENDENCIES_2)
+get_units_invalid_SOURCES = get-units-invalid.c
+get_units_invalid_OBJECTS = get-units-invalid.$(OBJEXT)
+get_units_invalid_DEPENDENCIES = $(am__DEPENDENCIES_4)
+get_units_split_SOURCES = get-units-split.c
+get_units_split_OBJECTS = get-units-split.$(OBJEXT)
+get_units_split_DEPENDENCIES = $(am__DEPENDENCIES_4)
 getsrc_die_SOURCES = getsrc_die.c
 getsrc_die_OBJECTS = getsrc_die.$(OBJEXT)
 getsrc_die_DEPENDENCIES = $(am__DEPENDENCIES_4) $(am__DEPENDENCIES_2)
@@ -460,9 +484,6 @@ low_high_pc_SOURCES = low_high_pc.c
 low_high_pc_OBJECTS = low_high_pc.$(OBJEXT)
 low_high_pc_DEPENDENCIES = $(am__DEPENDENCIES_4) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_1)
-md5_sha1_test_SOURCES = md5-sha1-test.c
-md5_sha1_test_OBJECTS = md5-sha1-test.$(OBJEXT)
-md5_sha1_test_DEPENDENCIES = $(libeu)
 msg_tst_SOURCES = msg_tst.c
 msg_tst_OBJECTS = msg_tst.$(OBJEXT)
 msg_tst_DEPENDENCIES = $(am__DEPENDENCIES_2)
@@ -527,6 +548,9 @@ typeiter_DEPENDENCIES = $(am__DEPENDENCIES_4) $(am__DEPENDENCIES_2)
 typeiter2_SOURCES = typeiter2.c
 typeiter2_OBJECTS = typeiter2.$(OBJEXT)
 typeiter2_DEPENDENCIES = $(am__DEPENDENCIES_4) $(am__DEPENDENCIES_2)
+unit_info_SOURCES = unit-info.c
+unit_info_OBJECTS = unit-info.$(OBJEXT)
+unit_info_DEPENDENCIES = $(am__DEPENDENCIES_4)
 update1_SOURCES = update1.c
 update1_OBJECTS = update1.$(OBJEXT)
 update1_DEPENDENCIES = $(am__DEPENDENCIES_2)
@@ -584,14 +608,15 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = addrcfi.c addrscopes.c aggregate_size.c alldts.c allfcts.c \
-	allregs.c arextract.c arls.c arsymtest.c asm-tst1.c asm-tst2.c \
-	asm-tst3.c asm-tst4.c asm-tst5.c asm-tst6.c asm-tst7.c \
-	asm-tst8.c asm-tst9.c backtrace.c backtrace-child.c \
+SOURCES = addrcfi.c addrscopes.c aggregate_size.c all-dwarf-ranges.c \
+	alldts.c allfcts.c allregs.c arextract.c arls.c arsymtest.c \
+	asm-tst1.c asm-tst2.c asm-tst3.c asm-tst4.c asm-tst5.c \
+	asm-tst6.c asm-tst7.c asm-tst8.c asm-tst9.c \
+	attr-integrate-skel.c backtrace.c backtrace-child.c \
 	$(backtrace_child_biarch_SOURCES) backtrace-data.c \
 	backtrace-dwarf.c buildid.c debugaltlink.c debuglink.c \
-	deleted.c deleted-lib.c dwarf-getmacros.c dwarf-getstring.c \
-	dwarf-ranges.c dwarf_default_lower_bound.c \
+	deleted.c deleted-lib.c dwarf-die-addr-die.c dwarf-getmacros.c \
+	dwarf-getstring.c dwarf-ranges.c dwarf_default_lower_bound.c \
 	dwelfgnucompressed.c dwfl-addr-sect.c dwfl-bug-addr-overflow.c \
 	dwfl-bug-fd-leak.c dwfl-bug-getmodules.c dwfl-bug-report.c \
 	dwfl-proc-attach.c dwfl-report-elf-align.c dwfllines.c \
@@ -599,22 +624,24 @@ SOURCES = addrcfi.c addrscopes.c aggregate_size.c alldts.c allfcts.c \
 	elfgetzdata.c elfputzdata.c elfshphehdr.c elfstrmerge.c \
 	elfstrtab.c emptyfile.c fillfile.c find-prologues.c \
 	funcretval.c funcscopes.c get-aranges.c get-files.c \
-	get-lines.c get-pubnames.c getsrc_die.c hash.c line2addr.c \
-	low_high_pc.c md5-sha1-test.c msg_tst.c newdata.c newfile.c \
-	newscn.c peel_type.c rdwrmmap.c rerequest_tag.c saridx.c \
-	scnnames.c sectiondump.c show-abbrev.c show-die-info.c \
-	showptable.c strptr.c system-elf-libelf-test.c \
-	test-elf_cntl_gelf_getshdr.c test-flag-nobits.c test-nlist.c \
-	typeiter.c typeiter2.c update1.c update2.c update3.c update4.c \
-	varlocs.c vdsosyms.c vendorelf.c zstrptr.c
-DIST_SOURCES = addrcfi.c addrscopes.c aggregate_size.c alldts.c \
-	allfcts.c allregs.c arextract.c arls.c arsymtest.c asm-tst1.c \
-	asm-tst2.c asm-tst3.c asm-tst4.c asm-tst5.c asm-tst6.c \
-	asm-tst7.c asm-tst8.c asm-tst9.c backtrace.c backtrace-child.c \
+	get-lines.c get-pubnames.c get-units-invalid.c \
+	get-units-split.c getsrc_die.c hash.c line2addr.c \
+	low_high_pc.c msg_tst.c newdata.c newfile.c newscn.c \
+	peel_type.c rdwrmmap.c rerequest_tag.c saridx.c scnnames.c \
+	sectiondump.c show-abbrev.c show-die-info.c showptable.c \
+	strptr.c system-elf-libelf-test.c test-elf_cntl_gelf_getshdr.c \
+	test-flag-nobits.c test-nlist.c typeiter.c typeiter2.c \
+	unit-info.c update1.c update2.c update3.c update4.c varlocs.c \
+	vdsosyms.c vendorelf.c zstrptr.c
+DIST_SOURCES = addrcfi.c addrscopes.c aggregate_size.c \
+	all-dwarf-ranges.c alldts.c allfcts.c allregs.c arextract.c \
+	arls.c arsymtest.c asm-tst1.c asm-tst2.c asm-tst3.c asm-tst4.c \
+	asm-tst5.c asm-tst6.c asm-tst7.c asm-tst8.c asm-tst9.c \
+	attr-integrate-skel.c backtrace.c backtrace-child.c \
 	$(backtrace_child_biarch_SOURCES) backtrace-data.c \
 	backtrace-dwarf.c buildid.c debugaltlink.c debuglink.c \
-	deleted.c deleted-lib.c dwarf-getmacros.c dwarf-getstring.c \
-	dwarf-ranges.c dwarf_default_lower_bound.c \
+	deleted.c deleted-lib.c dwarf-die-addr-die.c dwarf-getmacros.c \
+	dwarf-getstring.c dwarf-ranges.c dwarf_default_lower_bound.c \
 	dwelfgnucompressed.c dwfl-addr-sect.c dwfl-bug-addr-overflow.c \
 	dwfl-bug-fd-leak.c dwfl-bug-getmodules.c dwfl-bug-report.c \
 	dwfl-proc-attach.c dwfl-report-elf-align.c dwfllines.c \
@@ -622,14 +649,15 @@ DIST_SOURCES = addrcfi.c addrscopes.c aggregate_size.c alldts.c \
 	elfgetzdata.c elfputzdata.c elfshphehdr.c elfstrmerge.c \
 	elfstrtab.c emptyfile.c fillfile.c find-prologues.c \
 	funcretval.c funcscopes.c get-aranges.c get-files.c \
-	get-lines.c get-pubnames.c getsrc_die.c hash.c line2addr.c \
-	low_high_pc.c md5-sha1-test.c msg_tst.c newdata.c newfile.c \
-	newscn.c peel_type.c rdwrmmap.c rerequest_tag.c saridx.c \
-	scnnames.c sectiondump.c show-abbrev.c show-die-info.c \
-	showptable.c strptr.c system-elf-libelf-test.c \
-	test-elf_cntl_gelf_getshdr.c test-flag-nobits.c test-nlist.c \
-	typeiter.c typeiter2.c update1.c update2.c update3.c update4.c \
-	varlocs.c vdsosyms.c vendorelf.c zstrptr.c
+	get-lines.c get-pubnames.c get-units-invalid.c \
+	get-units-split.c getsrc_die.c hash.c line2addr.c \
+	low_high_pc.c msg_tst.c newdata.c newfile.c newscn.c \
+	peel_type.c rdwrmmap.c rerequest_tag.c saridx.c scnnames.c \
+	sectiondump.c show-abbrev.c show-die-info.c showptable.c \
+	strptr.c system-elf-libelf-test.c test-elf_cntl_gelf_getshdr.c \
+	test-flag-nobits.c test-nlist.c typeiter.c typeiter2.c \
+	unit-info.c update1.c update2.c update3.c update4.c varlocs.c \
+	vdsosyms.c vendorelf.c zstrptr.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -957,9 +985,12 @@ builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
+dso_LDFLAGS = @dso_LDFLAGS@
 dvidir = @dvidir@
 eu_version = @eu_version@
 exec_prefix = @exec_prefix@
+fpic_CFLAGS = @fpic_CFLAGS@
+fpie_CFLAGS = @fpie_CFLAGS@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -1005,7 +1036,10 @@ ARFLAGS = cr
 @HAVE_NULL_DEREFERENCE_WARNING_FALSE@NULL_DEREFERENCE_WARNING = 
 @HAVE_NULL_DEREFERENCE_WARNING_TRUE@NULL_DEREFERENCE_WARNING = -Wnull-dereference
 @HAVE_IMPLICIT_FALLTHROUGH_WARNING_FALSE@IMPLICIT_FALLTHROUGH_WARNING = 
-@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough
+
+# Use strict fallthrough. Only __attribute__((fallthrough)) will prevent the
+# warning
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough=5
 AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	    -Wold-style-definition -Wstrict-prototypes \
 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
@@ -1013,11 +1047,14 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	    $(if $($(*F)_no_Werror),,-Werror) \
 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
+	    $(if $($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
 	    $($(*F)_CFLAGS)
 
 COMPILE.os = $(filter-out -fprofile-arcs -ftest-coverage, $(COMPILE))
 DEFS.os = -DPIC -DSHARED $(am__append_1)
-CLEANFILES = *.gcno *.gcda
+
+# A lock file used to make sure only one test dumps core at a time
+CLEANFILES = *.gcno *.gcda core-dump-backtrace.lock
 textrel_msg = echo "WARNING: TEXTREL found in '$@'"
 @FATAL_TEXTREL_FALSE@textrel_found = $(textrel_msg)
 @FATAL_TEXTREL_TRUE@textrel_found = $(textrel_msg); exit 1
@@ -1029,7 +1066,7 @@ AM_LDFLAGS = $(am__append_3) $(am__append_4)
 asm_TESTS = asm-tst1 asm-tst2 asm-tst3 asm-tst4 asm-tst5 \
 	    asm-tst6 asm-tst7 asm-tst8 asm-tst9
 
-EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
+EXTRA_DIST = run-arextract.sh run-arsymtest.sh run-ar.sh \
 	     run-show-die-info.sh run-get-files.sh run-get-lines.sh \
 	     run-get-pubnames.sh run-get-aranges.sh \
 	     run-show-abbrev.sh run-strip-test.sh \
@@ -1048,7 +1085,7 @@ EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
 	     testfile-nobitsalign.bz2 testfile-nobitsalign.strip.bz2 \
 	     run-strip-reloc.sh hello_i386.ko.bz2 hello_x86_64.ko.bz2 \
 	     hello_ppc64.ko.bz2 hello_s390.ko.bz2 hello_aarch64.ko.bz2 \
-	     hello_m68k.ko.bz2 \
+	     hello_m68k.ko.bz2 hello_riscv64.ko.bz2 \
 	     run-unstrip-test.sh run-unstrip-test2.sh \
 	     testfile-info-link.bz2 testfile-info-link.debuginfo.bz2 \
 	     testfile-info-link.stripped.bz2 run-unstrip-test3.sh \
@@ -1058,12 +1095,17 @@ EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
 	     run-elflint-self.sh run-ranlib-test.sh run-ranlib-test2.sh \
 	     run-ranlib-test3.sh run-ranlib-test4.sh \
 	     run-addrscopes.sh run-strings-test.sh run-funcscopes.sh \
-	     run-nm-self.sh run-readelf-self.sh run-addrcfi.sh \
+	     run-nm-self.sh run-readelf-self.sh run-readelf-info-plus.sh \
+	     run-addrcfi.sh \
+	     run-varlocs-self.sh run-exprlocs-self.sh \
 	     run-find-prologues.sh run-allregs.sh run-native-test.sh \
 	     run-addrname-test.sh run-dwfl-bug-offline-rel.sh \
 	     run-dwfl-addr-sect.sh run-early-offscn.sh \
 	     run-dwarf-getmacros.sh \
 	     run-dwarf-ranges.sh debug-ranges-no-lowpc.o.bz2 \
+	     testfileranges4.debug.bz2 testfileranges5.debug.bz2 \
+	     testfilesplitranges5.debug.bz2 \
+	     testfile-ranges-hello5.dwo.bz2 testfile-ranges-world5.dwo.bz2 \
 	     run-test-flag-nobits.sh \
 	     run-dwarf-getstring.sh run-rerequest_tag.sh run-alldts.sh \
 	     testfile15.bz2 testfile15.debug.bz2 \
@@ -1094,11 +1136,19 @@ EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
 	     testfile-macros-0xff.bz2 \
 	     run-readelf-macro.sh testfilemacro.bz2 \
 	     run-readelf-loc.sh testfileloc.bz2 \
+	     splitdwarf4-not-split4.dwo.bz2 \
+	     testfile-splitdwarf4-not-split4.debug.bz2 \
+	     run-readelf-ranges.sh \
 	     run-readelf-aranges.sh run-readelf-line.sh testfilefoobarbaz.bz2 \
+	     testfile-ppc64-min-instr.bz2 \
+	     testfile-dwarf-45.source \
+	     testfile-dwarf-4.bz2 testfile-dwarf-5.bz2 \
 	     run-readelf-z.sh \
 	     run-readelf-dwz-multi.sh libtestfile_multi_shared.so.bz2 \
 	     testfile_multi.dwz.bz2 testfile_multi_main.bz2 \
 	     testfile-dwzstr.bz2 testfile-dwzstr.multi.bz2 \
+	     run-readelf-addr.sh run-readelf-str.sh \
+	     run-readelf-types.sh \
 	     run-allfcts-multi.sh \
 	     test-offset-loop.bz2 test-offset-loop.alt.bz2 \
 	     run-prelink-addr-test.sh \
@@ -1132,6 +1182,7 @@ EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
 	     testfilebazdynppc64.bz2 testfilebazmdbppc64.bz2 \
 	     testfilebazminppc64.bz2 testfilebazminppc64_pl.bz2 \
 	     testfilebazminppc64_plr.bz2 testfilebaztabppc64.bz2 \
+	     run-readelf-variant.sh testfile-ada-variant.bz2 \
 	     run-dwflsyms.sh \
 	     run-unstrip-n.sh testcore-rtlib.bz2 testcore-rtlib-ppc.bz2 \
 	     run-low_high_pc.sh testfile_low_high_pc.bz2 \
@@ -1154,13 +1205,15 @@ EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
 	     testfileppc32.bz2 testfileppc64.bz2 \
 	     testfiles390.bz2 testfiles390x.bz2 \
 	     testfilearm.bz2 testfileaarch64.bz2 \
-	     run-varlocs.sh \
+	     run-varlocs.sh run-exprlocs.sh testfile-stridex.bz2 \
 	     testfile_const_type.c testfile_const_type.bz2 \
 	     testfile_implicit_pointer.c testfile_implicit_pointer.bz2 \
 	     testfile_parameter_ref.c testfile_parameter_ref.bz2 \
 	     testfile_entry_value.c testfile_entry_value.bz2 \
 	     testfile_implicit_value.c testfile_implicit_value.bz2 \
 	     testfile_aarch64_core.bz2 testfile_i686_core.bz2 \
+	     addrx_constx-4.dwo.bz2 addrx_constx-5.dwo.bz2 \
+	     testfile-addrx_constx-4.bz2 testfile-addrx_constx-5.bz2 \
 	     run-funcretval.sh funcretval_test.c funcretval_test_aarch64.bz2 \
 	     run-backtrace-data.sh run-backtrace-dwarf.sh cleanup-13.c \
 	     run-backtrace-native.sh run-backtrace-native-biarch.sh \
@@ -1199,7 +1252,8 @@ EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
 	     run-deleted.sh run-linkmap-cut.sh linkmap-cut-lib.so.bz2 \
 	     linkmap-cut.bz2 linkmap-cut.core.bz2 \
 	     run-aggregate-size.sh testfile-sizes1.o.bz2 testfile-sizes2.o.bz2 \
-	     testfile-sizes3.o.bz2 run-peel-type.sh \
+	     testfile-sizes3.o.bz2 testfile-sizes4.o.bz2 testfile-sizes4.s \
+	     run-peel-type.sh \
 	     run-readelf-A.sh testfileppc32attrs.o.bz2 \
 	     testfilesparc64attrs.o.bz2 testfileppc64attrs.o.bz2 \
 	     testfile-debug-types.bz2 \
@@ -1217,7 +1271,16 @@ EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
 	     run-zstrptr.sh run-compress-test.sh \
 	     run-disasm-bpf.sh \
 	     testfile-bpf-dis1.expect.bz2 testfile-bpf-dis1.o.bz2 \
-	     testfile-m68k-core.bz2 testfile-m68k.bz2 testfile-m68k-s.bz2
+	     testfile-m68k-core.bz2 testfile-m68k.bz2 testfile-m68k-s.bz2 \
+	     run-dwarf-die-addr-die.sh \
+	     run-get-units-invalid.sh run-get-units-split.sh \
+	     testfile-hello4.dwo.bz2 testfile-hello5.dwo.bz2 \
+	     testfile-splitdwarf-4.bz2 testfile-splitdwarf-5.bz2 \
+	     testfile-world5.dwo.bz2 testfile-world4.dwo.bz2 \
+	     run-attr-integrate-skel.sh \
+	     run-all-dwarf-ranges.sh testfilesplitranges4.debug.bz2 \
+	     testfile-ranges-hello.dwo.bz2 testfile-ranges-world.dwo.bz2 \
+	     run-unit-info.sh
 
 @USE_VALGRIND_TRUE@valgrind_cmd = 'valgrind -q --leak-check=full --error-exitcode=1'
 installed_TESTS_ENVIRONMENT = libdir=$(DESTDIR)$(libdir); \
@@ -1317,7 +1380,6 @@ addrcfi_LDADD = $(libdw) $(libebl) $(libelf) $(argp_LDADD) -ldl
 test_flag_nobits_LDADD = $(libelf)
 rerequest_tag_LDADD = $(libdw)
 alldts_LDADD = $(libdw) $(libelf)
-md5_sha1_test_LDADD = $(libeu)
 typeiter_LDADD = $(libdw) $(libelf)
 typeiter2_LDADD = $(libdw) $(libelf)
 low_high_pc_LDADD = $(libdw) $(libelf) $(argp_LDADD)
@@ -1328,7 +1390,7 @@ dwfl_report_elf_align_LDADD = $(libdw)
 varlocs_LDADD = $(libdw) $(libelf) $(argp_LDADD)
 backtrace_LDADD = $(libdw) $(libelf) $(argp_LDADD)
 # backtrace-child-biarch also uses those *_CFLAGS and *_LDLAGS variables:
-backtrace_child_CFLAGS = -fPIE
+backtrace_child_CFLAGS = $(fpie_CFLAGS)
 backtrace_child_LDFLAGS = -pie -pthread
 backtrace_child_biarch_SOURCES = backtrace-child.c
 backtrace_data_LDADD = $(libdw) $(libelf)
@@ -1338,8 +1400,8 @@ debuglink_LDADD = $(libdw) $(libelf)
 debugaltlink_LDADD = $(libdw) $(libelf)
 buildid_LDADD = $(libdw) $(libelf)
 deleted_LDADD = ./deleted-lib.so
-deleted_lib_so_LDFLAGS = -shared -rdynamic
-deleted_lib_so_CFLAGS = -fPIC -fasynchronous-unwind-tables
+deleted_lib_so_LDFLAGS = -shared
+deleted_lib_so_CFLAGS = $(fpic_CFLAGS) -fasynchronous-unwind-tables
 aggregate_size_LDADD = $(libdw) $(libelf) $(argp_LDADD)
 peel_type_LDADD = $(libdw) $(libelf) $(argp_LDADD)
 vdsosyms_LDADD = $(libdw) $(libelf)
@@ -1360,6 +1422,12 @@ emptyfile_LDADD = $(libelf)
 vendorelf_LDADD = $(libelf)
 fillfile_LDADD = $(libelf)
 dwarf_default_lower_bound_LDADD = $(libdw)
+dwarf_die_addr_die_LDADD = $(libdw)
+get_units_invalid_LDADD = $(libdw)
+get_units_split_LDADD = $(libdw)
+attr_integrate_skel_LDADD = $(libdw)
+all_dwarf_ranges_LDADD = $(libdw)
+unit_info_LDADD = $(libdw)
 
 # We want to test the libelf header against the system elf.h header.
 # Don't include any -I CPPFLAGS.
@@ -1415,6 +1483,10 @@ addrscopes$(EXEEXT): $(addrscopes_OBJECTS) $(addrscopes_DEPENDENCIES) $(EXTRA_ad
 aggregate_size$(EXEEXT): $(aggregate_size_OBJECTS) $(aggregate_size_DEPENDENCIES) $(EXTRA_aggregate_size_DEPENDENCIES) 
 	@rm -f aggregate_size$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(aggregate_size_OBJECTS) $(aggregate_size_LDADD) $(LIBS)
+
+all-dwarf-ranges$(EXEEXT): $(all_dwarf_ranges_OBJECTS) $(all_dwarf_ranges_DEPENDENCIES) $(EXTRA_all_dwarf_ranges_DEPENDENCIES) 
+	@rm -f all-dwarf-ranges$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(all_dwarf_ranges_OBJECTS) $(all_dwarf_ranges_LDADD) $(LIBS)
 
 alldts$(EXEEXT): $(alldts_OBJECTS) $(alldts_DEPENDENCIES) $(EXTRA_alldts_DEPENDENCIES) 
 	@rm -f alldts$(EXEEXT)
@@ -1476,6 +1548,10 @@ asm-tst9$(EXEEXT): $(asm_tst9_OBJECTS) $(asm_tst9_DEPENDENCIES) $(EXTRA_asm_tst9
 	@rm -f asm-tst9$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(asm_tst9_OBJECTS) $(asm_tst9_LDADD) $(LIBS)
 
+attr-integrate-skel$(EXEEXT): $(attr_integrate_skel_OBJECTS) $(attr_integrate_skel_DEPENDENCIES) $(EXTRA_attr_integrate_skel_DEPENDENCIES) 
+	@rm -f attr-integrate-skel$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(attr_integrate_skel_OBJECTS) $(attr_integrate_skel_LDADD) $(LIBS)
+
 backtrace$(EXEEXT): $(backtrace_OBJECTS) $(backtrace_DEPENDENCIES) $(EXTRA_backtrace_DEPENDENCIES) 
 	@rm -f backtrace$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(backtrace_OBJECTS) $(backtrace_LDADD) $(LIBS)
@@ -1511,6 +1587,10 @@ deleted$(EXEEXT): $(deleted_OBJECTS) $(deleted_DEPENDENCIES) $(EXTRA_deleted_DEP
 deleted-lib.so$(EXEEXT): $(deleted_lib_so_OBJECTS) $(deleted_lib_so_DEPENDENCIES) $(EXTRA_deleted_lib_so_DEPENDENCIES) 
 	@rm -f deleted-lib.so$(EXEEXT)
 	$(AM_V_CCLD)$(deleted_lib_so_LINK) $(deleted_lib_so_OBJECTS) $(deleted_lib_so_LDADD) $(LIBS)
+
+dwarf-die-addr-die$(EXEEXT): $(dwarf_die_addr_die_OBJECTS) $(dwarf_die_addr_die_DEPENDENCIES) $(EXTRA_dwarf_die_addr_die_DEPENDENCIES) 
+	@rm -f dwarf-die-addr-die$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(dwarf_die_addr_die_OBJECTS) $(dwarf_die_addr_die_LDADD) $(LIBS)
 
 dwarf-getmacros$(EXEEXT): $(dwarf_getmacros_OBJECTS) $(dwarf_getmacros_DEPENDENCIES) $(EXTRA_dwarf_getmacros_DEPENDENCIES) 
 	@rm -f dwarf-getmacros$(EXEEXT)
@@ -1640,6 +1720,14 @@ get-pubnames$(EXEEXT): $(get_pubnames_OBJECTS) $(get_pubnames_DEPENDENCIES) $(EX
 	@rm -f get-pubnames$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(get_pubnames_OBJECTS) $(get_pubnames_LDADD) $(LIBS)
 
+get-units-invalid$(EXEEXT): $(get_units_invalid_OBJECTS) $(get_units_invalid_DEPENDENCIES) $(EXTRA_get_units_invalid_DEPENDENCIES) 
+	@rm -f get-units-invalid$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(get_units_invalid_OBJECTS) $(get_units_invalid_LDADD) $(LIBS)
+
+get-units-split$(EXEEXT): $(get_units_split_OBJECTS) $(get_units_split_DEPENDENCIES) $(EXTRA_get_units_split_DEPENDENCIES) 
+	@rm -f get-units-split$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(get_units_split_OBJECTS) $(get_units_split_LDADD) $(LIBS)
+
 getsrc_die$(EXEEXT): $(getsrc_die_OBJECTS) $(getsrc_die_DEPENDENCIES) $(EXTRA_getsrc_die_DEPENDENCIES) 
 	@rm -f getsrc_die$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(getsrc_die_OBJECTS) $(getsrc_die_LDADD) $(LIBS)
@@ -1655,10 +1743,6 @@ line2addr$(EXEEXT): $(line2addr_OBJECTS) $(line2addr_DEPENDENCIES) $(EXTRA_line2
 low_high_pc$(EXEEXT): $(low_high_pc_OBJECTS) $(low_high_pc_DEPENDENCIES) $(EXTRA_low_high_pc_DEPENDENCIES) 
 	@rm -f low_high_pc$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(low_high_pc_OBJECTS) $(low_high_pc_LDADD) $(LIBS)
-
-md5-sha1-test$(EXEEXT): $(md5_sha1_test_OBJECTS) $(md5_sha1_test_DEPENDENCIES) $(EXTRA_md5_sha1_test_DEPENDENCIES) 
-	@rm -f md5-sha1-test$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(md5_sha1_test_OBJECTS) $(md5_sha1_test_LDADD) $(LIBS)
 
 msg_tst$(EXEEXT): $(msg_tst_OBJECTS) $(msg_tst_DEPENDENCIES) $(EXTRA_msg_tst_DEPENDENCIES) 
 	@rm -f msg_tst$(EXEEXT)
@@ -1740,6 +1824,10 @@ typeiter2$(EXEEXT): $(typeiter2_OBJECTS) $(typeiter2_DEPENDENCIES) $(EXTRA_typei
 	@rm -f typeiter2$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(typeiter2_OBJECTS) $(typeiter2_LDADD) $(LIBS)
 
+unit-info$(EXEEXT): $(unit_info_OBJECTS) $(unit_info_DEPENDENCIES) $(EXTRA_unit_info_DEPENDENCIES) 
+	@rm -f unit-info$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(unit_info_OBJECTS) $(unit_info_LDADD) $(LIBS)
+
 update1$(EXEEXT): $(update1_OBJECTS) $(update1_DEPENDENCIES) $(EXTRA_update1_DEPENDENCIES) 
 	@rm -f update1$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(update1_OBJECTS) $(update1_LDADD) $(LIBS)
@@ -1781,6 +1869,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/addrcfi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/addrscopes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aggregate_size.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/all-dwarf-ranges.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alldts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/allfcts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/allregs.Po@am__quote@
@@ -1796,6 +1885,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-tst7.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-tst8.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asm-tst9.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/attr-integrate-skel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/backtrace-child.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/backtrace-data.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/backtrace.Po@am__quote@
@@ -1806,6 +1896,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debuglink.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/deleted.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/deleted_lib_so-deleted-lib.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwarf-die-addr-die.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwarf-getmacros.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwarf-getstring.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwarf-ranges.Po@am__quote@
@@ -1838,11 +1929,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get-files.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get-lines.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get-pubnames.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get-units-invalid.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get-units-split.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getsrc_die.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/line2addr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/low_high_pc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5-sha1-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/msg_tst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/newdata.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/newfile.Po@am__quote@
@@ -1863,6 +1955,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-nlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/typeiter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/typeiter2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unit-info.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/update1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/update2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/update3.Po@am__quote@
@@ -2145,6 +2238,13 @@ run-arextract.sh.log: run-arextract.sh
 run-arsymtest.sh.log: run-arsymtest.sh
 	@p='run-arsymtest.sh'; \
 	b='run-arsymtest.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-ar.sh.log: run-ar.sh
+	@p='run-ar.sh'; \
+	b='run-ar.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -2548,6 +2648,27 @@ run-readelf-self.sh.log: run-readelf-self.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-readelf-info-plus.sh.log: run-readelf-info-plus.sh
+	@p='run-readelf-info-plus.sh'; \
+	b='run-readelf-info-plus.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-varlocs-self.sh.log: run-varlocs-self.sh
+	@p='run-varlocs-self.sh'; \
+	b='run-varlocs-self.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-exprlocs-self.sh.log: run-exprlocs-self.sh
+	@p='run-exprlocs-self.sh'; \
+	b='run-exprlocs-self.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 run-readelf-test1.sh.log: run-readelf-test1.sh
 	@p='run-readelf-test1.sh'; \
 	b='run-readelf-test1.sh'; \
@@ -2593,6 +2714,13 @@ run-readelf-macro.sh.log: run-readelf-macro.sh
 run-readelf-loc.sh.log: run-readelf-loc.sh
 	@p='run-readelf-loc.sh'; \
 	b='run-readelf-loc.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-readelf-ranges.sh.log: run-readelf-ranges.sh
+	@p='run-readelf-ranges.sh'; \
+	b='run-readelf-ranges.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -2835,6 +2963,13 @@ run-dwfllines.sh.log: run-dwfllines.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-readelf-variant.sh.log: run-readelf-variant.sh
+	@p='run-readelf-variant.sh'; \
+	b='run-readelf-variant.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 run-dwfl-report-elf-align.sh.log: run-dwfl-report-elf-align.sh
 	@p='run-dwfl-report-elf-align.sh'; \
 	b='run-dwfl-report-elf-align.sh'; \
@@ -2880,6 +3015,13 @@ run-addr2line-alt-debugpath.sh.log: run-addr2line-alt-debugpath.sh
 run-varlocs.sh.log: run-varlocs.sh
 	@p='run-varlocs.sh'; \
 	b='run-varlocs.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-exprlocs.sh.log: run-exprlocs.sh
+	@p='run-exprlocs.sh'; \
+	b='run-exprlocs.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -3055,6 +3197,27 @@ run-readelf-zx.sh.log: run-readelf-zx.sh
 run-readelf-zp.sh.log: run-readelf-zp.sh
 	@p='run-readelf-zp.sh'; \
 	b='run-readelf-zp.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-readelf-addr.sh.log: run-readelf-addr.sh
+	@p='run-readelf-addr.sh'; \
+	b='run-readelf-addr.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-readelf-str.sh.log: run-readelf-str.sh
+	@p='run-readelf-str.sh'; \
+	b='run-readelf-str.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-readelf-types.sh.log: run-readelf-types.sh
+	@p='run-readelf-types.sh'; \
+	b='run-readelf-types.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -3248,16 +3411,51 @@ dwarf_default_lower_bound.log: dwarf_default_lower_bound$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-msg_tst.log: msg_tst$(EXEEXT)
-	@p='msg_tst$(EXEEXT)'; \
-	b='msg_tst'; \
+run-dwarf-die-addr-die.sh.log: run-dwarf-die-addr-die.sh
+	@p='run-dwarf-die-addr-die.sh'; \
+	b='run-dwarf-die-addr-die.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-md5-sha1-test.log: md5-sha1-test$(EXEEXT)
-	@p='md5-sha1-test$(EXEEXT)'; \
-	b='md5-sha1-test'; \
+run-get-units-invalid.sh.log: run-get-units-invalid.sh
+	@p='run-get-units-invalid.sh'; \
+	b='run-get-units-invalid.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-get-units-split.sh.log: run-get-units-split.sh
+	@p='run-get-units-split.sh'; \
+	b='run-get-units-split.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-attr-integrate-skel.sh.log: run-attr-integrate-skel.sh
+	@p='run-attr-integrate-skel.sh'; \
+	b='run-attr-integrate-skel.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-all-dwarf-ranges.sh.log: run-all-dwarf-ranges.sh
+	@p='run-all-dwarf-ranges.sh'; \
+	b='run-all-dwarf-ranges.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+run-unit-info.sh.log: run-unit-info.sh
+	@p='run-unit-info.sh'; \
+	b='run-unit-info.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+msg_tst.log: msg_tst$(EXEEXT)
+	@p='msg_tst$(EXEEXT)'; \
+	b='msg_tst'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -3525,13 +3723,13 @@ uninstall-am:
 
 
 %.os: %.c %.o
-@AMDEP_TRUE@	$(AM_V_CC)if $(COMPILE.os) -c -o $@ -fPIC $(DEFS.os) -MT $@ -MD -MP \
+@AMDEP_TRUE@	$(AM_V_CC)if $(COMPILE.os) -c -o $@ $(fpic_CFLAGS) $(DEFS.os) -MT $@ -MD -MP \
 @AMDEP_TRUE@	  -MF "$(DEPDIR)/$*.Tpo" `test -f '$<' || echo '$(srcdir)/'`$<; \
 @AMDEP_TRUE@	then cat "$(DEPDIR)/$*.Tpo" >> "$(DEPDIR)/$*.Po"; \
 @AMDEP_TRUE@	     rm -f "$(DEPDIR)/$*.Tpo"; \
 @AMDEP_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
 @AMDEP_TRUE@	fi
-@AMDEP_FALSE@	$(AM_V_CC)$(COMPILE.os) -c -o $@ -fPIC $(DEFS.os) $<
+@AMDEP_FALSE@	$(AM_V_CC)$(COMPILE.os) -c -o $@ $(fpic_CFLAGS) $(DEFS.os) $<
 
 print-%:
 	@echo $*=$($*)

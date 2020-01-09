@@ -1,7 +1,7 @@
 # -*- rpm-spec-*-
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 Name: elfutils
-Version: 0.170
+Version: 0.172
 Release: 1
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -224,10 +224,31 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libelf.a
 
 %files default-yama-scope
-%config(noreplace) %{_sysctldir}/10-default-yama-scope.conf
+%{_sysctldir}/10-default-yama-scope.conf
 
 %changelog
-* Wed Aug  2 2017 Mark Wielaard <mark@gmail.com> 0.170-1
+* Mon Jun 11 2018 Mark Wielaard <mark@klomp.org> 0.172-1
+- No functional changes compared to 0.171.
+- Various bug fixes in libdw and eu-readelf dealing with bad DWARF5
+  data. Thanks to running the afl fuzzer on eu-readelf and various
+  testcases.
+- eu-readelf -N is ~15% faster.
+
+* Fri Jun 01 2018 Mark Wielaard <mark@klomp.org> 0.171-1
+- DWARF5 and split dwarf, including GNU DebugFission, support.
+- readelf: Handle all new DWARF5 sections.
+  --debug-dump=info+ will show split unit DIEs when found.
+  --dwarf-skeleton can be used when inspecting a .dwo file.
+  Recognizes GNU locviews with --debug-dump=loc.
+- libdw: New functions dwarf_die_addr_die, dwarf_get_units,
+  dwarf_getabbrevattr_data and dwarf_cu_info.
+  libdw will now try to resolve the alt file on first use
+  when not set yet with dwarf_set_alt.
+  dwarf_aggregate_size() now works with multi-dimensional arrays.
+- libdwfl: Use process_vm_readv when available instead of ptrace.
+- backends: Add a RISC-V backend.
+
+* Wed Aug  2 2017 Mark Wielaard <mark@klomp.org> 0.170-1
 - libdw: Added new DWARF5 attribute, tag, character encoding,
   language code, calling convention, defaulted member function
   and macro constants to dwarf.h.

@@ -344,3 +344,11 @@ ELFUTILS_0.170 {
     dwarf_default_lower_bound;
     dwarf_line_file;
 } ELFUTILS_0.167;
+
+ELFUTILS_0.171 {
+  global:
+    dwarf_die_addr_die;
+    dwarf_get_units;
+    dwarf_getabbrevattr_data;
+    dwarf_cu_info;
+} ELFUTILS_0.170;

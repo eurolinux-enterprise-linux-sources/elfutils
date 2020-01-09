@@ -33,12 +33,12 @@ AM_CPPFLAGS += -I$(top_srcdir)/libebl -I$(top_srcdir)/libasm \
 
 
 modules = i386 sh x86_64 ia64 alpha arm aarch64 sparc ppc ppc64 s390 \
-	  tilegx m68k bpf
+	  tilegx m68k bpf riscv
 libebl_pic = libebl_i386_pic.a libebl_sh_pic.a libebl_x86_64_pic.a    \
 	     libebl_ia64_pic.a libebl_alpha_pic.a libebl_arm_pic.a    \
 	     libebl_aarch64_pic.a libebl_sparc_pic.a libebl_ppc_pic.a \
 	     libebl_ppc64_pic.a libebl_s390_pic.a libebl_tilegx_pic.a \
-	     libebl_m68k_pic.a libebl_bpf_pic.a
+	     libebl_m68k_pic.a libebl_bpf_pic.a libebl_riscv_pic.a
 noinst_LIBRARIES = $(libebl_pic)
 noinst_DATA = $(libebl_pic:_pic.a=.so)
 
@@ -119,20 +119,31 @@ m68k_SRCS = m68k_init.c m68k_symbol.c m68k_regs.c \
 libebl_m68k_pic_a_SOURCES = $(m68k_SRCS)
 am_libebl_m68k_pic_a_OBJECTS = $(m68k_SRCS:.c=.os)
 
+# m68k prstatus core notes are described by a packed structure
+# which has not naturally aligned fields. Since we don't access
+# these fields directly, but take their offset to be used later
+# to extract the data through elfxx_xlatetom/memmove, this isn't
+# an issue.
+m68k_corenote_no_Wpacked_not_aligned = yes
+
 bpf_SRCS = bpf_init.c bpf_regs.c
 cpu_bpf = ../libcpu/libcpu_bpf.a
 libebl_bpf_pic_a_SOURCES = $(bpf_SRCS)
 am_libebl_bpf_pic_a_OBJECTS = $(bpf_SRCS:.c=.os)
+
+riscv_SRCS = riscv_init.c riscv_symbol.c
+libebl_riscv_pic_a_SOURCES = $(riscv_SRCS)
+am_libebl_riscv_pic_a_OBJECTS = $(riscv_SRCS:.c=.os)
 
 
 libebl_%.so libebl_%.map: libebl_%_pic.a $(libelf) $(libdw) $(libeu)
 	@rm -f $(@:.so=.map)
 	$(AM_V_at)echo 'ELFUTILS_$(PACKAGE_VERSION) { global: $*_init; local: *; };' \
 	  > $(@:.so=.map)
-	$(AM_V_CCLD)$(LINK) -shared -o $(@:.map=.so) \
+	$(AM_V_CCLD)$(LINK) $(dso_LDFLAGS) -o $(@:.map=.so) \
 		-Wl,--whole-archive $< $(cpu_$*) -Wl,--no-whole-archive \
 		-Wl,--version-script,$(@:.so=.map),--no-undefined \
-		-Wl,-z,defs,-z,relro -Wl,--as-needed $(libelf) $(libdw) $(libeu)
+		-Wl,--as-needed $(libelf) $(libdw) $(libeu)
 	@$(textrel_check)
 
 libebl_i386.so: $(cpu_i386)

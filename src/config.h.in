@@ -22,11 +22,20 @@
    don't. */
 #undef HAVE_DECL_RAWMEMCHR
 
+/* Defined if __attribute__((fallthrough)) is supported */
+#undef HAVE_FALLTHROUGH
+
+/* Defined if __attribute__((gcc_struct)) is supported */
+#undef HAVE_GCC_STRUCT
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `process_vm_readv' function. */
+#undef HAVE_PROCESS_VM_READV
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -51,6 +60,9 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Defined if __attribute__((visibility())) is supported */
+#undef HAVE_VISIBILITY
 
 /* $libdir subdirectory containing libebl modules. */
 #undef LIBEBL_SUBDIR

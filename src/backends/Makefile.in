@@ -159,9 +159,13 @@ am__objects_9 = ppc_init.$(OBJEXT) ppc_symbol.$(OBJEXT) \
 	ppc_auxv.$(OBJEXT) ppc_attrs.$(OBJEXT) ppc_syscall.$(OBJEXT) \
 	ppc_cfi.$(OBJEXT) ppc_initreg.$(OBJEXT)
 libebl_ppc_pic_a_OBJECTS = $(am_libebl_ppc_pic_a_OBJECTS)
+libebl_riscv_pic_a_AR = $(AR) $(ARFLAGS)
+libebl_riscv_pic_a_LIBADD =
+am__objects_10 = riscv_init.$(OBJEXT) riscv_symbol.$(OBJEXT)
+libebl_riscv_pic_a_OBJECTS = $(am_libebl_riscv_pic_a_OBJECTS)
 libebl_s390_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_s390_pic_a_LIBADD =
-am__objects_10 = s390_init.$(OBJEXT) s390_symbol.$(OBJEXT) \
+am__objects_11 = s390_init.$(OBJEXT) s390_symbol.$(OBJEXT) \
 	s390_regs.$(OBJEXT) s390_retval.$(OBJEXT) \
 	s390_corenote.$(OBJEXT) s390x_corenote.$(OBJEXT) \
 	s390_cfi.$(OBJEXT) s390_initreg.$(OBJEXT) \
@@ -169,12 +173,12 @@ am__objects_10 = s390_init.$(OBJEXT) s390_symbol.$(OBJEXT) \
 libebl_s390_pic_a_OBJECTS = $(am_libebl_s390_pic_a_OBJECTS)
 libebl_sh_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_sh_pic_a_LIBADD =
-am__objects_11 = sh_init.$(OBJEXT) sh_symbol.$(OBJEXT) \
+am__objects_12 = sh_init.$(OBJEXT) sh_symbol.$(OBJEXT) \
 	sh_corenote.$(OBJEXT) sh_regs.$(OBJEXT) sh_retval.$(OBJEXT)
 libebl_sh_pic_a_OBJECTS = $(am_libebl_sh_pic_a_OBJECTS)
 libebl_sparc_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_sparc_pic_a_LIBADD =
-am__objects_12 = sparc_init.$(OBJEXT) sparc_symbol.$(OBJEXT) \
+am__objects_13 = sparc_init.$(OBJEXT) sparc_symbol.$(OBJEXT) \
 	sparc_regs.$(OBJEXT) sparc_retval.$(OBJEXT) \
 	sparc_corenote.$(OBJEXT) sparc64_corenote.$(OBJEXT) \
 	sparc_auxv.$(OBJEXT) sparc_attrs.$(OBJEXT) sparc_cfi.$(OBJEXT) \
@@ -182,13 +186,13 @@ am__objects_12 = sparc_init.$(OBJEXT) sparc_symbol.$(OBJEXT) \
 libebl_sparc_pic_a_OBJECTS = $(am_libebl_sparc_pic_a_OBJECTS)
 libebl_tilegx_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_tilegx_pic_a_LIBADD =
-am__objects_13 = tilegx_init.$(OBJEXT) tilegx_symbol.$(OBJEXT) \
+am__objects_14 = tilegx_init.$(OBJEXT) tilegx_symbol.$(OBJEXT) \
 	tilegx_regs.$(OBJEXT) tilegx_retval.$(OBJEXT) \
 	tilegx_corenote.$(OBJEXT)
 libebl_tilegx_pic_a_OBJECTS = $(am_libebl_tilegx_pic_a_OBJECTS)
 libebl_x86_64_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_x86_64_pic_a_LIBADD =
-am__objects_14 = x86_64_init.$(OBJEXT) x86_64_symbol.$(OBJEXT) \
+am__objects_15 = x86_64_init.$(OBJEXT) x86_64_symbol.$(OBJEXT) \
 	x86_64_corenote.$(OBJEXT) x86_64_cfi.$(OBJEXT) \
 	x86_64_retval.$(OBJEXT) x86_64_regs.$(OBJEXT) \
 	i386_auxv.$(OBJEXT) x86_64_syscall.$(OBJEXT) \
@@ -228,17 +232,17 @@ SOURCES = $(libebl_aarch64_pic_a_SOURCES) \
 	$(libebl_bpf_pic_a_SOURCES) $(libebl_i386_pic_a_SOURCES) \
 	$(libebl_ia64_pic_a_SOURCES) $(libebl_m68k_pic_a_SOURCES) \
 	$(libebl_ppc64_pic_a_SOURCES) $(libebl_ppc_pic_a_SOURCES) \
-	$(libebl_s390_pic_a_SOURCES) $(libebl_sh_pic_a_SOURCES) \
-	$(libebl_sparc_pic_a_SOURCES) $(libebl_tilegx_pic_a_SOURCES) \
-	$(libebl_x86_64_pic_a_SOURCES)
+	$(libebl_riscv_pic_a_SOURCES) $(libebl_s390_pic_a_SOURCES) \
+	$(libebl_sh_pic_a_SOURCES) $(libebl_sparc_pic_a_SOURCES) \
+	$(libebl_tilegx_pic_a_SOURCES) $(libebl_x86_64_pic_a_SOURCES)
 DIST_SOURCES = $(libebl_aarch64_pic_a_SOURCES) \
 	$(libebl_alpha_pic_a_SOURCES) $(libebl_arm_pic_a_SOURCES) \
 	$(libebl_bpf_pic_a_SOURCES) $(libebl_i386_pic_a_SOURCES) \
 	$(libebl_ia64_pic_a_SOURCES) $(libebl_m68k_pic_a_SOURCES) \
 	$(libebl_ppc64_pic_a_SOURCES) $(libebl_ppc_pic_a_SOURCES) \
-	$(libebl_s390_pic_a_SOURCES) $(libebl_sh_pic_a_SOURCES) \
-	$(libebl_sparc_pic_a_SOURCES) $(libebl_tilegx_pic_a_SOURCES) \
-	$(libebl_x86_64_pic_a_SOURCES)
+	$(libebl_riscv_pic_a_SOURCES) $(libebl_s390_pic_a_SOURCES) \
+	$(libebl_sh_pic_a_SOURCES) $(libebl_sparc_pic_a_SOURCES) \
+	$(libebl_tilegx_pic_a_SOURCES) $(libebl_x86_64_pic_a_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -363,9 +367,12 @@ builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
+dso_LDFLAGS = @dso_LDFLAGS@
 dvidir = @dvidir@
 eu_version = @eu_version@
 exec_prefix = @exec_prefix@
+fpic_CFLAGS = @fpic_CFLAGS@
+fpie_CFLAGS = @fpie_CFLAGS@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -413,7 +420,10 @@ ARFLAGS = cr
 @HAVE_NULL_DEREFERENCE_WARNING_FALSE@NULL_DEREFERENCE_WARNING = 
 @HAVE_NULL_DEREFERENCE_WARNING_TRUE@NULL_DEREFERENCE_WARNING = -Wnull-dereference
 @HAVE_IMPLICIT_FALLTHROUGH_WARNING_FALSE@IMPLICIT_FALLTHROUGH_WARNING = 
-@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough
+
+# Use strict fallthrough. Only __attribute__((fallthrough)) will prevent the
+# warning
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough=5
 AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	    -Wold-style-definition -Wstrict-prototypes \
 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
@@ -421,6 +431,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	    $(if $($(*F)_no_Werror),,-Werror) \
 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
+	    $(if $($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
 	    $($(*F)_CFLAGS)
 
 COMPILE.os = $(filter-out -fprofile-arcs -ftest-coverage, $(COMPILE))
@@ -432,13 +443,13 @@ textrel_msg = echo "WARNING: TEXTREL found in '$@'"
 @FATAL_TEXTREL_TRUE@textrel_found = $(textrel_msg); exit 1
 textrel_check = if $(READELF) -d $@ | fgrep -q TEXTREL; then $(textrel_found); fi
 modules = i386 sh x86_64 ia64 alpha arm aarch64 sparc ppc ppc64 s390 \
-	  tilegx m68k bpf
+	  tilegx m68k bpf riscv
 
 libebl_pic = libebl_i386_pic.a libebl_sh_pic.a libebl_x86_64_pic.a    \
 	     libebl_ia64_pic.a libebl_alpha_pic.a libebl_arm_pic.a    \
 	     libebl_aarch64_pic.a libebl_sparc_pic.a libebl_ppc_pic.a \
 	     libebl_ppc64_pic.a libebl_s390_pic.a libebl_tilegx_pic.a \
-	     libebl_m68k_pic.a libebl_bpf_pic.a
+	     libebl_m68k_pic.a libebl_bpf_pic.a libebl_riscv_pic.a
 
 noinst_LIBRARIES = $(libebl_pic)
 noinst_DATA = $(libebl_pic:_pic.a=.so)
@@ -515,10 +526,20 @@ m68k_SRCS = m68k_init.c m68k_symbol.c m68k_regs.c \
 
 libebl_m68k_pic_a_SOURCES = $(m68k_SRCS)
 am_libebl_m68k_pic_a_OBJECTS = $(m68k_SRCS:.c=.os)
+
+# m68k prstatus core notes are described by a packed structure
+# which has not naturally aligned fields. Since we don't access
+# these fields directly, but take their offset to be used later
+# to extract the data through elfxx_xlatetom/memmove, this isn't
+# an issue.
+m68k_corenote_no_Wpacked_not_aligned = yes
 bpf_SRCS = bpf_init.c bpf_regs.c
 cpu_bpf = ../libcpu/libcpu_bpf.a
 libebl_bpf_pic_a_SOURCES = $(bpf_SRCS)
 am_libebl_bpf_pic_a_OBJECTS = $(bpf_SRCS:.c=.os)
+riscv_SRCS = riscv_init.c riscv_symbol.c
+libebl_riscv_pic_a_SOURCES = $(riscv_SRCS)
+am_libebl_riscv_pic_a_OBJECTS = $(riscv_SRCS:.c=.os)
 noinst_HEADERS = libebl_CPU.h common-reloc.c linux-core-note.c x86_corenote.c
 EXTRA_DIST = $(foreach m,$(modules),$($(m)_SRCS)) $(modules:=_reloc.def)
 all: all-am
@@ -604,6 +625,11 @@ libebl_ppc_pic.a: $(libebl_ppc_pic_a_OBJECTS) $(libebl_ppc_pic_a_DEPENDENCIES) $
 	$(AM_V_at)-rm -f libebl_ppc_pic.a
 	$(AM_V_AR)$(libebl_ppc_pic_a_AR) libebl_ppc_pic.a $(libebl_ppc_pic_a_OBJECTS) $(libebl_ppc_pic_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libebl_ppc_pic.a
+
+libebl_riscv_pic.a: $(libebl_riscv_pic_a_OBJECTS) $(libebl_riscv_pic_a_DEPENDENCIES) $(EXTRA_libebl_riscv_pic_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libebl_riscv_pic.a
+	$(AM_V_AR)$(libebl_riscv_pic_a_AR) libebl_riscv_pic.a $(libebl_riscv_pic_a_OBJECTS) $(libebl_riscv_pic_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libebl_riscv_pic.a
 
 libebl_s390_pic.a: $(libebl_s390_pic_a_OBJECTS) $(libebl_s390_pic_a_DEPENDENCIES) $(EXTRA_libebl_s390_pic_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libebl_s390_pic.a
@@ -696,6 +722,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_retval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_symbol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_syscall.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/riscv_init.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/riscv_symbol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s390_cfi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s390_corenote.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s390_init.Po@am__quote@
@@ -951,13 +979,13 @@ uninstall-am:
 
 
 %.os: %.c %.o
-@AMDEP_TRUE@	$(AM_V_CC)if $(COMPILE.os) -c -o $@ -fPIC $(DEFS.os) -MT $@ -MD -MP \
+@AMDEP_TRUE@	$(AM_V_CC)if $(COMPILE.os) -c -o $@ $(fpic_CFLAGS) $(DEFS.os) -MT $@ -MD -MP \
 @AMDEP_TRUE@	  -MF "$(DEPDIR)/$*.Tpo" `test -f '$<' || echo '$(srcdir)/'`$<; \
 @AMDEP_TRUE@	then cat "$(DEPDIR)/$*.Tpo" >> "$(DEPDIR)/$*.Po"; \
 @AMDEP_TRUE@	     rm -f "$(DEPDIR)/$*.Tpo"; \
 @AMDEP_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
 @AMDEP_TRUE@	fi
-@AMDEP_FALSE@	$(AM_V_CC)$(COMPILE.os) -c -o $@ -fPIC $(DEFS.os) $<
+@AMDEP_FALSE@	$(AM_V_CC)$(COMPILE.os) -c -o $@ $(fpic_CFLAGS) $(DEFS.os) $<
 
 print-%:
 	@echo $*=$($*)
@@ -966,10 +994,10 @@ libebl_%.so libebl_%.map: libebl_%_pic.a $(libelf) $(libdw) $(libeu)
 	@rm -f $(@:.so=.map)
 	$(AM_V_at)echo 'ELFUTILS_$(PACKAGE_VERSION) { global: $*_init; local: *; };' \
 	  > $(@:.so=.map)
-	$(AM_V_CCLD)$(LINK) -shared -o $(@:.map=.so) \
+	$(AM_V_CCLD)$(LINK) $(dso_LDFLAGS) -o $(@:.map=.so) \
 		-Wl,--whole-archive $< $(cpu_$*) -Wl,--no-whole-archive \
 		-Wl,--version-script,$(@:.so=.map),--no-undefined \
-		-Wl,-z,defs,-z,relro -Wl,--as-needed $(libelf) $(libdw) $(libeu)
+		-Wl,--as-needed $(libelf) $(libdw) $(libeu)
 	@$(textrel_check)
 
 libebl_i386.so: $(cpu_i386)

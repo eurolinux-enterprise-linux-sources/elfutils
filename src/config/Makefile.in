@@ -82,7 +82,7 @@ subdir = config
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/libelf.pc.in $(srcdir)/libdw.pc.in ChangeLog ar-lib \
 	compile config.guess config.sub depcomp install-sh missing \
-	ylwrap
+	texinfo.tex ylwrap
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/biarch.m4 \
 	$(top_srcdir)/m4/largefile.m4 $(top_srcdir)/m4/nls.m4 \
@@ -241,9 +241,12 @@ builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
+dso_LDFLAGS = @dso_LDFLAGS@
 dvidir = @dvidir@
 eu_version = @eu_version@
 exec_prefix = @exec_prefix@
+fpic_CFLAGS = @fpic_CFLAGS@
+fpie_CFLAGS = @fpie_CFLAGS@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@

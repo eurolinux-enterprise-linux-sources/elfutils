@@ -104,8 +104,7 @@ libeu_a_AR = $(AR) $(ARFLAGS)
 libeu_a_LIBADD =
 am_libeu_a_OBJECTS = xstrdup.$(OBJEXT) xstrndup.$(OBJEXT) \
 	xmalloc.$(OBJEXT) next_prime.$(OBJEXT) crc32.$(OBJEXT) \
-	crc32_file.$(OBJEXT) md5.$(OBJEXT) sha1.$(OBJEXT) \
-	color.$(OBJEXT) printversion.$(OBJEXT)
+	crc32_file.$(OBJEXT) color.$(OBJEXT) printversion.$(OBJEXT)
 libeu_a_OBJECTS = $(am_libeu_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -260,9 +259,12 @@ builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
+dso_LDFLAGS = @dso_LDFLAGS@
 dvidir = @dvidir@
 eu_version = @eu_version@
 exec_prefix = @exec_prefix@
+fpic_CFLAGS = @fpic_CFLAGS@
+fpie_CFLAGS = @fpie_CFLAGS@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -309,15 +311,19 @@ ARFLAGS = cr
 @HAVE_NULL_DEREFERENCE_WARNING_FALSE@NULL_DEREFERENCE_WARNING = 
 @HAVE_NULL_DEREFERENCE_WARNING_TRUE@NULL_DEREFERENCE_WARNING = -Wnull-dereference
 @HAVE_IMPLICIT_FALLTHROUGH_WARNING_FALSE@IMPLICIT_FALLTHROUGH_WARNING = 
-@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough
+
+# Use strict fallthrough. Only __attribute__((fallthrough)) will prevent the
+# warning
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough=5
 AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	-Wold-style-definition -Wstrict-prototypes \
 	$(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
 	$(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
 	$(if $($(*F)_no_Werror),,-Werror) $(if \
 	$($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
-	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
-	$($(*F)_CFLAGS) -fPIC
+	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) $(if \
+	$($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+	$($(*F)_CFLAGS) $(fpic_CFLAGS)
 COMPILE.os = $(filter-out -fprofile-arcs -ftest-coverage, $(COMPILE))
 DEFS.os = -DPIC -DSHARED $(am__append_1)
 CLEANFILES = *.gcno *.gcda
@@ -327,11 +333,11 @@ textrel_msg = echo "WARNING: TEXTREL found in '$@'"
 textrel_check = if $(READELF) -d $@ | fgrep -q TEXTREL; then $(textrel_found); fi
 noinst_LIBRARIES = libeu.a
 libeu_a_SOURCES = xstrdup.c xstrndup.c xmalloc.c next_prime.c \
-		  crc32.c crc32_file.c md5.c sha1.c \
+		  crc32.c crc32_file.c \
 		  color.c printversion.c
 
 noinst_HEADERS = fixedsizehash.h libeu.h system.h dynamicsizehash.h list.h \
-		 md5.h sha1.h eu-config.h color.h printversion.h bpf.h
+		 eu-config.h color.h printversion.h bpf.h
 
 EXTRA_DIST = dynamicsizehash.c
 @GPROF_FALSE@xmalloc_CFLAGS = -ffunction-sections
@@ -388,10 +394,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crc32.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crc32_file.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/next_prime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/printversion.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmalloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xstrdup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xstrndup.Po@am__quote@
@@ -613,13 +617,13 @@ uninstall-am:
 
 
 %.os: %.c %.o
-@AMDEP_TRUE@	$(AM_V_CC)if $(COMPILE.os) -c -o $@ -fPIC $(DEFS.os) -MT $@ -MD -MP \
+@AMDEP_TRUE@	$(AM_V_CC)if $(COMPILE.os) -c -o $@ $(fpic_CFLAGS) $(DEFS.os) -MT $@ -MD -MP \
 @AMDEP_TRUE@	  -MF "$(DEPDIR)/$*.Tpo" `test -f '$<' || echo '$(srcdir)/'`$<; \
 @AMDEP_TRUE@	then cat "$(DEPDIR)/$*.Tpo" >> "$(DEPDIR)/$*.Po"; \
 @AMDEP_TRUE@	     rm -f "$(DEPDIR)/$*.Tpo"; \
 @AMDEP_TRUE@	else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; \
 @AMDEP_TRUE@	fi
-@AMDEP_FALSE@	$(AM_V_CC)$(COMPILE.os) -c -o $@ -fPIC $(DEFS.os) $<
+@AMDEP_FALSE@	$(AM_V_CC)$(COMPILE.os) -c -o $@ $(fpic_CFLAGS) $(DEFS.os) $<
 
 print-%:
 	@echo $*=$($*)
