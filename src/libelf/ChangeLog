@@ -1,3 +1,94 @@
+2013-11-08  Mark Wielaard  <mjw@redhat.com>
+
+	* elf32_updatefile.c (elfXX_updatemmap): Only memcpy ehdr when not
+	already directly mmapped.
+
+2013-11-05  Mark Wielaard  <mjw@redhat.com>
+
+	* elf32_updatefile.c (elfXX_updatefile): Copy all section headers
+	if elf->flags dirty.
+
+2013-11-01  Michael Forney  <mforney@mforney.org>
+
+	* Makefile.am: Use READELF.
+
+2013-10-01  Petr Machata  <pmachata@redhat.com>
+
+	* elf.h: Update from glibc.
+
+2013-06-17  Petr Machata  <pmachata@redhat.com>
+
+	* elf.h: Update from glibc.
+
+2013-08-28  Namhyung Kim  <namhyung@gmail.com>
+
+	* gelf.h (gelf_fsize): Fix typo in comment.
+
+2013-08-28  Mark Wielaard  <mjw@redhat.com>
+
+	* gelf_getauxv.c (gelf_getauxv): Add missing whitespace.
+
+2013-08-27  Mark Wielaard  <mjw@redhat.com>
+
+	* gelf_getauxv.c (gelf_getauxv): Remove unnecessary casts to char *.
+
+2013-08-25  Kurt Roeckx  <kurt@roeckx.be>
+
+	* gelf_getauxv.c (gelf_getauxv): Use memcpy instead of pointer
+	dereference to avoid alignment problems.
+
+2013-01-07  Roland McGrath  <roland@hack.frob.com>
+
+	* elf_getarsym.c (elf_getarsym): Copy FILE_DATA into stack space if it
+	would be unaligned and !ALLOW_UNALIGNED.
+
+	* elf_getarsym.c (read_number_entries): Use memcpy instead of pointer
+	dereference so as not to assume the field is naturally aligned.
+
+2012-09-17  Petr Machata  <pmachata@redhat.com>
+
+	* elf.h: Update from glibc.
+
+2012-08-16  Roland McGrath  <roland@hack.frob.com>
+
+	* elf.h: Update from glibc.
+
+2012-08-14  Mark Wielaard  <mjw@redhat.com>
+
+	* elf32_checksum.c (ebl_debugscn_p): Removed unused define and
+	confusing outdated comment.
+
+2012-08-01  Petr Machata  <pmachata@redhat.com>
+
+	* elf_getarsym (read_number_entries): New function.
+	(elf_getarsym): Handle 64-bit symbol table, stored in special
+	entry named "/SYM64/".
+	* elf_begin.c (__libelf_next_arhdr_wrlock): Don't reject archive
+	because it contains 64-bit symbol table.
+
+2012-07-19  Mark Wielaard  <mjw@redhat.com>
+
+	* elf32_getshdr.c (load_shdr_wrlock): Add elf->flags & ELF_F_MALLOCED
+	to asserts.
+
+2012-07-17  Petr Machata  <pmachata@redhat.com>
+
+	* elf32_xlatetom.c (elfw2(LIBELFBITS, xlatetom)): Do not check for
+	integer number of records in case of ELF_T_NHDR.
+
+2012-04-02  Mark Wielaard  <mjw@redhat.com>
+
+	* elf32_offscn.c: Do not match SHT_NOBITS sections at OFFSET unless
+	there are no nonempty sections at that offset.
+
+2012-03-21  Roland McGrath  <roland@hack.frob.com>
+
+	* elf-knowledge.h (SECTION_STRIP_P): Remove < SHT_NUM check.
+
+2011-02-26  Mark Wielaard  <mjw@redhat.com>
+
+	* elf_end.c (elf_end): Call rwlock_unlock before rwlock_fini.
+
 2011-01-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf_getdata_rawchunk.c (elf_getdata_rawchunk): Fix off64_t overflow

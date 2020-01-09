@@ -1,10 +1,10 @@
 Name: elfutils
 Summary: A collection of utilities and DSOs to handle compiled objects
-Version: 0.152
-%global baserelease 1
+Version: 0.158
+%global baserelease 3.2
 URL: https://fedorahosted.org/elfutils/
 %global source_url http://fedorahosted.org/releases/e/l/elfutils/%{version}/
-License: GPLv2 with exceptions
+License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Group: Development/Tools
 
 %if %{?_with_compat:1}%{!?_with_compat:0}
@@ -24,7 +24,7 @@ Group: Development/Tools
 %global scanf_has_m             (%rhel >= 6)
 %global separate_devel_static   (%rhel >= 6)
 %global use_zlib                (%rhel >= 5)
-%global use_xz                  (%rhel >= 6)
+%global use_xz                  (%rhel >= 5)
 %endif
 %if 0%{?fedora}
 %global portability             (%fedora < 9)
@@ -43,8 +43,14 @@ Group: Development/Tools
 %global depsuffix %{?_isa}%{!?_isa:-%{_arch}}
 
 Source: %{?source_url}%{name}-%{version}.tar.bz2
+
 Patch1: %{?source_url}elfutils-robustify.patch
 Patch2: %{?source_url}elfutils-portability.patch
+
+Patch3: elfutils-0.158-mod-e_type.patch
+Patch4: elfutils-0.158-CVE-2014-0172.patch
+Patch5: elfutils-0.158-unstrip.patch
+Patch6: elfutils-0.158-readelf-nostrings.patch
 
 %if !%{compat}
 Release: %{baserelease}%{?dist}
@@ -94,6 +100,7 @@ symbols), readelf (to see the raw ELF file structures), and elflint
 %package libs
 Summary: Libraries to handle compiled objects
 Group: Development/Tools
+License: GPLv2+ or LGPLv3+
 %if 0%{!?_isa:1}
 Provides: elfutils-libs%{depsuffix} = %{version}-%{release}
 %endif
@@ -108,6 +115,7 @@ other programs using these libraries.
 %package devel
 Summary: Development libraries to handle compiled objects
 Group: Development/Tools
+License: GPLv2+ or LGPLv3+
 %if 0%{!?_isa:1}
 Provides: elfutils-devel%{depsuffix} = %{version}-%{release}
 %endif
@@ -127,6 +135,7 @@ assembler interface.
 %package devel-static
 Summary: Static archives to handle compiled objects
 Group: Development/Tools
+License: GPLv2+ or LGPLv3+
 %if 0%{!?_isa:1}
 Provides: elfutils-devel-static%{depsuffix} = %{version}-%{release}
 %endif
@@ -140,6 +149,7 @@ with the code to handle compiled objects.
 %package libelf
 Summary: Library to read and write ELF files
 Group: Development/Tools
+License: GPLv2+ or LGPLv3+
 %if 0%{!?_isa:1}
 Provides: elfutils-libelf%{depsuffix} = %{version}-%{release}
 %endif
@@ -154,6 +164,7 @@ elfutils package use it also to generate new ELF files.
 %package libelf-devel
 Summary: Development support for libelf
 Group: Development/Tools
+License: GPLv2+ or LGPLv3+
 %if 0%{!?_isa:1}
 Provides: elfutils-libelf-devel%{depsuffix} = %{version}-%{release}
 %endif
@@ -172,6 +183,7 @@ different sections of an ELF file.
 %package libelf-devel-static
 Summary: Static archive of libelf
 Group: Development/Tools
+License: GPLv2+ or LGPLv3+
 %if 0%{!?_isa:1}
 Provides: elfutils-libelf-devel-static%{depsuffix} = %{version}-%{release}
 %endif
@@ -203,24 +215,35 @@ sed -i.scanf-m -e 's/%m/%a/g' src/addr2line.c tests/line2addr.c
 %endif
 %endif
 
+%patch3 -p1 -b .e_type
+%patch4 -p1 -b .CVE-2014-0172
+%patch5 -p1 -b .unstrip
+%patch6 -p1 -b .readelf-nostrings
+
 find . -name \*.sh ! -perm -0100 -print | xargs chmod +x
 
 %build
 # Remove -Wall from default flags.  The makefiles enable enough warnings
 # themselves, and they use -Werror.  Appending -Wall defeats the cases where
 # the makefiles disable some specific warnings for specific code.
+# Also remove -Werror=format-security which doesn't work without
+# -Wformat (enabled by -Wall). We enable -Wformat explicitly for some
+# files later.
 RPM_OPT_FLAGS=${RPM_OPT_FLAGS/-Wall/}
+RPM_OPT_FLAGS=${RPM_OPT_FLAGS/-Werror=format-security/}
 
 %if %{compat}
 # Some older glibc headers can run afoul of -Werror all by themselves.
 # Disabling the fancy inlines avoids those problems.
 RPM_OPT_FLAGS="$RPM_OPT_FLAGS -D__NO_INLINE__"
+COMPAT_CONFIG_FLAGS="--disable-werror"
+%else
+COMPAT_CONFIG_FLAGS=""
 %endif
 
-%configure CFLAGS="$RPM_OPT_FLAGS -fexceptions" || {
-  cat config.log
-  exit 2
-}
+trap 'cat config.log' EXIT
+%configure --enable-dwz $COMPAT_CONFIG_FLAGS CFLAGS="$RPM_OPT_FLAGS -fexceptions"
+trap '' EXIT
 make -s %{?_smp_mflags}
 
 %install
@@ -238,7 +261,7 @@ chmod +x ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/elfutils/lib*.so*
 %find_lang %{name}
 
 %check
-make -s check || %{nocheck}
+make -s %{?_smp_mflags} check || (cat tests/test-suite.log; %{nocheck})
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}
@@ -253,7 +276,7 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc COPYING README TODO
+%doc COPYING COPYING-GPLV2 COPYING-LGPLV3 README TODO CONTRIBUTING
 %{_bindir}/eu-addr2line
 %{_bindir}/eu-ar
 %{_bindir}/eu-elfcmp
@@ -264,6 +287,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_bindir}/eu-ranlib
 %{_bindir}/eu-readelf
 %{_bindir}/eu-size
+%{_bindir}/eu-stack
 %{_bindir}/eu-strings
 %{_bindir}/eu-strip
 #%%{_bindir}/eu-ld
@@ -315,6 +339,16 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libelf.a
 
 %changelog
+* Wed May 25 2014 Mark Wielaard <mjw@redhat.com> - 0.158-3.2
+- Add elfutils-0.158-unstrip.patch (#806474)
+- Add elfutils-0.158-readelf-nostrings.patch (#1101440)
+
+* Fri May 09 2014 Mark Wielaard <mjw@redhat.com> - 0.158-3.1
+- Rebase to elfutils-0.158.3 (#755728)
+
+* Tue Mar 25 2013 Mark Wielaard <mjw@redhat.com> - 0.152-2
+- Add support for archives with 64-bit symbol tables (#1059897)
+
 * Tue Feb 15 2011 Roland McGrath <roland@redhat.com> - 0.152-1
 - Update to 0.152
   - Various build and warning nits fixed for newest GCC and Autoconf.

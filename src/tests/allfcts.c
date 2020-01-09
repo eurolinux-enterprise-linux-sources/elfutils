@@ -1,26 +1,18 @@
-/* Copyright (C) 2005 Red Hat, Inc.
-   This file is part of Red Hat elfutils.
+/* Copyright (C) 2005, 2013 Red Hat, Inc.
+   This file is part of elfutils.
 
-   Red Hat elfutils is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by the
-   Free Software Foundation; version 2 of the License.
+   This file is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
-   Red Hat elfutils is distributed in the hope that it will be useful, but
+   elfutils is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with Red Hat elfutils; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301 USA.
-
-   Red Hat elfutils is an included package of the Open Invention Network.
-   An included package of the Open Invention Network is a package for which
-   Open Invention Network licensees cross-license their patents.  No patent
-   license is granted, either expressly or impliedly, by designation as an
-   included package.  Should you wish to participate in the Open Invention
-   Network licensing program, please visit www.openinventionnetwork.com
-   <http://www.openinventionnetwork.com>.  */
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -42,7 +34,7 @@ cb (Dwarf_Die *func, void *arg __attribute__ ((unused)))
 
   printf ("%s:%d:%s\n", file, line, fct);
 
-  return DWARF_CB_OK;
+  return DWARF_CB_ABORT;
 }
 
 
@@ -65,7 +57,13 @@ main (int argc, char *argv[])
 	      Dwarf_Die die_mem;
 	      Dwarf_Die *die = dwarf_offdie (dbg, off + cuhl, &die_mem);
 
-	      (void) dwarf_getfuncs (die, cb, NULL, 0);
+	      /* Explicitly stop in the callback and then resume each time.  */
+	      ptrdiff_t doff = 0;
+	      do
+		{
+		  doff = dwarf_getfuncs (die, cb, NULL, doff);
+		}
+	      while (doff != 0 && dwarf_errno () == 0);
 
 	      off = noff;
 	    }
