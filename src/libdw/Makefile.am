@@ -29,7 +29,7 @@
 ##
 include $(top_srcdir)/config/eu.am
 if BUILD_STATIC
-AM_CFLAGS += -fpic
+AM_CFLAGS += -fPIC
 endif
 AM_CPPFLAGS += -I$(srcdir)/../libelf
 VERSION = 1
@@ -39,7 +39,7 @@ noinst_LIBRARIES = libdw_pic.a
 noinst_PROGRAMS = $(noinst_LIBRARIES:_pic.a=.so)
 
 include_HEADERS = dwarf.h
-pkginclude_HEADERS = libdw.h
+pkginclude_HEADERS = libdw.h known-dwarf.h
 
 libdw_a_SOURCES = dwarf_begin.c dwarf_begin_elf.c dwarf_end.c dwarf_getelf.c \
 		  dwarf_getpubnames.c dwarf_getabbrev.c dwarf_tag.c \
@@ -108,13 +108,13 @@ libdw.so$(EXEEXT): $(srcdir)/libdw.map libdw_pic.a ../libdwelf/libdwelf_pic.a \
 	  ../libelf/libelf.so
 # The rpath is necessary for libebl because its $ORIGIN use will
 # not fly in a setuid executable that links in libdw.
-	$(LINK) -shared -o $@ -Wl,--soname,$@.$(VERSION),-z,defs \
+	$(AM_V_CCLD)$(LINK) -shared -o $@ -Wl,--soname,$@.$(VERSION),-z,defs \
 		-Wl,--enable-new-dtags,-rpath,$(pkglibdir) \
 		-Wl,--version-script,$<,--no-undefined \
 		-Wl,--whole-archive $(filter-out $<,$^) -Wl,--no-whole-archive\
-		-ldl $(zip_LIBS)
+		-ldl $(argp_LDADD) $(zip_LIBS)
 	@$(textrel_check)
-	ln -fs $@ $@.$(VERSION)
+	$(AM_V_at)ln -fs $@ $@.$(VERSION)
 
 install: install-am libdw.so
 	$(mkinstalldirs) $(DESTDIR)$(libdir)
@@ -137,6 +137,6 @@ libdw_a_LIBADD += $(addprefix ../libdwelf/,$(libdwelf_objects))
 noinst_HEADERS = libdwP.h memory-access.h dwarf_abbrev_hash.h \
 		 dwarf_sig8_hash.h cfi.h encoded-value.h
 
-EXTRA_DIST = libdw.map known-dwarf.h
+EXTRA_DIST = libdw.map
 
 MOSTLYCLEANFILES = $(am_libdw_pic_a_OBJECTS) libdw.so.$(VERSION)

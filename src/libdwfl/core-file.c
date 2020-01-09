@@ -1,5 +1,5 @@
 /* Core file handling.
-   Copyright (C) 2008-2010, 2013 Red Hat, Inc.
+   Copyright (C) 2008-2010, 2013, 2015 Red Hat, Inc.
    This file is part of elfutils.
 
    This file is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@
    This implementation is pessimal for non-mmap cases and should
    be replaced by more diddling inside libelf internals.  */
 static Elf *
-elf_begin_rand (Elf *parent, loff_t offset, loff_t size, loff_t *next)
+elf_begin_rand (Elf *parent, off_t offset, off_t size, off_t *next)
 {
   if (parent == NULL)
     return NULL;
@@ -58,14 +58,14 @@ elf_begin_rand (Elf *parent, loff_t offset, loff_t size, loff_t *next)
     return NULL;
   }
 
-  loff_t min = (parent->kind == ELF_K_ELF ?
+  off_t min = (parent->kind == ELF_K_ELF ?
 		(parent->class == ELFCLASS32
 		 ? sizeof (Elf32_Ehdr) : sizeof (Elf64_Ehdr))
 		: parent->kind == ELF_K_AR ? SARMAG
 		: 0);
 
   if (unlikely (offset < min)
-      || unlikely (offset >= (loff_t) parent->maximum_size))
+      || unlikely (offset >= (off_t) parent->maximum_size))
     return fail (ELF_E_RANGE);
 
   /* For an archive, fetch just the size field
@@ -92,11 +92,11 @@ elf_begin_rand (Elf *parent, loff_t offset, loff_t size, loff_t *next)
       char *endp;
       size = strtoll (h.ar_size, &endp, 10);
       if (unlikely (endp == h.ar_size)
-	  || unlikely ((loff_t) parent->maximum_size - offset < size))
+	  || unlikely ((off_t) parent->maximum_size - offset < size))
 	return fail (ELF_E_INVALID_ARCHIVE);
     }
 
-  if (unlikely ((loff_t) parent->maximum_size - offset < size))
+  if (unlikely ((off_t) parent->maximum_size - offset < size))
     return fail (ELF_E_RANGE);
 
   /* Even if we fail at this point, update *NEXT to point past the file.  */
@@ -104,7 +104,7 @@ elf_begin_rand (Elf *parent, loff_t offset, loff_t size, loff_t *next)
     *next = offset + size;
 
   if (unlikely (offset == 0)
-      && unlikely (size == (loff_t) parent->maximum_size))
+      && unlikely (size == (off_t) parent->maximum_size))
     return elf_clone (parent, parent->cmd);
 
   /* Note the image is guaranteed live only as long as PARENT
@@ -114,7 +114,7 @@ elf_begin_rand (Elf *parent, loff_t offset, loff_t size, loff_t *next)
   Elf_Data *data = elf_getdata_rawchunk (parent, offset, size, ELF_T_BYTE);
   if (data == NULL)
     return NULL;
-  assert ((loff_t) data->d_size == size);
+  assert ((off_t) data->d_size == size);
   return elf_memory (data->d_buf, size);
 }
 
@@ -161,6 +161,9 @@ dwfl_report_core_segments (Dwfl *dwfl, Elf *elf, size_t phnum, GElf_Phdr *notes)
 /* Never read more than this much without mmap.  */
 #define MAX_EAGER_COST	8192
 
+/* Dwfl_Module_Callback passed to and called by dwfl_segment_report_module
+   to read in a segment as ELF image directly if possible or indicate an
+   attempt must be made to read in the while segment right now.  */
 static bool
 core_file_read_eagerly (Dwfl_Module *mod,
 			void **userdata __attribute__ ((unused)),
@@ -174,6 +177,10 @@ core_file_read_eagerly (Dwfl_Module *mod,
 {
   Elf *core = arg;
 
+  /* The available buffer is often the whole segment when the core file
+     was mmap'd if used together with the dwfl_elf_phdr_memory_callback.
+     Which means that if it is complete we can just construct the whole
+     ELF image right now without having to read in anything more.  */
   if (whole <= *buffer_available)
     {
       /* All there ever was, we already have on hand.  */
@@ -198,8 +205,9 @@ core_file_read_eagerly (Dwfl_Module *mod,
       return *elfp != NULL;
     }
 
-  /* We don't have the whole file.
-     Figure out if this is better than nothing.  */
+  /* We don't have the whole file.  Which either means the core file
+     wasn't mmap'd, but needs to still be read in, or that the segment
+     is truncated.  Figure out if this is better than nothing.  */
 
   if (worthwhile == 0)
     /* Caller doesn't think so.  */
@@ -212,11 +220,15 @@ core_file_read_eagerly (Dwfl_Module *mod,
     requires find_elf hook re-doing the magic to fall back if no file found
   */
 
-  if (mod->build_id_len > 0)
-    /* There is a build ID that could help us find the whole file,
-       which might be more useful than what we have.
-       We'll just rely on that.  */
+  if (whole > MAX_EAGER_COST && mod->build_id_len > 0)
+    /* We can't cheaply read the whole file here, so we'd
+       be using a partial file.  But there is a build ID that could
+       help us find the whole file, which might be more useful than
+       what we have.  We'll just rely on that.  */
     return false;
+
+  /* The file is either small (most likely the vdso) or big and incomplete,
+     but we don't have a build-id.  */
 
   if (core->map_address != NULL)
     /* It's cheap to get, so get it.  */
@@ -258,8 +270,8 @@ dwfl_elf_phdr_memory_callback (Dwfl *dwfl, int ndx,
   GElf_Off end;
   GElf_Addr end_vaddr;
 
-  inline void update_end ()
-  {
+  inline void update_end (void)
+{
     end = (phdr.p_offset + phdr.p_filesz + align - 1) & -align;
     end_vaddr = (phdr.p_vaddr + phdr.p_memsz + align - 1) & -align;
   }
@@ -576,7 +588,7 @@ dwfl_core_file_report (Dwfl *dwfl, Elf *elf, const char *executable)
 INTDEF (dwfl_core_file_report)
 NEW_VERSION (dwfl_core_file_report, ELFUTILS_0.158)
 
-#ifdef SHARED
+#ifdef SYMBOL_VERSIONING
 int _compat_without_executable_dwfl_core_file_report (Dwfl *dwfl, Elf *elf);
 COMPAT_VERSION_NEWPROTO (dwfl_core_file_report, ELFUTILS_0.146,
 			 without_executable)

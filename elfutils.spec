@@ -1,88 +1,39 @@
 Name: elfutils
 Summary: A collection of utilities and DSOs to handle compiled objects
-Version: 0.161
-%global baserelease 3
+Version: 0.164
+%global baserelease 2
 URL: https://fedorahosted.org/elfutils/
 %global source_url http://fedorahosted.org/releases/e/l/elfutils/%{version}/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Group: Development/Tools
 
-%if %{?_with_compat:1}%{!?_with_compat:0}
-%global compat 1
-%else
-%global compat 0
-%endif
+Release: %{baserelease}%{?dist}
 
-%global portability             %{compat}
-%global scanf_has_m             !%{compat}
-%global separate_devel_static   1
-%global use_zlib                0
-%global use_xz                  0
+%global provide_yama_scope	0
 
-%if 0%{?rhel}
-%global portability             (%rhel < 6)
-%global scanf_has_m             (%rhel >= 6)
-%global separate_devel_static   (%rhel >= 6)
-%global use_zlib                (%rhel >= 5)
-%global use_xz                  (%rhel >= 5)
-%endif
 %if 0%{?fedora}
-%global portability             (%fedora < 9)
-%global scanf_has_m             (%fedora >= 8)
-%global separate_devel_static   (%fedora >= 7)
-%global use_zlib                (%fedora >= 5)
-%global use_xz                  (%fedora >= 10)
-%endif
-
-%if %{compat} || %{!?rhel:6}%{?rhel} < 6
-%global nocheck true
-%else
-%global nocheck false
+%global provide_yama_scope	(%fedora >= 22)
 %endif
 
 %global depsuffix %{?_isa}%{!?_isa:-%{_arch}}
 
 Source: %{?source_url}%{name}-%{version}.tar.bz2
 
-Patch1: %{?source_url}elfutils-portability-%{version}.patch
-
-Patch2: elfutils-0.161-ar-long-name.patch
-# libdw: fix offset for sig8 lookup in dwarf_formref_die
-Patch3: elfutils-0.161-formref-type.patch
-
-%if !%{compat}
-Release: %{baserelease}%{?dist}
-%else
-Release: 0.%{baserelease}
-%endif
+# Patches
+Patch1: elfutils-0.165-nobitsalign-strip.patch
 
 Requires: elfutils-libelf%{depsuffix} = %{version}-%{release}
 Requires: elfutils-libs%{depsuffix} = %{version}-%{release}
-
-%if %{!?rhel:6}%{?rhel} < 6 || %{!?fedora:9}%{?fedora} < 10
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 
 BuildRequires: gettext
 BuildRequires: bison >= 1.875
 BuildRequires: flex >= 2.5.4a
 BuildRequires: bzip2
-%if !%{compat}
-BuildRequires: gcc >= 3.4
-# Need <byteswap.h> that gives unsigned bswap_16 etc.
-BuildRequires: glibc-headers >= 2.3.4-11
-%else
-BuildRequires: gcc >= 3.2
-%endif
+BuildRequires: gcc >= 4.4
 
-%if %{use_zlib}
 BuildRequires: zlib-devel >= 1.2.2.3
 BuildRequires: bzip2-devel
-%endif
-
-%if %{use_xz}
 BuildRequires: xz-devel
-%endif
 
 %global _gnu %{nil}
 %global _program_prefix eu-
@@ -103,6 +54,9 @@ License: GPLv2+ or LGPLv3+
 Provides: elfutils-libs%{depsuffix} = %{version}-%{release}
 %endif
 Requires: elfutils-libelf%{depsuffix} = %{version}-%{release}
+%if %{provide_yama_scope}
+Requires: default-yama-scope
+%endif
 
 %description libs
 The elfutils-libs package contains libraries which implement DWARF, ELF,
@@ -119,9 +73,6 @@ Provides: elfutils-devel%{depsuffix} = %{version}-%{release}
 %endif
 Requires: elfutils-libs%{depsuffix} = %{version}-%{release}
 Requires: elfutils-libelf-devel%{depsuffix} = %{version}-%{release}
-%if !%{separate_devel_static}
-Requires: elfutils-devel-static%{depsuffix} = %{version}-%{release}
-%endif
 
 %description devel
 The elfutils-devel package contains the libraries to create
@@ -167,9 +118,6 @@ License: GPLv2+ or LGPLv3+
 Provides: elfutils-libelf-devel%{depsuffix} = %{version}-%{release}
 %endif
 Requires: elfutils-libelf%{depsuffix} = %{version}-%{release}
-%if !%{separate_devel_static}
-Requires: elfutils-libelf-devel-static%{depsuffix} = %{version}-%{release}
-%endif
 Obsoletes: libelf-devel <= 0.8.2-2
 
 %description libelf-devel
@@ -191,28 +139,31 @@ Requires: elfutils-libelf-devel%{depsuffix} = %{version}-%{release}
 The elfutils-libelf-static package contains the static archive
 for libelf.
 
+%if %{provide_yama_scope}
+%package default-yama-scope
+Summary: Default yama attach scope sysctl setting
+Group: Development/Tools
+License: GPLv2+ or LGPLv3+
+Provides: default-yama-scope
+BuildArch: noarch
+# For the sysctl_apply macro
+BuildRequires: systemd >= 215
+
+%description default-yama-scope
+Yama sysctl setting to enable default attach scope settings
+enabling programs to use ptrace attach, access to
+/proc/PID/{mem,personality,stack,syscall}, and the syscalls
+process_vm_readv and process_vm_writev which are used for
+interprocess services, communication and introspection
+(like synchronisation, signaling, debugging, tracing and
+profiling) of processes.
+%endif
+
 %prep
 %setup -q
 
-: 'compat=%compat'
-: 'portability=%portability'
-: 'separate_devel_static=%separate_devel_static'
-: 'scanf_has_m=%scanf_has_m'
-
-%if %{portability}
-%patch1 -p1 -b .portability
-sleep 1
-find . \( -name Makefile.in -o -name aclocal.m4 \) -print | xargs touch
-sleep 1
-find . \( -name configure -o -name config.h.in \) -print | xargs touch
-%else
-%if !%{scanf_has_m}
-sed -i.scanf-m -e 's/%m/%a/g' src/addr2line.c tests/line2addr.c
-%endif
-%endif
-
-%patch2 -p1 -b .ar_long_name
-%patch3 -p1 -b .formref_type
+# Apply patches
+%patch1 -p1 -b .nobitsalign
 
 find . -name \*.sh ! -perm -0100 -print | xargs chmod +x
 
@@ -223,21 +174,10 @@ find . -name \*.sh ! -perm -0100 -print | xargs chmod +x
 # But add -Wformat explicitly for use with -Werror=format-security which
 # doesn't work without -Wformat (enabled by -Wall).
 RPM_OPT_FLAGS="${RPM_OPT_FLAGS/-Wall/}"
-%if !%{compat}
 RPM_OPT_FLAGS="${RPM_OPT_FLAGS} -Wformat"
-%endif
-
-%if %{compat}
-# Some older glibc headers can run afoul of -Werror all by themselves.
-# Disabling the fancy inlines avoids those problems.
-RPM_OPT_FLAGS="$RPM_OPT_FLAGS -D__NO_INLINE__"
-COMPAT_CONFIG_FLAGS="--disable-werror"
-%else
-COMPAT_CONFIG_FLAGS=""
-%endif
 
 trap 'cat config.log' EXIT
-%configure $COMPAT_CONFIG_FLAGS CFLAGS="$RPM_OPT_FLAGS -fexceptions"
+%configure CFLAGS="$RPM_OPT_FLAGS -fexceptions"
 trap '' EXIT
 make -s %{?_smp_mflags}
 
@@ -255,8 +195,12 @@ chmod +x ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/elfutils/lib*.so*
 
 %find_lang %{name}
 
+%if %{provide_yama_scope}
+install -Dm0644 config/10-default-yama-scope.conf ${RPM_BUILD_ROOT}%{_sysctldir}/10-default-yama-scope.conf
+%endif
+
 %check
-make -s %{?_smp_mflags} check || (cat tests/test-suite.log; %{nocheck})
+make -s %{?_smp_mflags} check || (cat tests/test-suite.log; false)
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}
@@ -268,6 +212,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %post libelf -p /sbin/ldconfig
 
 %postun libelf -p /sbin/ldconfig
+
+%if %{provide_yama_scope}
+%post default-yama-scope
+%sysctl_apply 10-default-yama-scope.conf
+%endif
 
 %files
 %defattr(-,root,root)
@@ -307,6 +256,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_includedir}/dwarf.h
 %dir %{_includedir}/elfutils
 %{_includedir}/elfutils/elf-knowledge.h
+%{_includedir}/elfutils/known-dwarf.h
 %{_includedir}/elfutils/libasm.h
 %{_includedir}/elfutils/libebl.h
 %{_includedir}/elfutils/libdw.h
@@ -340,20 +290,37 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %{_libdir}/libelf.a
 
+%if %{provide_yama_scope}
+%files default-yama-scope
+%defattr(-,root,root)
+%config(noreplace) %{_sysctldir}/10-default-yama-scope.conf
+%endif
+
 %changelog
+* Thu Feb 04 2016 Mark Wielaard <mjw@redhat.com> - 0.164-2
+- Add elfutils-0.165-nobitsalign-strip.patch (#1303845)
+
+* Mon Nov 16 2015 Mark Wielaard <mjw@redhat.com> - 0.164-1
+- Update to elfutils-0.164 (#1254647)
+- Drop old compat stuff
+- Drop upstreamed patches
+  - elfutils-0.161-ar-long-name.patch
+  - elfutils-0.161-formref-type.patch
+- Include elfutils/known-dwarf.h
+
 * Thu Feb 05 2015 Mark Wielaard <mjw@redhat.com> - 0.161-3
 - Update to 0.161. (#1167724)
 - Add elfutils-0.161-ar-long-name.patch (#1181525 CVE-2014-9447)
 - Add elfutils-0.161-formref-type.patch
 
-* Wed May 25 2014 Mark Wielaard <mjw@redhat.com> - 0.158-3.2
+* Wed May 28 2014 Mark Wielaard <mjw@redhat.com> - 0.158-3.2
 - Add elfutils-0.158-unstrip.patch (#806474)
 - Add elfutils-0.158-readelf-nostrings.patch (#1101440)
 
 * Fri May 09 2014 Mark Wielaard <mjw@redhat.com> - 0.158-3.1
 - Rebase to elfutils-0.158.3 (#755728)
 
-* Tue Mar 25 2013 Mark Wielaard <mjw@redhat.com> - 0.152-2
+* Tue Mar 25 2014 Mark Wielaard <mjw@redhat.com> - 0.152-2
 - Add support for archives with 64-bit symbol tables (#1059897)
 
 * Tue Feb 15 2011 Roland McGrath <roland@redhat.com> - 0.152-1

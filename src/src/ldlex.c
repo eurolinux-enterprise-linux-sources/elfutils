@@ -1627,7 +1627,7 @@ YY_RULE_SETUP
 case 29:
 YY_RULE_SETUP
 #line 149 "/home/mark/src/elfutils/src/ldlex.l"
-{ int cnt = 1 ;
+{ unsigned int cnt = 1 ;
 				  ldlval.num = 0;
 				  while (cnt < ldleng - 1)
 				    ldlval.num |= attrib_convert (ldtext[cnt++]);

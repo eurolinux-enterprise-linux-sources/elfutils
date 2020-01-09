@@ -1,5 +1,5 @@
 /* PPC specific symbolic name handling.
-   Copyright (C) 2004, 2005, 2007, 2014 Red Hat, Inc.
+   Copyright (C) 2004, 2005, 2007, 2014, 2015 Red Hat, Inc.
    This file is part of elfutils.
    Written by Ulrich Drepper <drepper@redhat.com>, 2004.
 
@@ -98,7 +98,8 @@ find_dyn_got (Elf *elf, GElf_Addr *addr)
       GElf_Shdr shdr_mem;
       GElf_Shdr *shdr = gelf_getshdr (scn, &shdr_mem);
       Elf_Data *data = elf_getdata (scn, NULL);
-      if (shdr != NULL && shdr->sh_type == SHT_DYNAMIC && data != NULL)
+      if (shdr != NULL && shdr->sh_type == SHT_DYNAMIC && data != NULL
+	  && shdr->sh_entsize != 0)
 	for (unsigned int j = 0; j < shdr->sh_size / shdr->sh_entsize; ++j)
 	  {
 	    GElf_Dyn dyn_mem;
@@ -142,9 +143,14 @@ ppc_check_special_symbol (Elf *elf, GElf_Ehdr *ehdr, const GElf_Sym *sym,
   if (sname == NULL)
     return false;
 
+  /* Small data area.  Normally points to .sdata, in which case we
+     check it is at an offset of 0x8000.  It might however fall in the
+     .data section, in which case we cannot check the offset.  The
+     size always should be zero.  */
   if (strcmp (name, "_SDA_BASE_") == 0)
-    return (strcmp (sname, ".sdata") == 0
-	    && sym->st_value == destshdr->sh_addr + 0x8000
+    return (((strcmp (sname, ".sdata") == 0
+	      && sym->st_value == destshdr->sh_addr + 0x8000)
+	     || strcmp (sname, ".data") == 0)
 	    && sym->st_size == 0);
 
   if (strcmp (name, "_SDA2_BASE_") == 0)

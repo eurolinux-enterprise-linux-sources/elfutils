@@ -1,5 +1,5 @@
 /* Find debugging and symbol information for a module in libdwfl.
-   Copyright (C) 2005-2012, 2014 Red Hat, Inc.
+   Copyright (C) 2005-2012, 2014, 2015 Red Hat, Inc.
    This file is part of elfutils.
 
    This file is free software; you can redistribute it and/or modify
@@ -46,7 +46,7 @@ open_elf_file (Elf **elf, int *fd, char **name)
       /* If there was a pre-primed file name left that the callback left
 	 behind, try to open that file name.  */
       if (*fd < 0 && *name != NULL)
-	*fd = TEMP_FAILURE_RETRY (open64 (*name, O_RDONLY));
+	*fd = TEMP_FAILURE_RETRY (open (*name, O_RDONLY));
 
       if (*fd < 0)
 	return CBFAIL;
@@ -367,35 +367,44 @@ find_prelink_address_sync (Dwfl_Module *mod, struct dwfl_file *file)
   src.d_size = phnum * phentsize;
 
   GElf_Addr undo_interp = 0;
+  bool class32 = ehdr.e32.e_ident[EI_CLASS] == ELFCLASS32;
   {
-    union
-    {
-      Elf32_Phdr p32[phnum];
-      Elf64_Phdr p64[phnum];
-    } phdr;
-    dst.d_buf = &phdr;
-    dst.d_size = sizeof phdr;
+    size_t phdr_size = class32 ? sizeof (Elf32_Phdr) : sizeof (Elf64_Phdr);
+    if (unlikely (phnum > SIZE_MAX / phdr_size))
+      return DWFL_E_NOMEM;
+    const size_t phdrs_bytes = phnum * phdr_size;
+    void *phdrs = malloc (phdrs_bytes);
+    if (unlikely (phdrs == NULL))
+      return DWFL_E_NOMEM;
+    dst.d_buf = phdrs;
+    dst.d_size = phdrs_bytes;
     if (unlikely (gelf_xlatetom (mod->main.elf, &dst, &src,
 				 ehdr.e32.e_ident[EI_DATA]) == NULL))
-      return DWFL_E_LIBELF;
-    if (ehdr.e32.e_ident[EI_CLASS] == ELFCLASS32)
       {
+	free (phdrs);
+	return DWFL_E_LIBELF;
+      }
+    if (class32)
+      {
+	Elf32_Phdr (*p32)[phnum] = phdrs;
 	for (uint_fast16_t i = 0; i < phnum; ++i)
-	  if (phdr.p32[i].p_type == PT_INTERP)
+	  if ((*p32)[i].p_type == PT_INTERP)
 	    {
-	      undo_interp = phdr.p32[i].p_vaddr;
+	      undo_interp = (*p32)[i].p_vaddr;
 	      break;
 	    }
       }
     else
       {
+	Elf64_Phdr (*p64)[phnum] = phdrs;
 	for (uint_fast16_t i = 0; i < phnum; ++i)
-	  if (phdr.p64[i].p_type == PT_INTERP)
+	  if ((*p64)[i].p_type == PT_INTERP)
 	    {
-	      undo_interp = phdr.p64[i].p_vaddr;
+	      undo_interp = (*p64)[i].p_vaddr;
 	      break;
 	    }
       }
+    free (phdrs);
   }
 
   if (unlikely ((main_interp == 0) != (undo_interp == 0)))
@@ -405,16 +414,21 @@ find_prelink_address_sync (Dwfl_Module *mod, struct dwfl_file *file)
   src.d_type = ELF_T_SHDR;
   src.d_size = gelf_fsize (mod->main.elf, ELF_T_SHDR, shnum - 1, EV_CURRENT);
 
-  union
-  {
-    Elf32_Shdr s32[shnum - 1];
-    Elf64_Shdr s64[shnum - 1];
-  } shdr;
-  dst.d_buf = &shdr;
-  dst.d_size = sizeof shdr;
+  size_t shdr_size = class32 ? sizeof (Elf32_Shdr) : sizeof (Elf64_Shdr);
+  if (unlikely (shnum - 1  > SIZE_MAX / shdr_size))
+    return DWFL_E_NOMEM;
+  const size_t shdrs_bytes = (shnum - 1) * shdr_size;
+  void *shdrs = malloc (shdrs_bytes);
+  if (unlikely (shdrs == NULL))
+    return DWFL_E_NOMEM;
+  dst.d_buf = shdrs;
+  dst.d_size = shdrs_bytes;
   if (unlikely (gelf_xlatetom (mod->main.elf, &dst, &src,
 			       ehdr.e32.e_ident[EI_DATA]) == NULL))
-    return DWFL_E_LIBELF;
+    {
+      free (shdrs);
+      return DWFL_E_LIBELF;
+    }
 
   /* Now we can look at the original section headers of the main file
      before it was prelinked.  First we'll apply our method to the main
@@ -457,7 +471,10 @@ find_prelink_address_sync (Dwfl_Module *mod, struct dwfl_file *file)
       GElf_Shdr sh_mem;
       GElf_Shdr *sh = gelf_getshdr (scn, &sh_mem);
       if (unlikely (sh == NULL))
-	return DWFL_E_LIBELF;
+	{
+	  free (shdrs);
+	  return DWFL_E_LIBELF;
+	}
       consider_shdr (main_interp, sh->sh_type, sh->sh_flags,
 		     sh->sh_addr, sh->sh_size);
     }
@@ -466,20 +483,33 @@ find_prelink_address_sync (Dwfl_Module *mod, struct dwfl_file *file)
       mod->main.address_sync = highest;
 
       highest = 0;
-      if (ehdr.e32.e_ident[EI_CLASS] == ELFCLASS32)
-	for (size_t i = 0; i < shnum - 1; ++i)
-	  consider_shdr (undo_interp, shdr.s32[i].sh_type, shdr.s32[i].sh_flags,
-			 shdr.s32[i].sh_addr, shdr.s32[i].sh_size);
+      if (class32)
+	{
+	  Elf32_Shdr (*s32)[shnum - 1] = shdrs;
+	  for (size_t i = 0; i < shnum - 1; ++i)
+	    consider_shdr (undo_interp, (*s32)[i].sh_type,
+			   (*s32)[i].sh_flags, (*s32)[i].sh_addr,
+			   (*s32)[i].sh_size);
+	}
       else
-	for (size_t i = 0; i < shnum - 1; ++i)
-	  consider_shdr (undo_interp, shdr.s64[i].sh_type, shdr.s64[i].sh_flags,
-			 shdr.s64[i].sh_addr, shdr.s64[i].sh_size);
+	{
+	  Elf64_Shdr (*s64)[shnum - 1] = shdrs;
+	  for (size_t i = 0; i < shnum - 1; ++i)
+	    consider_shdr (undo_interp, (*s64)[i].sh_type,
+			   (*s64)[i].sh_flags, (*s64)[i].sh_addr,
+			   (*s64)[i].sh_size);
+	}
 
       if (highest > file->vaddr)
 	file->address_sync = highest;
       else
-	return DWFL_E_BAD_PRELINK;
+	{
+	  free (shdrs);
+	  return DWFL_E_BAD_PRELINK;
+	}
     }
+
+  free (shdrs);
 
   return DWFL_E_NOERROR;
 }
@@ -1083,6 +1113,9 @@ find_symtab (Dwfl_Module *mod)
   if (elf_strptr (mod->symfile->elf, strshndx, 0) == NULL)
     {
     elferr:
+      mod->symdata = NULL;
+      mod->syments = 0;
+      mod->first_global = 0;
       mod->symerr = DWFL_E (LIBELF, elf_errno ());
       goto aux_cleanup; /* This cleans up some more and tries find_dynsym.  */
     }
@@ -1109,7 +1142,8 @@ find_symtab (Dwfl_Module *mod)
 
   // Sanity check number of symbols.
   GElf_Shdr shdr_mem, *shdr = gelf_getshdr (symscn, &shdr_mem);
-  if (mod->syments > mod->symdata->d_size / shdr->sh_entsize
+  if (shdr == NULL || shdr->sh_entsize == 0
+      || mod->syments > mod->symdata->d_size / shdr->sh_entsize
       || (size_t) mod->first_global > mod->syments)
     goto elferr;
 

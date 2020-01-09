@@ -1,5 +1,5 @@
 /* Sniff out modules from ELF headers visible in memory segments.
-   Copyright (C) 2008-2012, 2014 Red Hat, Inc.
+   Copyright (C) 2008-2012, 2014, 2015 Red Hat, Inc.
    This file is part of elfutils.
 
    This file is free software; you can redistribute it and/or modify
@@ -36,7 +36,6 @@
 #include <gelf.h>
 #include <inttypes.h>
 #include <sys/param.h>
-#include <alloca.h>
 #include <endian.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -52,6 +51,10 @@
 # define MY_ELFDATA	ELFDATA2LSB
 #else
 # define MY_ELFDATA	ELFDATA2MSB
+#endif
+
+#ifndef MAX
+# define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
 
@@ -278,8 +281,13 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
   Elf *elf = NULL;
   int fd = -1;
 
+  /* We might have to reserve some memory for the phdrs.  Set to NULL
+     here so we can always safely free it.  */
+  void *phdrsp = NULL;
+
   inline int finish (void)
   {
+    free (phdrsp);
     release_buffer (&buffer, &buffer_available);
     if (elf != NULL)
       elf_end (elf);
@@ -400,14 +408,17 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
 
   xlatefrom.d_buf = ph_buffer;
 
-  union
-  {
-    Elf32_Phdr p32[phnum];
-    Elf64_Phdr p64[phnum];
-  } phdrs;
+  bool class32 = ei_class == ELFCLASS32;
+  size_t phdr_size = class32 ? sizeof (Elf32_Phdr) : sizeof (Elf64_Phdr);
+  if (unlikely (phnum > SIZE_MAX / phdr_size))
+    return finish ();
+  const size_t phdrsp_bytes = phnum * phdr_size;
+  phdrsp = malloc (phdrsp_bytes);
+  if (unlikely (phdrsp == NULL))
+    return finish ();
 
-  xlateto.d_buf = &phdrs;
-  xlateto.d_size = sizeof phdrs;
+  xlateto.d_buf = phdrsp;
+  xlateto.d_size = phdrsp_bytes;
 
   /* Track the bounds of the file visible in memory.  */
   GElf_Off file_trimmed_end = 0; /* Proper p_vaddr + p_filesz end.  */
@@ -564,16 +575,19 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
 	break;
       }
   }
+
+  Elf32_Phdr (*p32)[phnum] = phdrsp;
+  Elf64_Phdr (*p64)[phnum] = phdrsp;
   if (ei_class == ELFCLASS32)
     {
       if (elf32_xlatetom (&xlateto, &xlatefrom, ei_data) == NULL)
 	found_bias = false;	/* Trigger error check.  */
       else
 	for (uint_fast16_t i = 0; i < phnum; ++i)
-	  consider_phdr (phdrs.p32[i].p_type,
-			 phdrs.p32[i].p_vaddr, phdrs.p32[i].p_memsz,
-			 phdrs.p32[i].p_offset, phdrs.p32[i].p_filesz,
-			 phdrs.p32[i].p_align);
+	  consider_phdr ((*p32)[i].p_type,
+			 (*p32)[i].p_vaddr, (*p32)[i].p_memsz,
+			 (*p32)[i].p_offset, (*p32)[i].p_filesz,
+			 (*p32)[i].p_align);
     }
   else
     {
@@ -581,10 +595,10 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
 	found_bias = false;	/* Trigger error check.  */
       else
 	for (uint_fast16_t i = 0; i < phnum; ++i)
-	  consider_phdr (phdrs.p64[i].p_type,
-			 phdrs.p64[i].p_vaddr, phdrs.p64[i].p_memsz,
-			 phdrs.p64[i].p_offset, phdrs.p64[i].p_filesz,
-			 phdrs.p64[i].p_align);
+	  consider_phdr ((*p64)[i].p_type,
+			 (*p64)[i].p_vaddr, (*p64)[i].p_memsz,
+			 (*p64)[i].p_offset, (*p64)[i].p_filesz,
+			 (*p64)[i].p_align);
     }
 
   finish_portion (&ph_buffer, &ph_buffer_size);
@@ -677,7 +691,7 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
       name = file_note_name;
       name_is_final = true;
       bool invalid = false;
-      fd = open64 (name, O_RDONLY);
+      fd = open (name, O_RDONLY);
       if (fd >= 0)
 	{
 	  Dwfl_Error error = __libdw_open_file (&fd, &elf, true, false);
@@ -687,8 +701,13 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
 	}
       if (invalid)
 	{
-	  free (build_id);
-	  return finish ();
+	  /* The file was there, but the build_id didn't match.  We
+	     still want to report the module, but need to get the ELF
+	     some other way if possible.  */
+	  close (fd);
+	  fd = -1;
+	  elf_end (elf);
+	  elf = NULL;
 	}
     }
 
@@ -740,32 +759,33 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
   if (dyn_filesz != 0 && dyn_filesz % dyn_entsize == 0
       && ! read_portion (&dyn_data, &dyn_data_size, dyn_vaddr, dyn_filesz))
     {
-      union
-      {
-	Elf32_Dyn d32[dyn_filesz / sizeof (Elf32_Dyn)];
-	Elf64_Dyn d64[dyn_filesz / sizeof (Elf64_Dyn)];
-      } dyn;
+      void *dyns = malloc (dyn_filesz);
+      Elf32_Dyn (*d32)[dyn_filesz / sizeof (Elf32_Dyn)] = dyns;
+      Elf64_Dyn (*d64)[dyn_filesz / sizeof (Elf64_Dyn)] = dyns;
+      if (unlikely (dyns == NULL))
+	return finish ();
 
       xlatefrom.d_type = xlateto.d_type = ELF_T_DYN;
       xlatefrom.d_buf = (void *) dyn_data;
       xlatefrom.d_size = dyn_filesz;
-      xlateto.d_buf = &dyn;
-      xlateto.d_size = sizeof dyn;
+      xlateto.d_buf = dyns;
+      xlateto.d_size = dyn_filesz;
 
       if (ei_class == ELFCLASS32)
 	{
 	  if (elf32_xlatetom (&xlateto, &xlatefrom, ei_data) != NULL)
-	    for (size_t i = 0; i < dyn_filesz / sizeof dyn.d32[0]; ++i)
-	      if (consider_dyn (dyn.d32[i].d_tag, dyn.d32[i].d_un.d_val))
+	    for (size_t i = 0; i < dyn_filesz / sizeof (Elf32_Dyn); ++i)
+	      if (consider_dyn ((*d32)[i].d_tag, (*d32)[i].d_un.d_val))
 		break;
 	}
       else
 	{
 	  if (elf64_xlatetom (&xlateto, &xlatefrom, ei_data) != NULL)
-	    for (size_t i = 0; i < dyn_filesz / sizeof dyn.d64[0]; ++i)
-	      if (consider_dyn (dyn.d64[i].d_tag, dyn.d64[i].d_un.d_val))
+	    for (size_t i = 0; i < dyn_filesz / sizeof (Elf64_Dyn); ++i)
+	      if (consider_dyn ((*d64)[i].d_tag, (*d64)[i].d_un.d_val))
 		break;
 	}
+      free (dyns);
     }
   finish_portion (&dyn_data, &dyn_data_size);
 
@@ -881,12 +901,12 @@ dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
 
 	  if (ei_class == ELFCLASS32)
 	    for (uint_fast16_t i = 0; i < phnum; ++i)
-	      read_phdr (phdrs.p32[i].p_type, phdrs.p32[i].p_vaddr,
-			 phdrs.p32[i].p_offset, phdrs.p32[i].p_filesz);
+	      read_phdr ((*p32)[i].p_type, (*p32)[i].p_vaddr,
+			 (*p32)[i].p_offset, (*p32)[i].p_filesz);
 	  else
 	    for (uint_fast16_t i = 0; i < phnum; ++i)
-	      read_phdr (phdrs.p64[i].p_type, phdrs.p64[i].p_vaddr,
-			 phdrs.p64[i].p_offset, phdrs.p64[i].p_filesz);
+	      read_phdr ((*p64)[i].p_type, (*p64)[i].p_vaddr,
+			 (*p64)[i].p_offset, (*p64)[i].p_filesz);
 	}
       else
 	{
