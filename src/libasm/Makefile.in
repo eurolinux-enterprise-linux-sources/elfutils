@@ -312,7 +312,6 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 argp_LDADD = @argp_LDADD@
-base_cpu = @base_cpu@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -357,7 +356,7 @@ top_srcdir = @top_srcdir@
 zip_LIBS = @zip_LIBS@
 AM_CPPFLAGS = -I. -I$(srcdir) -I$(top_srcdir)/lib -I.. \
 	-I$(top_srcdir)/libelf -I$(top_srcdir)/libebl \
-	-I$(top_srcdir)/libdw
+	-I$(top_srcdir)/libdw -I$(top_srcdir)/libdwelf
 
 # Drop the 'u' flag that automake adds by default. It is incompatible
 # with deterministic archives.
@@ -372,10 +371,12 @@ ARFLAGS = cr
 @HAVE_DUPLICATED_COND_WARNING_TRUE@DUPLICATED_COND_WARNING = -Wduplicated-cond
 @HAVE_NULL_DEREFERENCE_WARNING_FALSE@NULL_DEREFERENCE_WARNING = 
 @HAVE_NULL_DEREFERENCE_WARNING_TRUE@NULL_DEREFERENCE_WARNING = -Wnull-dereference
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_FALSE@IMPLICIT_FALLTHROUGH_WARNING = 
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough
 AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	    -Wold-style-definition -Wstrict-prototypes \
 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
-	    $(NULL_DEREFERENCE_WARNING) \
+	    $(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
 	    $(if $($(*F)_no_Werror),,-Werror) \
 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
@@ -791,7 +792,8 @@ libasm.so$(EXEEXT): libasm_pic.a libasm.map
 	$(AM_V_CCLD)$(LINK) -shared -o $@ -Wl,--whole-archive,$<,--no-whole-archive \
 		-Wl,--version-script,$(srcdir)/libasm.map,--no-undefined \
 		-Wl,--soname,$@.$(VERSION) \
-		../libebl/libebl.a ../libelf/libelf.so  $(libasm_so_LDLIBS)
+		../libebl/libebl.a ../libelf/libelf.so ../libdw/libdw.so \
+		$(libasm_so_LDLIBS)
 	@$(textrel_check)
 	$(AM_V_at)ln -fs $@ $@.$(VERSION)
 

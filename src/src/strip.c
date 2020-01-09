@@ -1,5 +1,5 @@
 /* Discard section not used at runtime from object files.
-   Copyright (C) 2000-2012, 2014, 2015 Red Hat, Inc.
+   Copyright (C) 2000-2012, 2014, 2015, 2016 Red Hat, Inc.
    This file is part of elfutils.
    Written by Ulrich Drepper <drepper@redhat.com>, 2000.
 
@@ -36,18 +36,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 
 #include <elf-knowledge.h>
 #include <libebl.h>
+#include "libdwelf.h"
+#include <libeu.h>
 #include <system.h>
 
 typedef uint8_t GElf_Byte;
 
 /* Name and version of program.  */
-static void print_version (FILE *stream, struct argp_state *state);
 ARGP_PROGRAM_VERSION_HOOK_DEF = print_version;
 
 /* Bug report address.  */
@@ -207,20 +207,6 @@ Only one input file allowed together with '-o' and '-f'"));
     }
 
   return result;
-}
-
-
-/* Print the version information.  */
-static void
-print_version (FILE *stream, struct argp_state *state __attribute__ ((unused)))
-{
-  fprintf (stream, "strip (%s) %s\n", PACKAGE_NAME, PACKAGE_VERSION);
-  fprintf (stream, gettext ("\
-Copyright (C) %s Red Hat, Inc.\n\
-This is free software; see the source for copying conditions.  There is NO\n\
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-"), "2012");
-  fprintf (stream, gettext ("Written by %s.\n"), "Ulrich Drepper");
 }
 
 
@@ -432,7 +418,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
     Elf32_Word group_idx;
     Elf32_Word group_cnt;
     Elf_Scn *newscn;
-    struct Ebl_Strent *se;
+    Dwelf_Strent *se;
     Elf32_Word *newsymidx;
   } *shdr_info = NULL;
   Elf_Scn *scn;
@@ -443,7 +429,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
   GElf_Ehdr *newehdr;
   GElf_Ehdr debugehdr_mem;
   GElf_Ehdr *debugehdr;
-  struct Ebl_Strtab *shst = NULL;
+  Dwelf_Strtab *shst = NULL;
   Elf_Data debuglink_crc_data;
   bool any_symtab_changes = false;
   Elf_Data *shstrtab_data = NULL;
@@ -1043,7 +1029,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
      will already be marked as unused.  */
 
   /* We need a string table for the section headers.  */
-  shst = ebl_strtabinit (true);
+  shst = dwelf_strtab_init (true);
   if (shst == NULL)
     {
       cleanup_debug ();
@@ -1071,7 +1057,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	elf_assert (elf_ndxscn (shdr_info[cnt].newscn) == shdr_info[cnt].idx);
 
 	/* Add this name to the section header string table.  */
-	shdr_info[cnt].se = ebl_strtabadd (shst, shdr_info[cnt].name, 0);
+	shdr_info[cnt].se = dwelf_strtab_add (shst, shdr_info[cnt].name);
       }
 
   /* Test whether we are doing anything at all.  */
@@ -1083,7 +1069,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
   if (debug_fname != NULL && !remove_shdrs)
     {
       /* Add the section header string table section name.  */
-      shdr_info[cnt].se = ebl_strtabadd (shst, ".gnu_debuglink", 15);
+      shdr_info[cnt].se = dwelf_strtab_add_len (shst, ".gnu_debuglink", 15);
       shdr_info[cnt].idx = idx++;
 
       /* Create the section header.  */
@@ -1146,7 +1132,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
   shdridx = cnt;
 
   /* Add the section header string table section name.  */
-  shdr_info[cnt].se = ebl_strtabadd (shst, ".shstrtab", 10);
+  shdr_info[cnt].se = dwelf_strtab_add_len (shst, ".shstrtab", 10);
   shdr_info[cnt].idx = idx;
 
   /* Create the section header.  */
@@ -1183,7 +1169,12 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	     gettext ("while create section header string table: %s"),
 	     elf_errmsg (-1));
     }
-  ebl_strtabfinalize (shst, shstrtab_data);
+  if (dwelf_strtab_finalize (shst, shstrtab_data) == NULL)
+    {
+      cleanup_debug ();
+      error (EXIT_FAILURE, 0,
+	     gettext ("no memory to create section header string table"));
+    }
 
   /* We have to set the section size.  */
   shdr_info[cnt].shdr.sh_size = shstrtab_data->d_size;
@@ -1199,7 +1190,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	elf_assert (scn != NULL);
 
 	/* Update the name.  */
-	shdr_info[cnt].shdr.sh_name = ebl_strtaboffset (shdr_info[cnt].se);
+	shdr_info[cnt].shdr.sh_name = dwelf_strent_off (shdr_info[cnt].se);
 
 	/* Update the section header from the input file.  Some fields
 	   might be section indeces which now have to be adjusted.  */
@@ -1335,15 +1326,12 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 
 		    /* Get the full section index, if necessary from the
 		       XINDEX table.  */
-		    if (sym->st_shndx != SHN_XINDEX)
-		      sec = shdr_info[sym->st_shndx].idx;
-		    else
-		      {
-			elf_assert (shndxdata != NULL
-				    && shndxdata->d_buf != NULL);
-
-			sec = shdr_info[xshndx].idx;
-		      }
+		    if (sym->st_shndx == SHN_XINDEX)
+		      elf_assert (shndxdata != NULL
+				  && shndxdata->d_buf != NULL);
+		    size_t sidx = (sym->st_shndx != SHN_XINDEX
+				   ? sym->st_shndx : xshndx);
+		    sec = shdr_info[sidx].idx;
 
 		    if (sec != 0)
 		      {
@@ -1381,6 +1369,24 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 			    shdr_info[cnt].shdr.sh_info = destidx - 1;
 			  }
 		      }
+		    else if ((shdr_info[cnt].shdr.sh_flags & SHF_ALLOC) != 0
+			     && GELF_ST_TYPE (sym->st_info) != STT_SECTION
+			     && shdr_info[sidx].shdr.sh_type != SHT_GROUP)
+		      {
+			/* Removing a real symbol from an allocated
+			   symbol table is hard and probably a
+			   mistake.  Really removing it means
+			   rewriting the dynamic segment and hash
+			   sections.  Just warn and set the symbol
+			   section to UNDEF.  */
+			error (0, 0,
+			       gettext ("Cannot remove symbol [%zd] from allocated symbol table [%zd]"), inner, cnt);
+			sym->st_shndx = SHN_UNDEF;
+			if (gelf_update_sym (shdr_info[cnt].data, destidx,
+					     sym) == 0)
+			  INTERNAL_ERROR (fname);
+			shdr_info[cnt].newsymidx[inner] = destidx++;
+		      }
 		    else if (debug_fname != NULL
 			     && shdr_info[cnt].debug_data == NULL)
 		      /* The symbol points to a section that is discarded
@@ -1388,8 +1394,6 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 			 this is a section or group signature symbol
 			 for a section which has been removed.  */
 		      {
-			size_t sidx = (sym->st_shndx != SHN_XINDEX
-					? sym->st_shndx : xshndx);
 			elf_assert (GELF_ST_TYPE (sym->st_info) == STT_SECTION
 				    || ((shdr_info[sidx].shdr.sh_type
 					 == SHT_GROUP)
@@ -1785,10 +1789,18 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	      Elf_Data *reldata = elf_getdata (scn, NULL);
 	      if (reldata == NULL || reldata->d_buf == NULL)
 		INTERNAL_ERROR (fname);
-	      /* We actually wanted the rawdata, but since we already
-		 accessed it earlier as elf_getdata () that won't
-		 work. But debug sections are all ELF_T_BYTE, so it
-		 doesn't really matter.  */
+
+	      /* Make sure we adjust the uncompressed debug data
+		 (and recompress if necessary at the end).  */
+	      GElf_Chdr tchdr;
+	      int tcompress_type = 0;
+	      if (gelf_getchdr (tscn, &tchdr) != NULL)
+		{
+		  tcompress_type = tchdr.ch_type;
+		  if (elf_compress (tscn, 0, 0) != 1)
+		    INTERNAL_ERROR (fname);
+		}
+
 	      Elf_Data *tdata = elf_getdata (tscn, NULL);
 	      if (tdata == NULL || tdata->d_buf == NULL
 		  || tdata->d_type != ELF_T_BYTE)
@@ -1970,6 +1982,10 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	      nrels = next;
 	      shdr->sh_size = reldata->d_size = nrels * shdr->sh_entsize;
 	      gelf_update_shdr (scn, shdr);
+
+	      if (tcompress_type != 0)
+		if (elf_compress (tscn, tcompress_type, ELF_CHF_FORCE) != 1)
+		  INTERNAL_ERROR (fname);
 	    }
 	}
     }
@@ -2171,7 +2187,7 @@ while computing checksum for debug information"));
   if (shstrtab_data != NULL)
     free (shstrtab_data->d_buf);
   if (shst != NULL)
-    ebl_strtabfree (shst);
+    dwelf_strtab_free (shst);
 
   /* That was it.  Close the descriptors.  */
   if (elf_end (newelf) != 0)

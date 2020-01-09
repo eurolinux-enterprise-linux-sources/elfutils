@@ -114,7 +114,7 @@ libeu_a_LIBADD =
 am_libeu_a_OBJECTS = xstrdup.$(OBJEXT) xstrndup.$(OBJEXT) \
 	xmalloc.$(OBJEXT) next_prime.$(OBJEXT) crc32.$(OBJEXT) \
 	crc32_file.$(OBJEXT) md5.$(OBJEXT) sha1.$(OBJEXT) \
-	color.$(OBJEXT)
+	color.$(OBJEXT) version.$(OBJEXT)
 libeu_a_OBJECTS = $(am_libeu_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -261,7 +261,6 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 argp_LDADD = @argp_LDADD@
-base_cpu = @base_cpu@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -320,11 +319,14 @@ ARFLAGS = cr
 @HAVE_DUPLICATED_COND_WARNING_TRUE@DUPLICATED_COND_WARNING = -Wduplicated-cond
 @HAVE_NULL_DEREFERENCE_WARNING_FALSE@NULL_DEREFERENCE_WARNING = 
 @HAVE_NULL_DEREFERENCE_WARNING_TRUE@NULL_DEREFERENCE_WARNING = -Wnull-dereference
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_FALSE@IMPLICIT_FALLTHROUGH_WARNING = 
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough
 AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	-Wold-style-definition -Wstrict-prototypes \
 	$(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
-	$(NULL_DEREFERENCE_WARNING) $(if $($(*F)_no_Werror),,-Werror) \
-	$(if $($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
+	$(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+	$(if $($(*F)_no_Werror),,-Werror) $(if \
+	$($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
 	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
 	$($(*F)_CFLAGS) -fPIC
 COMPILE.os = $(filter-out -fprofile-arcs -ftest-coverage, $(COMPILE))
@@ -337,10 +339,10 @@ textrel_check = if $(READELF) -d $@ | fgrep -q TEXTREL; then $(textrel_found); f
 noinst_LIBRARIES = libeu.a
 libeu_a_SOURCES = xstrdup.c xstrndup.c xmalloc.c next_prime.c \
 		  crc32.c crc32_file.c md5.c sha1.c \
-		  color.c
+		  color.c version.c
 
-noinst_HEADERS = fixedsizehash.h system.h dynamicsizehash.h list.h md5.h \
-		 sha1.h eu-config.h
+noinst_HEADERS = fixedsizehash.h libeu.h system.h dynamicsizehash.h list.h \
+		 md5.h sha1.h eu-config.h
 
 EXTRA_DIST = dynamicsizehash.c
 @GPROF_FALSE@xmalloc_CFLAGS = -ffunction-sections
@@ -399,6 +401,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/next_prime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmalloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xstrdup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xstrndup.Po@am__quote@

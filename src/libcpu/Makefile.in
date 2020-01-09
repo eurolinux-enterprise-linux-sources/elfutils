@@ -91,6 +91,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @SYMBOL_VERSIONING_TRUE@am__append_1 = -DSYMBOL_VERSIONING
+@HAVE_LINUX_BPF_H_TRUE@am__append_2 = libcpu_bpf.a
 @MAINTAINER_MODE_TRUE@noinst_PROGRAMS = i386_gendis$(EXEEXT)
 subdir = libcpu
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -111,6 +112,12 @@ AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
 am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
+libcpu_bpf_a_AR = $(AR) $(ARFLAGS)
+libcpu_bpf_a_LIBADD =
+am__libcpu_bpf_a_SOURCES_DIST = bpf_disasm.c
+@HAVE_LINUX_BPF_H_TRUE@am_libcpu_bpf_a_OBJECTS =  \
+@HAVE_LINUX_BPF_H_TRUE@	libcpu_bpf_a-bpf_disasm.$(OBJEXT)
+libcpu_bpf_a_OBJECTS = $(am_libcpu_bpf_a_OBJECTS)
 libcpu_i386_a_AR = $(AR) $(ARFLAGS)
 libcpu_i386_a_LIBADD =
 am_libcpu_i386_a_OBJECTS = i386_disasm.$(OBJEXT)
@@ -140,6 +147,10 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
@@ -166,9 +177,10 @@ AM_V_YACC = $(am__v_YACC_@AM_V@)
 am__v_YACC_ = $(am__v_YACC_@AM_DEFAULT_V@)
 am__v_YACC_0 = @echo "  YACC    " $@;
 am__v_YACC_1 = 
-SOURCES = $(libcpu_i386_a_SOURCES) $(libcpu_x86_64_a_SOURCES) \
-	$(i386_gendis_SOURCES)
-DIST_SOURCES = $(libcpu_i386_a_SOURCES) $(libcpu_x86_64_a_SOURCES) \
+SOURCES = $(libcpu_bpf_a_SOURCES) $(libcpu_i386_a_SOURCES) \
+	$(libcpu_x86_64_a_SOURCES) $(i386_gendis_SOURCES)
+DIST_SOURCES = $(am__libcpu_bpf_a_SOURCES_DIST) \
+	$(libcpu_i386_a_SOURCES) $(libcpu_x86_64_a_SOURCES) \
 	$(i386_gendis_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -287,7 +299,6 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 argp_LDADD = @argp_LDADD@
-base_cpu = @base_cpu@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -347,11 +358,14 @@ ARFLAGS = cr
 @HAVE_DUPLICATED_COND_WARNING_TRUE@DUPLICATED_COND_WARNING = -Wduplicated-cond
 @HAVE_NULL_DEREFERENCE_WARNING_FALSE@NULL_DEREFERENCE_WARNING = 
 @HAVE_NULL_DEREFERENCE_WARNING_TRUE@NULL_DEREFERENCE_WARNING = -Wnull-dereference
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_FALSE@IMPLICIT_FALLTHROUGH_WARNING = 
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough
 AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	-Wold-style-definition -Wstrict-prototypes \
 	$(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
-	$(NULL_DEREFERENCE_WARNING) $(if $($(*F)_no_Werror),,-Werror) \
-	$(if $($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
+	$(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+	$(if $($(*F)_no_Werror),,-Werror) $(if \
+	$($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
 	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
 	$($(*F)_CFLAGS) -fPIC -fdollars-in-identifiers
 COMPILE.os = $(filter-out -fprofile-arcs -ftest-coverage, $(COMPILE))
@@ -364,10 +378,12 @@ textrel_msg = echo "WARNING: TEXTREL found in '$@'"
 textrel_check = if $(READELF) -d $@ | fgrep -q TEXTREL; then $(textrel_found); fi
 LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS) -P$(<F:lex.l=)
 AM_YFLAGS = -p$(<F:parse.y=)
-noinst_LIBRARIES = libcpu_i386.a libcpu_x86_64.a
+noinst_LIBRARIES = libcpu_i386.a libcpu_x86_64.a $(am__append_2)
 libcpu_i386_a_SOURCES = i386_disasm.c i386_dis.h
 libcpu_x86_64_a_SOURCES = x86_64_disasm.c x86_64_dis.h
 i386_gendis_SOURCES = i386_gendis.c i386_lex.l i386_parse.y
+@HAVE_LINUX_BPF_H_TRUE@libcpu_bpf_a_SOURCES = bpf_disasm.c
+@HAVE_LINUX_BPF_H_TRUE@libcpu_bpf_a_CFLAGS = $(AM_CFLAGS) -Wno-format-nonliteral
 @MAINTAINER_MODE_TRUE@noinst_HEADERS = memory-access.h i386_parse.h i386_data.h
 i386_lex_no_Werror = yes
 libeu = ../lib/libeu.a
@@ -414,6 +430,11 @@ $(am__aclocal_m4_deps):
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
+libcpu_bpf.a: $(libcpu_bpf_a_OBJECTS) $(libcpu_bpf_a_DEPENDENCIES) $(EXTRA_libcpu_bpf_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libcpu_bpf.a
+	$(AM_V_AR)$(libcpu_bpf_a_AR) libcpu_bpf.a $(libcpu_bpf_a_OBJECTS) $(libcpu_bpf_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libcpu_bpf.a
+
 libcpu_i386.a: $(libcpu_i386_a_OBJECTS) $(libcpu_i386_a_DEPENDENCIES) $(EXTRA_libcpu_i386_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libcpu_i386.a
 	$(AM_V_AR)$(libcpu_i386_a_AR) libcpu_i386.a $(libcpu_i386_a_OBJECTS) $(libcpu_i386_a_LIBADD)
@@ -441,6 +462,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386_gendis.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386_lex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386_parse.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcpu_bpf_a-bpf_disasm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/x86_64_disasm.Po@am__quote@
 
 .c.o:
@@ -456,6 +478,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+libcpu_bpf_a-bpf_disasm.o: bpf_disasm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcpu_bpf_a_CFLAGS) $(CFLAGS) -MT libcpu_bpf_a-bpf_disasm.o -MD -MP -MF $(DEPDIR)/libcpu_bpf_a-bpf_disasm.Tpo -c -o libcpu_bpf_a-bpf_disasm.o `test -f 'bpf_disasm.c' || echo '$(srcdir)/'`bpf_disasm.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcpu_bpf_a-bpf_disasm.Tpo $(DEPDIR)/libcpu_bpf_a-bpf_disasm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='bpf_disasm.c' object='libcpu_bpf_a-bpf_disasm.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcpu_bpf_a_CFLAGS) $(CFLAGS) -c -o libcpu_bpf_a-bpf_disasm.o `test -f 'bpf_disasm.c' || echo '$(srcdir)/'`bpf_disasm.c
+
+libcpu_bpf_a-bpf_disasm.obj: bpf_disasm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcpu_bpf_a_CFLAGS) $(CFLAGS) -MT libcpu_bpf_a-bpf_disasm.obj -MD -MP -MF $(DEPDIR)/libcpu_bpf_a-bpf_disasm.Tpo -c -o libcpu_bpf_a-bpf_disasm.obj `if test -f 'bpf_disasm.c'; then $(CYGPATH_W) 'bpf_disasm.c'; else $(CYGPATH_W) '$(srcdir)/bpf_disasm.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcpu_bpf_a-bpf_disasm.Tpo $(DEPDIR)/libcpu_bpf_a-bpf_disasm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='bpf_disasm.c' object='libcpu_bpf_a-bpf_disasm.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcpu_bpf_a_CFLAGS) $(CFLAGS) -c -o libcpu_bpf_a-bpf_disasm.obj `if test -f 'bpf_disasm.c'; then $(CYGPATH_W) 'bpf_disasm.c'; else $(CYGPATH_W) '$(srcdir)/bpf_disasm.c'; fi`
 
 .l.c:
 	$(AM_V_LEX)$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)

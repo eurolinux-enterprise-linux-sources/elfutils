@@ -1,15 +1,15 @@
 Name: elfutils
-Summary: A collection of utilities and DSOs to handle compiled objects
-Version: 0.166
-%global baserelease 2
-URL: https://fedorahosted.org/elfutils/
-%global source_url http://fedorahosted.org/releases/e/l/elfutils/%{version}/
+Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
+Version: 0.168
+%global baserelease 8
+URL: http://elfutils.org/
+%global source_url ftp://sourceware.org/pub/elfutils/%{version}/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Group: Development/Tools
 
 Release: %{baserelease}%{?dist}
 
-%global provide_yama_scope	0
+%global provide_yama_scope	1
 
 %if 0%{?fedora}
 %global provide_yama_scope	(%fedora >= 22)
@@ -20,7 +20,9 @@ Release: %{baserelease}%{?dist}
 Source: %{?source_url}%{name}-%{version}.tar.bz2
 
 # Patches
-Patch1: elfutils-0.166-elfcmp-comp-gcc6.patch
+Patch1: elfutils-0.168-libasm-truncation.patch
+Patch2: elfutils-0.168-ppc64-attrs.patch
+Patch3: elfutils-0.168-ppc64-fallback-unwinder.patch
 
 Requires: elfutils-libelf%{depsuffix} = %{version}-%{release}
 Requires: elfutils-libs%{depsuffix} = %{version}-%{release}
@@ -37,6 +39,13 @@ BuildRequires: xz-devel
 
 %global _gnu %{nil}
 %global _program_prefix eu-
+
+# The lib[64]/elfutils directory contains the private ebl backend
+# libraries. They must not be exposed as global provides. We don't
+# need to filter the requires since they are only loaded with dlopen.
+%if 0%{?fedora} >= 15 || 0%{?rhel} >= 7
+%global __provides_exclude ^libebl_.*\\.so.*$
+%endif
 
 %description
 Elfutils is a collection of utilities, including stack (to show
@@ -164,7 +173,9 @@ profiling) of processes.
 %setup -q
 
 # Apply patches
-%patch1 -p1 -b .elfcmp_gcc6
+%patch1 -p1 -b .trunc
+%patch2 -p1 -b .attr
+%patch3 -p1 -b .unwind_ppc64
 
 find . -name \*.sh ! -perm -0100 -print | xargs chmod +x
 
@@ -188,11 +199,6 @@ make -s install DESTDIR=${RPM_BUILD_ROOT}
 
 chmod +x ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/lib*.so*
 chmod +x ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/elfutils/lib*.so*
-
-# XXX Nuke unpackaged files
-(cd ${RPM_BUILD_ROOT}
- rm -f .%{_bindir}/eu-ld
-)
 
 %find_lang %{name}
 
@@ -237,7 +243,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_bindir}/eu-stack
 %{_bindir}/eu-strings
 %{_bindir}/eu-strip
-#%%{_bindir}/eu-ld
 %{_bindir}/eu-unstrip
 %{_bindir}/eu-make-debug-archive
 %{_bindir}/eu-elfcompress
@@ -301,6 +306,18 @@ rm -rf ${RPM_BUILD_ROOT}
 %endif
 
 %changelog
+* Tue May 30 2017 Mark Wielaard <mjw@redhat.com> - 0.168-8
+- Fix ppc64 fallback unwinder (#1454754)
+
+* Thu May 25 2017 Mark Wielaard <mjw@redhat.com> - 0.168-7
+- Enable default-yama-scope (#1455514)
+
+* Mon May 22 2017 Mark Wielaard <mjw@redhat.com> - 0.168-6
+- Add ppc64 fallback unwinder (#1454754)
+
+* Wed Mar  1 2017 Mark Wielaard <mjw@redhat.com> - 0.168-5
+- Rebase to fedora elfutils 0.168 (#1371517, #1400302)
+
 * Thu Apr 14 2016 Mark Wielaard <mjw@redhat.com> - 0.166-2
 - Rebase to fedora elfutils 0.166 (#1296313, #1304873)
 

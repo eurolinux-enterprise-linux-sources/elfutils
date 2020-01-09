@@ -140,14 +140,12 @@ am__v_AR_1 =
 libebl_a_AR = $(AR) $(ARFLAGS)
 libebl_a_LIBADD =
 am__objects_1 = eblopenbackend.$(OBJEXT) eblclosebackend.$(OBJEXT) \
-	eblstrtab.$(OBJEXT) eblreloctypename.$(OBJEXT) \
-	eblsegmenttypename.$(OBJEXT) eblsectiontypename.$(OBJEXT) \
-	eblmachineflagname.$(OBJEXT) eblsymboltypename.$(OBJEXT) \
-	ebldynamictagname.$(OBJEXT) eblsectionname.$(OBJEXT) \
-	eblobjecttypename.$(OBJEXT) eblsymbolbindingname.$(OBJEXT) \
-	eblbackendname.$(OBJEXT) eblshflagscombine.$(OBJEXT) \
-	eblwstrtab.$(OBJEXT) eblgstrtab.$(OBJEXT) \
-	eblosabiname.$(OBJEXT) eblmachineflagcheck.$(OBJEXT) \
+	eblreloctypename.$(OBJEXT) eblsegmenttypename.$(OBJEXT) \
+	eblsectiontypename.$(OBJEXT) eblmachineflagname.$(OBJEXT) \
+	eblsymboltypename.$(OBJEXT) ebldynamictagname.$(OBJEXT) \
+	eblsectionname.$(OBJEXT) eblsymbolbindingname.$(OBJEXT) \
+	eblbackendname.$(OBJEXT) eblosabiname.$(OBJEXT) \
+	eblmachineflagcheck.$(OBJEXT) \
 	eblmachinesectionflagcheck.$(OBJEXT) \
 	eblreloctypecheck.$(OBJEXT) eblrelocvaliduse.$(OBJEXT) \
 	eblrelocsimpletype.$(OBJEXT) ebldynamictagcheck.$(OBJEXT) \
@@ -313,7 +311,6 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 argp_LDADD = @argp_LDADD@
-base_cpu = @base_cpu@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -373,11 +370,14 @@ ARFLAGS = cr
 @HAVE_DUPLICATED_COND_WARNING_TRUE@DUPLICATED_COND_WARNING = -Wduplicated-cond
 @HAVE_NULL_DEREFERENCE_WARNING_FALSE@NULL_DEREFERENCE_WARNING = 
 @HAVE_NULL_DEREFERENCE_WARNING_TRUE@NULL_DEREFERENCE_WARNING = -Wnull-dereference
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_FALSE@IMPLICIT_FALLTHROUGH_WARNING = 
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough
 AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	-Wold-style-definition -Wstrict-prototypes \
 	$(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
-	$(NULL_DEREFERENCE_WARNING) $(if $($(*F)_no_Werror),,-Werror) \
-	$(if $($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
+	$(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+	$(if $($(*F)_no_Werror),,-Werror) $(if \
+	$($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
 	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
 	$($(*F)_CFLAGS) -fPIC
 COMPILE.os = $(filter-out -fprofile-arcs -ftest-coverage, $(COMPILE))
@@ -389,13 +389,11 @@ textrel_msg = echo "WARNING: TEXTREL found in '$@'"
 textrel_check = if $(READELF) -d $@ | fgrep -q TEXTREL; then $(textrel_found); fi
 lib_LIBRARIES = libebl.a
 pkginclude_HEADERS = libebl.h
-gen_SOURCES = eblopenbackend.c eblclosebackend.c eblstrtab.c \
+gen_SOURCES = eblopenbackend.c eblclosebackend.c \
 	      eblreloctypename.c eblsegmenttypename.c \
 	      eblsectiontypename.c eblmachineflagname.c \
 	      eblsymboltypename.c ebldynamictagname.c eblsectionname.c \
-	      eblobjecttypename.c eblsymbolbindingname.c \
-	      eblbackendname.c eblshflagscombine.c eblwstrtab.c \
-	      eblgstrtab.c eblosabiname.c \
+	      eblsymbolbindingname.c eblbackendname.c eblosabiname.c \
 	      eblmachineflagcheck.c eblmachinesectionflagcheck.c \
 	      eblreloctypecheck.c eblrelocvaliduse.c eblrelocsimpletype.c \
 	      ebldynamictagcheck.c eblcorenotetypename.c eblobjnotetypename.c \
@@ -509,14 +507,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblelfdata.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblelfmachine.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblgotpcreloccheck.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblgstrtab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblinitreg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblmachineflagcheck.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblmachineflagname.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblmachinesectionflagcheck.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblnonerelocp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblnormalizepc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblobjecttypename.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblobjnote.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblobjnotetypename.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblopenbackend.Po@am__quote@
@@ -533,14 +529,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblsectionstripp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblsectiontypename.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblsegmenttypename.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblshflagscombine.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblstother.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblstrtab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblsymbolbindingname.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblsymboltypename.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblsysvhashentrysize.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblunwind.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eblwstrtab.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

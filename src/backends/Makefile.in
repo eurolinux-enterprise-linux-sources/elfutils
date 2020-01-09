@@ -130,21 +130,31 @@ am__objects_3 = arm_init.$(OBJEXT) arm_symbol.$(OBJEXT) \
 	arm_attrs.$(OBJEXT) arm_retval.$(OBJEXT) arm_cfi.$(OBJEXT) \
 	arm_initreg.$(OBJEXT)
 libebl_arm_pic_a_OBJECTS = $(am_libebl_arm_pic_a_OBJECTS)
+libebl_bpf_pic_a_AR = $(AR) $(ARFLAGS)
+libebl_bpf_pic_a_LIBADD =
+am__objects_4 = bpf_init.$(OBJEXT) bpf_regs.$(OBJEXT)
+libebl_bpf_pic_a_OBJECTS = $(am_libebl_bpf_pic_a_OBJECTS)
 libebl_i386_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_i386_pic_a_LIBADD =
-am__objects_4 = i386_init.$(OBJEXT) i386_symbol.$(OBJEXT) \
+am__objects_5 = i386_init.$(OBJEXT) i386_symbol.$(OBJEXT) \
 	i386_corenote.$(OBJEXT) i386_cfi.$(OBJEXT) \
 	i386_retval.$(OBJEXT) i386_regs.$(OBJEXT) i386_auxv.$(OBJEXT) \
 	i386_syscall.$(OBJEXT) i386_initreg.$(OBJEXT)
 libebl_i386_pic_a_OBJECTS = $(am_libebl_i386_pic_a_OBJECTS)
 libebl_ia64_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_ia64_pic_a_LIBADD =
-am__objects_5 = ia64_init.$(OBJEXT) ia64_symbol.$(OBJEXT) \
+am__objects_6 = ia64_init.$(OBJEXT) ia64_symbol.$(OBJEXT) \
 	ia64_regs.$(OBJEXT) ia64_retval.$(OBJEXT)
 libebl_ia64_pic_a_OBJECTS = $(am_libebl_ia64_pic_a_OBJECTS)
+libebl_m68k_pic_a_AR = $(AR) $(ARFLAGS)
+libebl_m68k_pic_a_LIBADD =
+am__objects_7 = m68k_init.$(OBJEXT) m68k_symbol.$(OBJEXT) \
+	m68k_regs.$(OBJEXT) m68k_retval.$(OBJEXT) \
+	m68k_corenote.$(OBJEXT)
+libebl_m68k_pic_a_OBJECTS = $(am_libebl_m68k_pic_a_OBJECTS)
 libebl_ppc64_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_ppc64_pic_a_LIBADD =
-am__objects_6 = ppc64_init.$(OBJEXT) ppc64_symbol.$(OBJEXT) \
+am__objects_8 = ppc64_init.$(OBJEXT) ppc64_symbol.$(OBJEXT) \
 	ppc64_retval.$(OBJEXT) ppc64_corenote.$(OBJEXT) \
 	ppc_regs.$(OBJEXT) ppc_auxv.$(OBJEXT) ppc_attrs.$(OBJEXT) \
 	ppc_syscall.$(OBJEXT) ppc_cfi.$(OBJEXT) ppc_initreg.$(OBJEXT) \
@@ -152,14 +162,14 @@ am__objects_6 = ppc64_init.$(OBJEXT) ppc64_symbol.$(OBJEXT) \
 libebl_ppc64_pic_a_OBJECTS = $(am_libebl_ppc64_pic_a_OBJECTS)
 libebl_ppc_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_ppc_pic_a_LIBADD =
-am__objects_7 = ppc_init.$(OBJEXT) ppc_symbol.$(OBJEXT) \
+am__objects_9 = ppc_init.$(OBJEXT) ppc_symbol.$(OBJEXT) \
 	ppc_retval.$(OBJEXT) ppc_regs.$(OBJEXT) ppc_corenote.$(OBJEXT) \
 	ppc_auxv.$(OBJEXT) ppc_attrs.$(OBJEXT) ppc_syscall.$(OBJEXT) \
 	ppc_cfi.$(OBJEXT) ppc_initreg.$(OBJEXT)
 libebl_ppc_pic_a_OBJECTS = $(am_libebl_ppc_pic_a_OBJECTS)
 libebl_s390_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_s390_pic_a_LIBADD =
-am__objects_8 = s390_init.$(OBJEXT) s390_symbol.$(OBJEXT) \
+am__objects_10 = s390_init.$(OBJEXT) s390_symbol.$(OBJEXT) \
 	s390_regs.$(OBJEXT) s390_retval.$(OBJEXT) \
 	s390_corenote.$(OBJEXT) s390x_corenote.$(OBJEXT) \
 	s390_cfi.$(OBJEXT) s390_initreg.$(OBJEXT) \
@@ -167,12 +177,12 @@ am__objects_8 = s390_init.$(OBJEXT) s390_symbol.$(OBJEXT) \
 libebl_s390_pic_a_OBJECTS = $(am_libebl_s390_pic_a_OBJECTS)
 libebl_sh_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_sh_pic_a_LIBADD =
-am__objects_9 = sh_init.$(OBJEXT) sh_symbol.$(OBJEXT) \
+am__objects_11 = sh_init.$(OBJEXT) sh_symbol.$(OBJEXT) \
 	sh_corenote.$(OBJEXT) sh_regs.$(OBJEXT) sh_retval.$(OBJEXT)
 libebl_sh_pic_a_OBJECTS = $(am_libebl_sh_pic_a_OBJECTS)
 libebl_sparc_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_sparc_pic_a_LIBADD =
-am__objects_10 = sparc_init.$(OBJEXT) sparc_symbol.$(OBJEXT) \
+am__objects_12 = sparc_init.$(OBJEXT) sparc_symbol.$(OBJEXT) \
 	sparc_regs.$(OBJEXT) sparc_retval.$(OBJEXT) \
 	sparc_corenote.$(OBJEXT) sparc64_corenote.$(OBJEXT) \
 	sparc_auxv.$(OBJEXT) sparc_attrs.$(OBJEXT) sparc_cfi.$(OBJEXT) \
@@ -180,13 +190,13 @@ am__objects_10 = sparc_init.$(OBJEXT) sparc_symbol.$(OBJEXT) \
 libebl_sparc_pic_a_OBJECTS = $(am_libebl_sparc_pic_a_OBJECTS)
 libebl_tilegx_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_tilegx_pic_a_LIBADD =
-am__objects_11 = tilegx_init.$(OBJEXT) tilegx_symbol.$(OBJEXT) \
+am__objects_13 = tilegx_init.$(OBJEXT) tilegx_symbol.$(OBJEXT) \
 	tilegx_regs.$(OBJEXT) tilegx_retval.$(OBJEXT) \
 	tilegx_corenote.$(OBJEXT)
 libebl_tilegx_pic_a_OBJECTS = $(am_libebl_tilegx_pic_a_OBJECTS)
 libebl_x86_64_pic_a_AR = $(AR) $(ARFLAGS)
 libebl_x86_64_pic_a_LIBADD =
-am__objects_12 = x86_64_init.$(OBJEXT) x86_64_symbol.$(OBJEXT) \
+am__objects_14 = x86_64_init.$(OBJEXT) x86_64_symbol.$(OBJEXT) \
 	x86_64_corenote.$(OBJEXT) x86_64_cfi.$(OBJEXT) \
 	x86_64_retval.$(OBJEXT) x86_64_regs.$(OBJEXT) \
 	i386_auxv.$(OBJEXT) x86_64_syscall.$(OBJEXT) \
@@ -222,14 +232,16 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libebl_aarch64_pic_a_SOURCES) \
 	$(libebl_alpha_pic_a_SOURCES) $(libebl_arm_pic_a_SOURCES) \
-	$(libebl_i386_pic_a_SOURCES) $(libebl_ia64_pic_a_SOURCES) \
+	$(libebl_bpf_pic_a_SOURCES) $(libebl_i386_pic_a_SOURCES) \
+	$(libebl_ia64_pic_a_SOURCES) $(libebl_m68k_pic_a_SOURCES) \
 	$(libebl_ppc64_pic_a_SOURCES) $(libebl_ppc_pic_a_SOURCES) \
 	$(libebl_s390_pic_a_SOURCES) $(libebl_sh_pic_a_SOURCES) \
 	$(libebl_sparc_pic_a_SOURCES) $(libebl_tilegx_pic_a_SOURCES) \
 	$(libebl_x86_64_pic_a_SOURCES)
 DIST_SOURCES = $(libebl_aarch64_pic_a_SOURCES) \
 	$(libebl_alpha_pic_a_SOURCES) $(libebl_arm_pic_a_SOURCES) \
-	$(libebl_i386_pic_a_SOURCES) $(libebl_ia64_pic_a_SOURCES) \
+	$(libebl_bpf_pic_a_SOURCES) $(libebl_i386_pic_a_SOURCES) \
+	$(libebl_ia64_pic_a_SOURCES) $(libebl_m68k_pic_a_SOURCES) \
 	$(libebl_ppc64_pic_a_SOURCES) $(libebl_ppc_pic_a_SOURCES) \
 	$(libebl_s390_pic_a_SOURCES) $(libebl_sh_pic_a_SOURCES) \
 	$(libebl_sparc_pic_a_SOURCES) $(libebl_tilegx_pic_a_SOURCES) \
@@ -350,7 +362,6 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 argp_LDADD = @argp_LDADD@
-base_cpu = @base_cpu@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -410,10 +421,12 @@ ARFLAGS = cr
 @HAVE_DUPLICATED_COND_WARNING_TRUE@DUPLICATED_COND_WARNING = -Wduplicated-cond
 @HAVE_NULL_DEREFERENCE_WARNING_FALSE@NULL_DEREFERENCE_WARNING = 
 @HAVE_NULL_DEREFERENCE_WARNING_TRUE@NULL_DEREFERENCE_WARNING = -Wnull-dereference
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_FALSE@IMPLICIT_FALLTHROUGH_WARNING = 
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough
 AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	    -Wold-style-definition -Wstrict-prototypes \
 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
-	    $(NULL_DEREFERENCE_WARNING) \
+	    $(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
 	    $(if $($(*F)_no_Werror),,-Werror) \
 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
@@ -428,12 +441,13 @@ textrel_msg = echo "WARNING: TEXTREL found in '$@'"
 @FATAL_TEXTREL_TRUE@textrel_found = $(textrel_msg); exit 1
 textrel_check = if $(READELF) -d $@ | fgrep -q TEXTREL; then $(textrel_found); fi
 modules = i386 sh x86_64 ia64 alpha arm aarch64 sparc ppc ppc64 s390 \
-	  tilegx
+	  tilegx m68k bpf
 
 libebl_pic = libebl_i386_pic.a libebl_sh_pic.a libebl_x86_64_pic.a    \
 	     libebl_ia64_pic.a libebl_alpha_pic.a libebl_arm_pic.a    \
 	     libebl_aarch64_pic.a libebl_sparc_pic.a libebl_ppc_pic.a \
-	     libebl_ppc64_pic.a libebl_s390_pic.a libebl_tilegx_pic.a
+	     libebl_ppc64_pic.a libebl_s390_pic.a libebl_tilegx_pic.a \
+	     libebl_m68k_pic.a libebl_bpf_pic.a
 
 noinst_LIBRARIES = $(libebl_pic)
 noinst_DATA = $(libebl_pic:_pic.a=.so)
@@ -504,6 +518,17 @@ tilegx_SRCS = tilegx_init.c tilegx_symbol.c tilegx_regs.c \
 
 libebl_tilegx_pic_a_SOURCES = $(tilegx_SRCS)
 am_libebl_tilegx_pic_a_OBJECTS = $(tilegx_SRCS:.c=.os)
+m68k_SRCS = m68k_init.c m68k_symbol.c m68k_regs.c \
+	    m68k_retval.c m68k_corenote.c
+
+libebl_m68k_pic_a_SOURCES = $(m68k_SRCS)
+am_libebl_m68k_pic_a_OBJECTS = $(m68k_SRCS:.c=.os)
+bpf_SRCS = bpf_init.c bpf_regs.c
+@HAVE_LINUX_BPF_H_FALSE@cpu_bpf = 
+# The disam hook depends on this if we have linux/bpf.h.
+@HAVE_LINUX_BPF_H_TRUE@cpu_bpf = ../libcpu/libcpu_bpf.a
+libebl_bpf_pic_a_SOURCES = $(bpf_SRCS)
+am_libebl_bpf_pic_a_OBJECTS = $(bpf_SRCS:.c=.os)
 noinst_HEADERS = libebl_CPU.h common-reloc.c linux-core-note.c x86_corenote.c
 EXTRA_DIST = $(foreach m,$(modules),$($(m)_SRCS)) $(modules:=_reloc.def)
 all: all-am
@@ -559,6 +584,11 @@ libebl_arm_pic.a: $(libebl_arm_pic_a_OBJECTS) $(libebl_arm_pic_a_DEPENDENCIES) $
 	$(AM_V_AR)$(libebl_arm_pic_a_AR) libebl_arm_pic.a $(libebl_arm_pic_a_OBJECTS) $(libebl_arm_pic_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libebl_arm_pic.a
 
+libebl_bpf_pic.a: $(libebl_bpf_pic_a_OBJECTS) $(libebl_bpf_pic_a_DEPENDENCIES) $(EXTRA_libebl_bpf_pic_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libebl_bpf_pic.a
+	$(AM_V_AR)$(libebl_bpf_pic_a_AR) libebl_bpf_pic.a $(libebl_bpf_pic_a_OBJECTS) $(libebl_bpf_pic_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libebl_bpf_pic.a
+
 libebl_i386_pic.a: $(libebl_i386_pic_a_OBJECTS) $(libebl_i386_pic_a_DEPENDENCIES) $(EXTRA_libebl_i386_pic_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libebl_i386_pic.a
 	$(AM_V_AR)$(libebl_i386_pic_a_AR) libebl_i386_pic.a $(libebl_i386_pic_a_OBJECTS) $(libebl_i386_pic_a_LIBADD)
@@ -568,6 +598,11 @@ libebl_ia64_pic.a: $(libebl_ia64_pic_a_OBJECTS) $(libebl_ia64_pic_a_DEPENDENCIES
 	$(AM_V_at)-rm -f libebl_ia64_pic.a
 	$(AM_V_AR)$(libebl_ia64_pic_a_AR) libebl_ia64_pic.a $(libebl_ia64_pic_a_OBJECTS) $(libebl_ia64_pic_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libebl_ia64_pic.a
+
+libebl_m68k_pic.a: $(libebl_m68k_pic_a_OBJECTS) $(libebl_m68k_pic_a_DEPENDENCIES) $(EXTRA_libebl_m68k_pic_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libebl_m68k_pic.a
+	$(AM_V_AR)$(libebl_m68k_pic_a_AR) libebl_m68k_pic.a $(libebl_m68k_pic_a_OBJECTS) $(libebl_m68k_pic_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libebl_m68k_pic.a
 
 libebl_ppc64_pic.a: $(libebl_ppc64_pic_a_OBJECTS) $(libebl_ppc64_pic_a_DEPENDENCIES) $(EXTRA_libebl_ppc64_pic_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libebl_ppc64_pic.a
@@ -632,6 +667,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arm_regs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arm_retval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arm_symbol.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bpf_init.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bpf_regs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386_auxv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386_cfi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386_corenote.Po@am__quote@
@@ -645,6 +682,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ia64_regs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ia64_retval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ia64_symbol.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m68k_corenote.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m68k_init.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m68k_regs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m68k_retval.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m68k_symbol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc64_corenote.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc64_init.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc64_resolve_sym.Po@am__quote@
@@ -939,6 +981,7 @@ libebl_%.so libebl_%.map: libebl_%_pic.a $(libelf) $(libdw)
 
 libebl_i386.so: $(cpu_i386)
 libebl_x86_64.so: $(cpu_x86_64)
+libebl_bpf.so: $(cpu_bpf)
 
 install: install-am install-ebl-modules
 install-ebl-modules:

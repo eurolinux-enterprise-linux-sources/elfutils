@@ -1,11 +1,12 @@
 # -*- rpm-spec-*-
-Summary: A collection of utilities and DSOs to handle compiled objects
+Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 Name: elfutils
-Version: 0.166
+Version: 0.168
 Release: 1
+URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Group: Development/Tools
-Source: elfutils-%{version}.tar.bz2
+Source: ftp://sourceware.org/pub/elfutils/%{version}/elfutils-%{version}.tar.bz2
 Obsoletes: libelf libelf-devel
 Requires: elfutils-libelf = %{version}-%{release}
 Requires: glibc >= 2.7
@@ -134,7 +135,6 @@ chmod +x ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/elfutils/lib*.so*
 
 # XXX Nuke unpackaged files
 { cd ${RPM_BUILD_ROOT}
-  rm -f .%{_bindir}/eu-ld
   rm -f .%{_includedir}/elfutils/libasm.h
   rm -f .%{_libdir}/libasm.so
   rm -f .%{_libdir}/libasm.a
@@ -176,7 +176,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_bindir}/eu-ar
 %{_bindir}/eu-unstrip
 %{_bindir}/eu-make-debug-archive
-#%{_bindir}/eu-ld
 %{_bindir}/eu-elfcompress
 %{_libdir}/libasm-%{version}.so
 %{_libdir}/libdw-%{version}.so
@@ -228,7 +227,22 @@ rm -rf ${RPM_BUILD_ROOT}
 %config(noreplace) %{_sysctldir}/10-default-yama-scope.conf
 
 %changelog
-* Thu Mar 31 2016 Mark Wielaard <mark@gmail.com> 0.166-1
+* Tue Dec 27 2016 Mark Wielaard <mark@klomp.org> 0.168-1
+- http://elfutils.org/ is now hosted at http://sourceware.org/elfutils/
+- libelf: gelf_newehdr and gelf_newehdr now return void *.
+- libdw: dwarf.h corrected the DW_LANG_PLI constant name (was DW_LANG_PL1).
+- readelf: Add optional --symbols[=SECTION] argument to select section name.
+
+* Thu Aug  4 2016 Mark Wielaard <mjw@redhat.com> 0.167-1
+- libasm: Add eBPF disassembler for EM_BPF files.
+- backends: Add m68k and BPF backends.
+- ld: Removed.
+- dwelf: Add ELF/DWARF string table creation functions.
+  dwelf_strtab_init, dwelf_strtab_add, dwelf_strtab_add_len,
+  dwelf_strtab_finalize, dwelf_strent_off, dwelf_strent_str and
+  dwelf_strtab_free.
+
+* Thu Mar 31 2016 Mark Wielaard <mjw@redhat.com> 0.166-1
 - config: The default program prefix for the installed tools is now
   eu-. Use configure --program-prefix="" to not use a program prefix.
 

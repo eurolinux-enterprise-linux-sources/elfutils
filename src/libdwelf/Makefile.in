@@ -114,7 +114,7 @@ libdwelf_a_LIBADD =
 am_libdwelf_a_OBJECTS = dwelf_elf_gnu_debuglink.$(OBJEXT) \
 	dwelf_dwarf_gnu_debugaltlink.$(OBJEXT) \
 	dwelf_elf_gnu_build_id.$(OBJEXT) \
-	dwelf_scn_gnu_compressed_size.$(OBJEXT)
+	dwelf_scn_gnu_compressed_size.$(OBJEXT) dwelf_strtab.$(OBJEXT)
 libdwelf_a_OBJECTS = $(am_libdwelf_a_OBJECTS)
 libdwelf_pic_a_AR = $(AR) $(ARFLAGS)
 libdwelf_pic_a_LIBADD =
@@ -292,7 +292,6 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 argp_LDADD = @argp_LDADD@
-base_cpu = @base_cpu@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -352,10 +351,12 @@ ARFLAGS = cr
 @HAVE_DUPLICATED_COND_WARNING_TRUE@DUPLICATED_COND_WARNING = -Wduplicated-cond
 @HAVE_NULL_DEREFERENCE_WARNING_FALSE@NULL_DEREFERENCE_WARNING = 
 @HAVE_NULL_DEREFERENCE_WARNING_TRUE@NULL_DEREFERENCE_WARNING = -Wnull-dereference
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_FALSE@IMPLICIT_FALLTHROUGH_WARNING = 
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough
 AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	    -Wold-style-definition -Wstrict-prototypes \
 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
-	    $(NULL_DEREFERENCE_WARNING) \
+	    $(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
 	    $(if $($(*F)_no_Werror),,-Werror) \
 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
@@ -372,7 +373,8 @@ noinst_LIBRARIES = libdwelf.a libdwelf_pic.a
 pkginclude_HEADERS = libdwelf.h
 noinst_HEADERS = libdwelfP.h
 libdwelf_a_SOURCES = dwelf_elf_gnu_debuglink.c dwelf_dwarf_gnu_debugaltlink.c \
-		     dwelf_elf_gnu_build_id.c dwelf_scn_gnu_compressed_size.c
+		     dwelf_elf_gnu_build_id.c dwelf_scn_gnu_compressed_size.c \
+		     dwelf_strtab.c
 
 libdwelf = $(libdw)
 libdw = ../libdw/libdw.so
@@ -439,6 +441,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwelf_elf_gnu_build_id.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwelf_elf_gnu_debuglink.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwelf_scn_gnu_compressed_size.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwelf_strtab.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

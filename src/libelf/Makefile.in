@@ -357,7 +357,6 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 argp_LDADD = @argp_LDADD@
-base_cpu = @base_cpu@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -415,11 +414,14 @@ ARFLAGS = cr
 @HAVE_DUPLICATED_COND_WARNING_TRUE@DUPLICATED_COND_WARNING = -Wduplicated-cond
 @HAVE_NULL_DEREFERENCE_WARNING_FALSE@NULL_DEREFERENCE_WARNING = 
 @HAVE_NULL_DEREFERENCE_WARNING_TRUE@NULL_DEREFERENCE_WARNING = -Wnull-dereference
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_FALSE@IMPLICIT_FALLTHROUGH_WARNING = 
+@HAVE_IMPLICIT_FALLTHROUGH_WARNING_TRUE@IMPLICIT_FALLTHROUGH_WARNING = -Wimplicit-fallthrough
 AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
 	-Wold-style-definition -Wstrict-prototypes \
 	$(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
-	$(NULL_DEREFERENCE_WARNING) $(if $($(*F)_no_Werror),,-Werror) \
-	$(if $($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
+	$(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+	$(if $($(*F)_no_Werror),,-Werror) $(if \
+	$($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
 	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
 	$($(*F)_CFLAGS) $(am__append_2)
 COMPILE.os = $(filter-out -fprofile-arcs -ftest-coverage, $(COMPILE))

@@ -53,7 +53,7 @@ check_PROGRAMS = arextract arsymtest newfile saridx scnnames sectiondump \
 		  buildid deleted deleted-lib.so aggregate_size vdsosyms \
 		  getsrc_die strptr newdata elfstrtab dwfl-proc-attach \
 		  elfshphehdr elfstrmerge dwelfgnucompressed elfgetchdr \
-		  elfgetzdata elfputzdata zstrptr
+		  elfgetzdata elfputzdata zstrptr emptyfile vendorelf
 
 asm_TESTS = asm-tst1 asm-tst2 asm-tst3 asm-tst4 asm-tst5 \
 	    asm-tst6 asm-tst7 asm-tst8 asm-tst9
@@ -78,11 +78,11 @@ TESTS = run-arextract.sh run-arsymtest.sh newfile test-nlist \
 	newscn run-strip-test.sh run-strip-test2.sh \
 	run-strip-test3.sh run-strip-test4.sh run-strip-test5.sh \
 	run-strip-test6.sh run-strip-test7.sh run-strip-test8.sh \
-	run-strip-test9.sh run-strip-test10.sh \
+	run-strip-test9.sh run-strip-test10.sh run-strip-test11.sh \
 	run-strip-groups.sh run-strip-reloc.sh run-strip-strmerge.sh \
 	run-strip-nobitsalign.sh \
-	run-unstrip-test.sh run-unstrip-test2.sh \
-	run-unstrip-test3.sh run-unstrip-M.sh run-elfstrmerge-test.sh \
+	run-unstrip-test.sh run-unstrip-test2.sh run-unstrip-test3.sh \
+	run-unstrip-test4.sh run-unstrip-M.sh run-elfstrmerge-test.sh \
 	run-ecp-test.sh run-ecp-test2.sh run-alldts.sh \
 	run-elflint-test.sh run-elflint-self.sh run-ranlib-test.sh \
 	run-ranlib-test2.sh run-ranlib-test3.sh run-ranlib-test4.sh \
@@ -126,7 +126,8 @@ TESTS = run-arextract.sh run-arsymtest.sh newfile test-nlist \
 	run-elfgetchdr.sh \
 	run-elfgetzdata.sh run-elfputzdata.sh run-zstrptr.sh \
 	run-compress-test.sh \
-	run-readelf-zdebug.sh run-readelf-zdebug-rel.sh
+	run-readelf-zdebug.sh run-readelf-zdebug-rel.sh \
+	emptyfile vendorelf
 
 if !BIARCH
 export ELFUTILS_DISABLE_BIARCH = 1
@@ -148,6 +149,9 @@ endif
 if HAVE_LIBASM
 check_PROGRAMS += $(asm_TESTS)
 TESTS += $(asm_TESTS)
+if HAVE_LINUX_BPF_H
+TESTS += run-disasm-bpf.sh
+endif
 endif
 
 EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
@@ -163,14 +167,17 @@ EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
 	     run-line2addr.sh run-elflint-test.sh testfile14.bz2 \
 	     run-strip-test4.sh run-strip-test5.sh run-strip-test6.sh \
 	     run-strip-test7.sh run-strip-test8.sh run-strip-groups.sh \
-	     run-strip-test9.sh run-strip-test10.sh run-strip-strmerge.sh \
-	     run-strip-nobitsalign.sh \
+	     run-strip-test9.sh run-strip-test10.sh run-strip-test11.sh \
+	     run-strip-strmerge.sh run-strip-nobitsalign.sh \
 	     testfile-nobitsalign.bz2 testfile-nobitsalign.strip.bz2 \
 	     run-strip-reloc.sh hello_i386.ko.bz2 hello_x86_64.ko.bz2 \
 	     hello_ppc64.ko.bz2 hello_s390.ko.bz2 hello_aarch64.ko.bz2 \
+	     hello_m68k.ko.bz2 \
 	     run-unstrip-test.sh run-unstrip-test2.sh \
 	     testfile-info-link.bz2 testfile-info-link.debuginfo.bz2 \
 	     testfile-info-link.stripped.bz2 run-unstrip-test3.sh \
+	     run-unstrip-test4.sh testfile-strtab.bz2 \
+	     testfile-strtab.stripped.bz2 testfile-strtab.debuginfo.bz2 \
 	     run-unstrip-M.sh run-elfstrmerge-test.sh \
 	     run-elflint-self.sh run-ranlib-test.sh run-ranlib-test2.sh \
 	     run-ranlib-test3.sh run-ranlib-test4.sh \
@@ -310,6 +317,7 @@ EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
 	     run-aggregate-size.sh testfile-sizes1.o.bz2 testfile-sizes2.o.bz2 \
 	     testfile-sizes3.o.bz2 \
 	     run-readelf-A.sh testfileppc32attrs.o.bz2 \
+	     testfilesparc64attrs.o.bz2 \
 	     testfile-debug-types.bz2 \
 	     run-getsrc-die.sh run-strptr.sh \
 	     testfile-x32-core.bz2 testfile-x32.bz2 \
@@ -322,7 +330,10 @@ EXTRA_DIST = run-arextract.sh run-arsymtest.sh \
 	     testfile-zgabi32.bz2 testfile-zgabi64.bz2 \
 	     testfile-zgabi32be.bz2 testfile-zgabi64be.bz2 \
 	     run-elfgetchdr.sh run-elfgetzdata.sh run-elfputzdata.sh \
-	     run-zstrptr.sh run-compress-test.sh
+	     run-zstrptr.sh run-compress-test.sh \
+	     run-disasm-bpf.sh \
+	     testfile-bpf-dis1.expect.bz2 testfile-bpf-dis1.o.bz2 \
+	     testfile-m68k-core.bz2 testfile-m68k.bz2 testfile-m68k-s.bz2
 
 if USE_VALGRIND
 valgrind_cmd='valgrind -q --leak-check=full --error-exitcode=1'
@@ -398,8 +409,8 @@ early_offscn_LDADD = $(libelf)
 ecp_LDADD = $(libelf)
 update1_LDADD = $(libelf)
 update2_LDADD = $(libelf)
-update3_LDADD = $(libebl) $(libelf)
-update4_LDADD = $(libebl) $(libelf)
+update3_LDADD = $(libdw) $(libelf)
+update4_LDADD = $(libdw) $(libelf)
 show_die_info_LDADD = $(libdw) $(libelf)
 get_pubnames_LDADD = $(libdw) $(libelf)
 show_abbrev_LDADD = $(libdw) $(libelf)
@@ -414,15 +425,15 @@ funcretval_LDADD = $(libdw) $(argp_LDADD)
 allregs_LDADD = $(libdw) $(argp_LDADD)
 find_prologues_LDADD = $(libdw) $(argp_LDADD)
 #show_ciefde_LDADD = ../libdwarf/libdwarf.so $(libelf)
-asm_tst1_LDADD = $(libasm) $(libebl) $(libelf) -ldl
-asm_tst2_LDADD = $(libasm) $(libebl) $(libelf) -ldl
-asm_tst3_LDADD = $(libasm) $(libebl) $(libelf) -ldl
-asm_tst4_LDADD = $(libasm) $(libebl) $(libelf) -ldl
-asm_tst5_LDADD = $(libasm) $(libebl) $(libelf) -ldl
-asm_tst6_LDADD = $(libasm) $(libebl) $(libelf) -ldl
-asm_tst7_LDADD = $(libasm) $(libebl) $(libelf) -ldl
-asm_tst8_LDADD = $(libasm) $(libebl) $(libelf) -ldl
-asm_tst9_LDADD = $(libasm) $(libebl) $(libelf) -ldl
+asm_tst1_LDADD = $(libasm) $(libebl) $(libelf) $(libdw) -ldl
+asm_tst2_LDADD = $(libasm) $(libebl) $(libelf) $(libdw) -ldl
+asm_tst3_LDADD = $(libasm) $(libebl) $(libelf) $(libdw) -ldl
+asm_tst4_LDADD = $(libasm) $(libebl) $(libelf) $(libdw) -ldl
+asm_tst5_LDADD = $(libasm) $(libebl) $(libelf) $(libdw) -ldl
+asm_tst6_LDADD = $(libasm) $(libebl) $(libelf) $(libdw) -ldl
+asm_tst7_LDADD = $(libasm) $(libebl) $(libelf) $(libdw) -ldl
+asm_tst8_LDADD = $(libasm) $(libebl) $(libelf) $(libdw) -ldl
+asm_tst9_LDADD = $(libasm) $(libebl) $(libelf) $(libdw) -ldl
 dwflmodtest_LDADD = $(libdw) $(libebl) $(libelf) $(argp_LDADD) -ldl
 rdwrmmap_LDADD = $(libelf)
 dwfl_bug_addr_overflow_LDADD = $(libdw) $(libebl) $(libelf) -ldl
@@ -437,7 +448,7 @@ dwarf_getstring_LDADD = $(libdw)
 addrcfi_LDADD = $(libdw) $(libebl) $(libelf) $(argp_LDADD) -ldl
 test_flag_nobits_LDADD = $(libelf)
 rerequest_tag_LDADD = $(libdw)
-alldts_LDADD = $(libebl) $(libelf)
+alldts_LDADD = $(libdw) $(libelf)
 md5_sha1_test_LDADD = $(libeu)
 typeiter_LDADD = $(libdw) $(libelf)
 typeiter2_LDADD = $(libdw) $(libelf)
@@ -470,12 +481,14 @@ elfstrtab_LDADD = $(libelf)
 dwfl_proc_attach_LDADD = $(libdw)
 dwfl_proc_attach_LDFLAGS = -pthread $(AM_LDFLAGS)
 elfshphehdr_LDADD =$(libelf)
-elfstrmerge_LDADD = $(libebl) $(libelf)
+elfstrmerge_LDADD = $(libdw) $(libelf)
 dwelfgnucompressed_LDADD = $(libelf) $(libdw)
 elfgetchdr_LDADD = $(libelf) $(libdw)
 elfgetzdata_LDADD = $(libelf)
 elfputzdata_LDADD = $(libelf)
 zstrptr_LDADD = $(libelf)
+emptyfile_LDADD = $(libelf)
+vendorelf_LDADD = $(libelf)
 
 # We want to test the libelf header against the system elf.h header.
 # Don't include any -I CPPFLAGS.

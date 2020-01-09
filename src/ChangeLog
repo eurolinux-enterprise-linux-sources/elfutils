@@ -1,3 +1,58 @@
+2016-12-27  Mark Wielaard  <mark@klomp.org>
+
+	* configure.ac: Set version to 0.168.
+	* NEWS: Add 0.168 updates.
+
+2016-12-24  Mark Wielaard  <mark@klomp.org>
+
+	* README: Move design notes to NOTES. Add URLs for home, releases,
+	bugs, git and mailinglist now on sourceware.
+	* NOTES: Add notes from README.
+	* CONTRIBUTING: Change fedorahosted.org references to new
+	sourceware.org locations.
+	* configure.ac (AC_INIT): Add package URL http://elfutils.org/
+	change bug-report to https://sourceware.org/bugzilla/
+	(AC_COPYRIGHT): Set to the elfutils developers.
+
+2016-11-23  Mark Wielaard  <mjw@redhat.com>
+
+	* configure.ac: Add test for bad fts.h. Add -DBAD_FTS=1 to CFLAGS
+	if necessary.
+
+2016-11-02  Mark Wielaard  <mjw@redhat.com>
+
+	* configure.ac: Add check for whether gcc accepts
+	-Wimplict-fallthrough.
+
+2016-10-11  Akihiko Odaki  <akihiko.odaki.4i@stu.hosei.ac.jp>
+
+	* configure.ac: Add memrchr, rawmemchr and powerof2 checks.
+
+2016-08-04  Mark Wielaard  <mjw@redhat.com>
+
+	* configure.ac: Set version to 0.167.
+	* NEWS: Add 0.167 section.
+
+2016-07-06  Mark Wielaard  <mjw@redhat.com>
+
+	* .gitignore: Remove src/ld. ldlex.c, ldscript.c and ldscript.h.
+	* configure.ac (enable generic): Removed.
+
+2016-06-28  Richard Henderson <rth@redhat.com>
+
+	* configure.ac (HAVE_LINUX_BPF_H): New test and conditional.
+
+2016-06-10  Mark Wielaard  <mjw@redhat.com>
+
+	* CONTRIBUTING: Extend patch, committer and maintainer guidelines.
+
+2016-05-02  Filipe Brandenburger  <filbranden@google.com>
+
+	* configure.ac (argp check): Pass pass &argv.
+	* configure.ac (-W<...> checks): Pass -Werror to the warning checks,
+	to ensure unsupported warning options are noticed during ./configure
+	time and not only later during build.
+
 2016-03-31  Mark Wielaard  <mjw@redhat.com>
 
 	* configure.ac: Set version to 0.166.

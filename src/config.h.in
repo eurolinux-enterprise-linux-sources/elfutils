@@ -6,8 +6,23 @@
 /* Should ar and ranlib use -D behavior by default? */
 #undef DEFAULT_AR_DETERMINISTIC
 
+/* Define to 1 if you have the declaration of `memrchr', and to 0 if you
+   don't. */
+#undef HAVE_DECL_MEMRCHR
+
+/* Define to 1 if you have the declaration of `powerof2', and to 0 if you
+   don't. */
+#undef HAVE_DECL_POWEROF2
+
+/* Define to 1 if you have the declaration of `rawmemchr', and to 0 if you
+   don't. */
+#undef HAVE_DECL_RAWMEMCHR
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <linux/bpf.h> header file. */
+#undef HAVE_LINUX_BPF_H
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -41,9 +56,6 @@
 
 /* Identifier for modules in the build. */
 #undef MODVERSION
-
-/* Define to 32 or 64 if a specific implementation is wanted. */
-#undef NATIVE_ELF
 
 /* Name of package */
 #undef PACKAGE
