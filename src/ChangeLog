@@ -1,3 +1,72 @@
+2014-12-18  Mark Wielaard  <mjw@redhat.com>
+
+	* configure.ac: Set version to 0.161.
+	* NEWS: Add dwarf.h additions.
+
+2014-12-15  Josh Stone  <jistone@redhat.com>
+
+	* .gitignore: Add config/compile as installed by automake 1.14.
+
+2014-11-27  Mark Wielaard  <mjw@redhat.com>
+
+	* configure.ac: Add --disable-textrelcheck.
+
+2014-10-06  Mark Wielaard  <mjw@redhat.com>
+
+	* NEWS: New section 0.161. Add dwarf_peel_type.
+
+2014-08-25  Mark Wielaard  <mjw@redhat.com>
+
+	* configure.ac: Set version to 0.160.
+	* NEWS: Add removal of DW_TAG_mutable_type, LZMA .ko.xz kernel
+	module support, ARM THUMB functions and ppc64le ELFv2 abi backends.
+
+2014-08-15  Mark Wielaard  <mjw@redhat.com>
+
+	* NEWS: Add dwarf_cu_die.
+
+2014-08-15  Mark Wielaard  <mjw@redhat.com>
+
+	* NEWS: Add dwarf_cu_getdwarf.
+
+2014-07-18  Mark Wielaard  <mjw@redhat.com>
+
+	* configure.ac (AC_CHECK_TYPE): Test for struct user_regs_struct.
+
+2014-05-26  Mark Wielaard  <mjw@redhat.com>
+
+	* NEWS: New section 0.160. Add unstrip --force.
+
+2014-05-17  Mark Wielaard  <mjw@redhat.com>
+
+	* configure.ac: Set version to 0.159.
+	* NEWS: Add entries for version 0.159.
+
+2014-05-02  Mark Wielaard  <mjw@redhat.com>
+
+	* NEWS: Add note about dwz support no longer being experimental and
+	new helper functions.
+	* configure.ac: Remove --enable-dwz.
+	* Makefile.am (DISTCHECK_CONFIGURE_FLAGS): Remove --enable-dwz.
+
+2014-04-11  Mark Wielaard  <mjw@redhat.com>
+
+	* Makefile.am (SUBDIRS): Add libdwelf.
+	* configure.ac (AC_CONFIG_FILES): Add libdwelf/Makefile.
+	* NEWS: Add note about libdwelf.
+
+2014-04-13  Mark Wielaard  <mjw@redhat.com>
+
+	* configure.ac: Remove mudflap enable arg and MUDFLAP conditional.
+
+2014-01-21  Mark Wielaard  <mjw@redhat.com>
+
+	* NEWS (Version 0.159): Add stack -i.
+
+2014-01-20  Mark Wielaard  <mjw@redhat.com>
+
+	* NEWS (Version 0.159): New. Add stack -d.
+
 2014-01-03  Mark Wielaard  <mjw@redhat.com>
 
 	* configure.ac: Set version to 0.158.

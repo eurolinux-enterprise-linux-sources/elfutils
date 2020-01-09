@@ -1,5 +1,5 @@
 /* Discard section not used at runtime from object files.
-   Copyright (C) 2000-2012 Red Hat, Inc.
+   Copyright (C) 2000-2012, 2014 Red Hat, Inc.
    This file is part of elfutils.
    Written by Ulrich Drepper <drepper@redhat.com>, 2000.
 
@@ -502,6 +502,11 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
     error (EXIT_FAILURE, 0,
 	   gettext ("cannot get section header string table index"));
 
+  /* Get the number of phdrs in the old file.  */
+  size_t phnum;
+  if (elf_getphdrnum (elf, &phnum) != 0)
+    error (EXIT_FAILURE, 0, gettext ("cannot get number of phdrs"));
+
   /* We now create a new ELF descriptor for the same file.  We
      construct it almost exactly in the same way with some information
      dropped.  */
@@ -513,7 +518,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 
   if (unlikely (gelf_newehdr (newelf, gelf_getclass (elf)) == 0)
       || (ehdr->e_type != ET_REL
-	  && unlikely (gelf_newphdr (newelf, ehdr->e_phnum) == 0)))
+	  && unlikely (gelf_newphdr (newelf, phnum) == 0)))
     {
       error (0, 0, gettext ("cannot create new file '%s': %s"),
 	     output_fname, elf_errmsg (-1));
@@ -522,7 +527,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 
   /* Copy over the old program header if needed.  */
   if (ehdr->e_type != ET_REL)
-    for (cnt = 0; cnt < ehdr->e_phnum; ++cnt)
+    for (cnt = 0; cnt < phnum; ++cnt)
       {
 	GElf_Phdr phdr_mem;
 	GElf_Phdr *phdr = gelf_getphdr (elf, cnt, &phdr_mem);
@@ -537,7 +542,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
       debugelf = elf_begin (debug_fd, ELF_C_WRITE_MMAP, NULL);
       if (unlikely (gelf_newehdr (debugelf, gelf_getclass (elf)) == 0)
 	  || (ehdr->e_type != ET_REL
-	      && unlikely (gelf_newphdr (debugelf, ehdr->e_phnum) == 0)))
+	      && unlikely (gelf_newphdr (debugelf, phnum) == 0)))
 	{
 	  error (0, 0, gettext ("cannot create new file '%s': %s"),
 		 debug_fname, elf_errmsg (-1));
@@ -546,7 +551,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 
       /* Copy over the old program header if needed.  */
       if (ehdr->e_type != ET_REL)
-	for (cnt = 0; cnt < ehdr->e_phnum; ++cnt)
+	for (cnt = 0; cnt < phnum; ++cnt)
 	  {
 	    GElf_Phdr phdr_mem;
 	    GElf_Phdr *phdr = gelf_getphdr (elf, cnt, &phdr_mem);
@@ -564,6 +569,11 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	     elf_errmsg (-1));
       goto fail_close;
     }
+
+  if (shstrndx >= shnum)
+    goto illformed;
+
+#define elf_assert(test) do { if (!(test)) goto illformed; } while (0)
 
   /* Storage for section information.  We leave room for two more
      entries since we unconditionally create a section header string
@@ -586,7 +596,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
     {
       /* This should always be true (i.e., there should not be any
 	 holes in the numbering).  */
-      assert (elf_ndxscn (scn) == cnt);
+      elf_assert (elf_ndxscn (scn) == cnt);
 
       shdr_info[cnt].scn = scn;
 
@@ -599,6 +609,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 					shdr_info[cnt].shdr.sh_name);
       if (shdr_info[cnt].name == NULL)
 	{
+	illformed:
 	  error (0, 0, gettext ("illformed file '%s'"), fname);
 	  goto fail_close;
 	}
@@ -608,6 +619,8 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 
       /* Remember the shdr.sh_link value.  */
       shdr_info[cnt].old_sh_link = shdr_info[cnt].shdr.sh_link;
+      if (shdr_info[cnt].old_sh_link >= shnum)
+	goto illformed;
 
       /* Sections in files other than relocatable object files which
 	 are not loaded can be freely moved by us.  In relocatable
@@ -620,7 +633,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	 appropriate reference.  */
       if (unlikely (shdr_info[cnt].shdr.sh_type == SHT_SYMTAB_SHNDX))
 	{
-	  assert (shdr_info[shdr_info[cnt].shdr.sh_link].symtab_idx == 0);
+	  elf_assert (shdr_info[shdr_info[cnt].shdr.sh_link].symtab_idx == 0);
 	  shdr_info[shdr_info[cnt].shdr.sh_link].symtab_idx = cnt;
 	}
       else if (unlikely (shdr_info[cnt].shdr.sh_type == SHT_GROUP))
@@ -637,7 +650,12 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	  for (inner = 1;
 	       inner < shdr_info[cnt].data->d_size / sizeof (Elf32_Word);
 	       ++inner)
-	    shdr_info[grpref[inner]].group_idx = cnt;
+	    {
+	      if (grpref[inner] < shnum)
+		shdr_info[grpref[inner]].group_idx = cnt;
+	      else
+		goto illformed;
+	    }
 
 	  if (inner == 1 || (inner == 2 && (grpref[0] & GRP_COMDAT) == 0))
 	    /* If the section group contains only one element and this
@@ -648,7 +666,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	}
       else if (unlikely (shdr_info[cnt].shdr.sh_type == SHT_GNU_versym))
 	{
-	  assert (shdr_info[shdr_info[cnt].shdr.sh_link].version_idx == 0);
+	  elf_assert (shdr_info[shdr_info[cnt].shdr.sh_link].version_idx == 0);
 	  shdr_info[shdr_info[cnt].shdr.sh_link].version_idx = cnt;
 	}
 
@@ -656,7 +674,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	 discarded right away.  */
       if ((shdr_info[cnt].shdr.sh_flags & SHF_GROUP) != 0)
 	{
-	  assert (shdr_info[cnt].group_idx != 0);
+	  elf_assert (shdr_info[cnt].group_idx != 0);
 
 	  if (shdr_info[shdr_info[cnt].group_idx].idx == 0)
 	    {
@@ -732,10 +750,14 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	    {
 	      /* If a relocation section is marked as being removed make
 		 sure the section it is relocating is removed, too.  */
-	      if ((shdr_info[cnt].shdr.sh_type == SHT_REL
+	      if (shdr_info[cnt].shdr.sh_type == SHT_REL
 		   || shdr_info[cnt].shdr.sh_type == SHT_RELA)
-		  && shdr_info[shdr_info[cnt].shdr.sh_info].idx != 0)
-		shdr_info[cnt].idx = 1;
+		{
+		  if (shdr_info[cnt].shdr.sh_info >= shnum)
+		    goto illformed;
+		  else if (shdr_info[shdr_info[cnt].shdr.sh_info].idx != 0)
+		    shdr_info[cnt].idx = 1;
+		}
 
 	      /* If a group section is marked as being removed make
 		 sure all the sections it contains are being removed, too.  */
@@ -779,7 +801,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 		  if (shdr_info[cnt].symtab_idx != 0
 		      && shdr_info[shdr_info[cnt].symtab_idx].data == NULL)
 		    {
-		      assert (shdr_info[cnt].shdr.sh_type == SHT_SYMTAB);
+		      elf_assert (shdr_info[cnt].shdr.sh_type == SHT_SYMTAB);
 
 		      shdr_info[shdr_info[cnt].symtab_idx].data
 			= elf_getdata (shdr_info[shdr_info[cnt].symtab_idx].scn,
@@ -819,6 +841,9 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 		      else if (scnidx == SHN_XINDEX)
 			scnidx = xndx;
 
+		      if (scnidx >= shnum)
+			goto illformed;
+
 		      if (shdr_info[scnidx].idx == 0)
 			/* This symbol table has a real symbol in
 			   a discarded section.  So preserve the
@@ -849,11 +874,15 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 		}
 
 	      /* Handle references through sh_info.  */
-	      if (SH_INFO_LINK_P (&shdr_info[cnt].shdr)
-		  && shdr_info[shdr_info[cnt].shdr.sh_info].idx == 0)
+	      if (SH_INFO_LINK_P (&shdr_info[cnt].shdr))
 		{
-		  shdr_info[shdr_info[cnt].shdr.sh_info].idx = 1;
-		  changes |= shdr_info[cnt].shdr.sh_info < cnt;
+		  if (shdr_info[cnt].shdr.sh_info >= shnum)
+		    goto illformed;
+		  else if ( shdr_info[shdr_info[cnt].shdr.sh_info].idx == 0)
+		    {
+		      shdr_info[shdr_info[cnt].shdr.sh_info].idx = 1;
+		      changes |= shdr_info[cnt].shdr.sh_info < cnt;
+		    }
 		}
 
 	      /* Mark the section as investigated.  */
@@ -995,7 +1024,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	  error (EXIT_FAILURE, 0, gettext ("while generating output file: %s"),
 		 elf_errmsg (-1));
 
-	assert (elf_ndxscn (shdr_info[cnt].newscn) == shdr_info[cnt].idx);
+	elf_assert (elf_ndxscn (shdr_info[cnt].newscn) == shdr_info[cnt].idx);
 
 	/* Add this name to the section header string table.  */
 	shdr_info[cnt].se = ebl_strtabadd (shst, shdr_info[cnt].name, 0);
@@ -1032,7 +1061,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	error (EXIT_FAILURE, 0,
 	       gettext ("while create section header section: %s"),
 	       elf_errmsg (-1));
-      assert (elf_ndxscn (shdr_info[cnt].newscn) == shdr_info[cnt].idx);
+      elf_assert (elf_ndxscn (shdr_info[cnt].newscn) == shdr_info[cnt].idx);
 
       shdr_info[cnt].data = elf_newdata (shdr_info[cnt].newscn);
       if (shdr_info[cnt].data == NULL)
@@ -1089,7 +1118,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
     error (EXIT_FAILURE, 0,
 	   gettext ("while create section header section: %s"),
 	   elf_errmsg (-1));
-  assert (elf_ndxscn (shdr_info[cnt].newscn) == idx);
+  elf_assert (elf_ndxscn (shdr_info[cnt].newscn) == idx);
 
   /* Finalize the string table and fill in the correct indices in the
      section headers.  */
@@ -1179,20 +1208,20 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 		    shndxdata = elf_getdata (shdr_info[shdr_info[cnt].symtab_idx].scn,
 					     NULL);
 
-		    assert ((versiondata->d_size / sizeof (Elf32_Word))
+		    elf_assert ((versiondata->d_size / sizeof (Elf32_Word))
 			    >= shdr_info[cnt].data->d_size / elsize);
 		  }
 
 		if (shdr_info[cnt].version_idx != 0)
 		  {
-		    assert (shdr_info[cnt].shdr.sh_type == SHT_DYNSYM);
+		    elf_assert (shdr_info[cnt].shdr.sh_type == SHT_DYNSYM);
 		    /* This section has associated version
 		       information.  We have to modify that
 		       information, too.  */
 		    versiondata = elf_getdata (shdr_info[shdr_info[cnt].version_idx].scn,
 					       NULL);
 
-		    assert ((versiondata->d_size / sizeof (GElf_Versym))
+		    elf_assert ((versiondata->d_size / sizeof (GElf_Versym))
 			    >= shdr_info[cnt].data->d_size / elsize);
 		  }
 
@@ -1247,7 +1276,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 		      sec = shdr_info[sym->st_shndx].idx;
 		    else
 		      {
-			assert (shndxdata != NULL);
+			elf_assert (shndxdata != NULL);
 
 			sec = shdr_info[xshndx].idx;
 		      }
@@ -1268,7 +1297,7 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 			    nxshndx = sec;
 			  }
 
-			assert (sec < SHN_LORESERVE || shndxdata != NULL);
+			elf_assert (sec < SHN_LORESERVE || shndxdata != NULL);
 
 			if ((inner != destidx || nshndx != sym->st_shndx
 			     || (shndxdata != NULL && nxshndx != xshndx))
@@ -1295,9 +1324,11 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 		      {
 			size_t sidx = (sym->st_shndx != SHN_XINDEX
 					? sym->st_shndx : xshndx);
-			assert (GELF_ST_TYPE (sym->st_info) == STT_SECTION
-				|| (shdr_info[sidx].shdr.sh_type == SHT_GROUP
-				    && shdr_info[sidx].shdr.sh_info == inner));
+			elf_assert (GELF_ST_TYPE (sym->st_info) == STT_SECTION
+				    || ((shdr_info[sidx].shdr.sh_type
+					 == SHT_GROUP)
+					&& (shdr_info[sidx].shdr.sh_info
+					    == inner)));
 		      }
 		  }
 
@@ -1485,11 +1516,11 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 		  {
 		    GElf_Sym sym_mem;
 		    GElf_Sym *sym = gelf_getsym (symd, inner, &sym_mem);
-		    assert (sym != NULL);
+		    elf_assert (sym != NULL);
 
 		    const char *name = elf_strptr (elf, strshndx,
 						   sym->st_name);
-		    assert (name != NULL);
+		    elf_assert (name != NULL);
 		    size_t hidx = elf_hash (name) % nbucket;
 
 		    if (bucket[hidx] == 0)
@@ -1508,8 +1539,8 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 	    else
 	      {
 		/* Alpha and S390 64-bit use 64-bit SHT_HASH entries.  */
-		assert (shdr_info[cnt].shdr.sh_entsize
-			== sizeof (Elf64_Xword));
+		elf_assert (shdr_info[cnt].shdr.sh_entsize
+			    == sizeof (Elf64_Xword));
 
 		Elf64_Xword *bucket = (Elf64_Xword *) hashd->d_buf;
 
@@ -1539,11 +1570,11 @@ handle_elf (int fd, Elf *elf, const char *prefix, const char *fname,
 		  {
 		    GElf_Sym sym_mem;
 		    GElf_Sym *sym = gelf_getsym (symd, inner, &sym_mem);
-		    assert (sym != NULL);
+		    elf_assert (sym != NULL);
 
 		    const char *name = elf_strptr (elf, strshndx,
 						   sym->st_name);
-		    assert (name != NULL);
+		    elf_assert (name != NULL);
 		    size_t hidx = elf_hash (name) % nbucket;
 
 		    if (bucket[hidx] == 0)

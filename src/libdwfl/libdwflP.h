@@ -1,5 +1,5 @@
 /* Internal definitions for libdwfl.
-   Copyright (C) 2005-2013 Red Hat, Inc.
+   Copyright (C) 2005-2014 Red Hat, Inc.
    This file is part of elfutils.
 
    This file is free software; you can redistribute it and/or modify
@@ -35,12 +35,14 @@
 #include <libdwfl.h>
 #include <libebl.h>
 #include <assert.h>
+#include <dirent.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "../libdw/libdwP.h"	/* We need its INTDECLs.  */
+#include "../libdwelf/libdwelfP.h"
 
 typedef struct Dwfl_Process Dwfl_Process;
 
@@ -89,7 +91,8 @@ typedef struct Dwfl_Process Dwfl_Process;
   DWFL_ERROR (ATTACH_STATE_CONFLICT, N_("Dwfl already has attached state"))   \
   DWFL_ERROR (NO_ATTACH_STATE, N_("Dwfl has no attached state"))	      \
   DWFL_ERROR (NO_UNWIND, N_("Unwinding not supported for this architecture")) \
-  DWFL_ERROR (INVALID_ARGUMENT, N_("Invalid argument"))
+  DWFL_ERROR (INVALID_ARGUMENT, N_("Invalid argument"))			      \
+  DWFL_ERROR (NO_CORE_FILE, N_("Not an ET_CORE ELF file"))
 
 #define DWFL_ERROR(name, text) DWFL_E_##name,
 typedef enum { DWFL_ERRORS DWFL_E_NUM } Dwfl_Error;
@@ -108,6 +111,7 @@ struct Dwfl
   Dwfl_Module *modulelist;    /* List in order used by full traversals.  */
 
   Dwfl_Process *process;
+  Dwfl_Error attacherr;      /* Previous error attaching process.  */
 
   GElf_Addr offline_next_address;
 
@@ -180,6 +184,9 @@ struct Dwfl_Module
   Elf_Data *aux_symxndxdata;	/* Data in the extended auxiliary table. */
 
   Dwarf *dw;			/* libdw handle for its debugging info.  */
+  Dwarf *alt;			/* Dwarf used for dwarf_setalt, or NULL.  */
+  int alt_fd; 			/* descriptor, only valid when alt != NULL.  */
+  Elf *alt_elf; 		/* Elf for alt Dwarf.  */
 
   Dwfl_Error symerr;		/* Previous failure to load symbols.  */
   Dwfl_Error dwerr;		/* Previous failure to load DWARF.  */
@@ -204,6 +211,7 @@ struct Dwfl_Module
 
   int segment;			/* Index of first segment table entry.  */
   bool gc;			/* Mark/sweep flag.  */
+  bool is_executable;		/* Use Dwfl::executable_for_core?  */
 };
 
 /* This holds information common for all the threads/tasks/TIDs of one process
@@ -387,6 +395,39 @@ struct dwfl_arange
 };
 
 
+/* Structure used for keeping track of ptrace attaching a thread.
+   Shared by linux-pid-attach and linux-proc-maps.  If it has been setup
+   then get the instance through __libdwfl_get_pid_arg.  */
+struct __libdwfl_pid_arg
+{
+  DIR *dir;
+  /* It is 0 if not used.  */
+  pid_t tid_attached;
+  /* Valid only if TID_ATTACHED is not zero.  */
+  bool tid_was_stopped;
+  /* True if threads are ptrace stopped by caller.  */
+  bool assume_ptrace_stopped;
+};
+
+/* If DWfl is not NULL and a Dwfl_Process has been setup that has
+   Dwfl_Thread_Callbacks set to pid_thread_callbacks, then return the
+   callbacks_arg, which will be a struct __libdwfl_pid_arg.  Otherwise
+   returns NULL.  */
+extern struct __libdwfl_pid_arg *__libdwfl_get_pid_arg (Dwfl *dwfl)
+  internal_function;
+
+/* Makes sure the given tid is attached. On success returns true and
+   sets tid_was_stopped.  */
+extern bool __libdwfl_ptrace_attach (pid_t tid, bool *tid_was_stoppedp)
+  internal_function;
+
+/* Detaches a tid that was attached through
+   __libdwfl_ptrace_attach. Must be given the tid_was_stopped as set
+   by __libdwfl_ptrace_attach.  */
+extern void __libdwfl_ptrace_detach (pid_t tid, bool tid_was_stopped)
+  internal_function;
+
+
 /* Internal wrapper for old dwfl_module_getsym and new dwfl_module_getsym_info.
    adjust_st_value set to true returns adjusted SYM st_value, set to false
    it will not adjust SYM at all, but does match against resolved *ADDR. */
@@ -483,8 +524,13 @@ extern int __libdwfl_find_build_id (Dwfl_Module *mod, bool set, Elf *elf)
   internal_function;
 
 /* Open a main or debuginfo file by its build ID, returns the fd.  */
+extern int __libdwfl_open_mod_by_build_id (Dwfl_Module *mod, bool debug,
+					   char **file_name) internal_function;
+
+/* Same, but takes an explicit build_id, can also be used for alt debug.  */
 extern int __libdwfl_open_by_build_id (Dwfl_Module *mod, bool debug,
-				       char **file_name) internal_function;
+				       char **file_name, const size_t id_len,
+				       const uint8_t *id) internal_function;
 
 extern uint32_t __libdwfl_crc32 (uint32_t crc, unsigned char *buf, size_t len)
   attribute_hidden;
@@ -614,6 +660,8 @@ extern int dwfl_segment_report_module (Dwfl *dwfl, int ndx, const char *name,
 				       void *memory_callback_arg,
 				       Dwfl_Module_Callback *read_eagerly,
 				       void *read_eagerly_arg,
+				       const void *note_file,
+				       size_t note_file_size,
 				       const struct r_debug_info *r_debug_info);
 
 /* Report a module for entry in the dynamic linker's struct link_map list.

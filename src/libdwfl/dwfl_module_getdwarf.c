@@ -1,5 +1,5 @@
 /* Find debugging and symbol information for a module in libdwfl.
-   Copyright (C) 2005-2012 Red Hat, Inc.
+   Copyright (C) 2005-2012, 2014 Red Hat, Inc.
    This file is part of elfutils.
 
    This file is free software; you can redistribute it and/or modify
@@ -27,19 +27,17 @@
    not, see <http://www.gnu.org/licenses/>.  */
 
 #include "libdwflP.h"
+#include <inttypes.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 #include "../libdw/libdwP.h"	/* DWARF_E_* values are here.  */
 #include "../libelf/libelfP.h"
 
-
-/* Open libelf FILE->fd and compute the load base of ELF as loaded in MOD.
-   When we return success, FILE->elf and FILE->vaddr are set up.  */
 static inline Dwfl_Error
-open_elf (Dwfl_Module *mod, struct dwfl_file *file)
+open_elf_file (Elf **elf, int *fd, char **name)
 {
-  if (file->elf == NULL)
+  if (*elf == NULL)
     {
       /* CBFAIL uses errno if it's set, so clear it first in case we don't
 	 set it with an open failure below.  */
@@ -47,24 +45,35 @@ open_elf (Dwfl_Module *mod, struct dwfl_file *file)
 
       /* If there was a pre-primed file name left that the callback left
 	 behind, try to open that file name.  */
-      if (file->fd < 0 && file->name != NULL)
-	file->fd = TEMP_FAILURE_RETRY (open64 (file->name, O_RDONLY));
+      if (*fd < 0 && *name != NULL)
+	*fd = TEMP_FAILURE_RETRY (open64 (*name, O_RDONLY));
 
-      if (file->fd < 0)
+      if (*fd < 0)
 	return CBFAIL;
 
-      Dwfl_Error error = __libdw_open_file (&file->fd, &file->elf, true, false);
-      if (error != DWFL_E_NOERROR)
-	return error;
+      return __libdw_open_file (fd, elf, true, false);
     }
-  else if (unlikely (elf_kind (file->elf) != ELF_K_ELF))
+  else if (unlikely (elf_kind (*elf) != ELF_K_ELF))
     {
-      elf_end (file->elf);
-      file->elf = NULL;
-      close (file->fd);
-      file->fd = -1;
+      elf_end (*elf);
+      *elf = NULL;
+      close (*fd);
+      *fd = -1;
       return DWFL_E_BADELF;
     }
+
+  /* Elf file already open and looks fine.  */
+  return DWFL_E_NOERROR;
+}
+
+/* Open libelf FILE->fd and compute the load base of ELF as loaded in MOD.
+   When we return success, FILE->elf and FILE->vaddr are set up.  */
+static inline Dwfl_Error
+open_elf (Dwfl_Module *mod, struct dwfl_file *file)
+{
+  Dwfl_Error error = open_elf_file (&file->elf, &file->fd, &file->name);
+  if (error != DWFL_E_NOERROR)
+    return error;
 
   GElf_Ehdr ehdr_mem, *ehdr = gelf_getehdr (file->elf, &ehdr_mem);
   if (ehdr == NULL)
@@ -77,7 +86,7 @@ open_elf (Dwfl_Module *mod, struct dwfl_file *file)
       return DWFL_E (LIBELF, elf_errno ());
     }
 
-  if (mod->e_type != ET_REL)
+  if (ehdr->e_type != ET_REL)
     {
       /* In any non-ET_REL file, we compute the "synchronization address".
 
@@ -131,11 +140,24 @@ open_elf (Dwfl_Module *mod, struct dwfl_file *file)
 	}
     }
 
-  mod->e_type = ehdr->e_type;
+  /* We only want to set the module e_type explictly once, derived from
+     the main ELF file.  (It might be changed for the kernel, because
+     that is special - see below.)  open_elf is always called first for
+     the main ELF file, because both find_dw and find_symtab call
+     __libdwfl_getelf first to open the main file.  So don't let debug
+     or aux files override the module e_type.  The kernel heuristic
+     below could otherwise trigger for non-kernel/non-main files, since
+     their phdrs might not match the actual load addresses.  */
+  if (file == &mod->main)
+    {
+      mod->e_type = ehdr->e_type;
 
-  /* Relocatable Linux kernels are ET_EXEC but act like ET_DYN.  */
-  if (mod->e_type == ET_EXEC && file->vaddr != mod->low_addr)
-    mod->e_type = ET_DYN;
+      /* Relocatable Linux kernels are ET_EXEC but act like ET_DYN.  */
+      if (mod->e_type == ET_EXEC && file->vaddr != mod->low_addr)
+	mod->e_type = ET_DYN;
+    }
+  else
+    assert (mod->main.elf != NULL);
 
   return DWFL_E_NOERROR;
 }
@@ -207,66 +229,6 @@ __libdwfl_getelf (Dwfl_Module *mod)
     mod_verify_build_id (mod);
 
   mod->main_bias = mod->e_type == ET_REL ? 0 : mod->low_addr - mod->main.vaddr;
-}
-
-/* Search an ELF file for a ".gnu_debuglink" section.  */
-static const char *
-find_debuglink (Elf *elf, GElf_Word *crc)
-{
-  size_t shstrndx;
-  if (elf_getshdrstrndx (elf, &shstrndx) < 0)
-    return NULL;
-
-  Elf_Scn *scn = NULL;
-  while ((scn = elf_nextscn (elf, scn)) != NULL)
-    {
-      GElf_Shdr shdr_mem;
-      GElf_Shdr *shdr = gelf_getshdr (scn, &shdr_mem);
-      if (shdr == NULL)
-	return NULL;
-
-      const char *name = elf_strptr (elf, shstrndx, shdr->sh_name);
-      if (name == NULL)
-	return NULL;
-
-      if (!strcmp (name, ".gnu_debuglink"))
-	break;
-    }
-
-  if (scn == NULL)
-    return NULL;
-
-  /* Found the .gnu_debuglink section.  Extract its contents.  */
-  Elf_Data *rawdata = elf_rawdata (scn, NULL);
-  if (rawdata == NULL)
-    return NULL;
-
-  Elf_Data crcdata =
-    {
-      .d_type = ELF_T_WORD,
-      .d_buf = crc,
-      .d_size = sizeof *crc,
-      .d_version = EV_CURRENT,
-    };
-  Elf_Data conv =
-    {
-      .d_type = ELF_T_WORD,
-      .d_buf = rawdata->d_buf + rawdata->d_size - sizeof *crc,
-      .d_size = sizeof *crc,
-      .d_version = EV_CURRENT,
-    };
-
-  GElf_Ehdr ehdr_mem;
-  GElf_Ehdr *ehdr = gelf_getehdr (elf, &ehdr_mem);
-  if (ehdr == NULL)
-    return NULL;
-
-  Elf_Data *d = gelf_xlatetom (elf, &crcdata, &conv, ehdr->e_ident[EI_DATA]);
-  if (d == NULL)
-    return NULL;
-  assert (d == &crcdata);
-
-  return rawdata->d_buf;
 }
 
 /* If the main file might have been prelinked, then we need to
@@ -531,7 +493,9 @@ find_debuginfo (Dwfl_Module *mod)
     return DWFL_E_NOERROR;
 
   GElf_Word debuglink_crc = 0;
-  const char *debuglink_file = find_debuglink (mod->main.elf, &debuglink_crc);
+  const char *debuglink_file;
+  debuglink_file = INTUSE(dwelf_elf_gnu_debuglink) (mod->main.elf,
+						    &debuglink_crc);
 
   mod->debug.fd = (*mod->dwfl->callbacks->find_debuginfo) (MODCB_ARGS (mod),
 							   mod->main.name,
@@ -544,6 +508,55 @@ find_debuginfo (Dwfl_Module *mod)
   return result;
 }
 
+/* Try to find the alternative debug link for the given DWARF and set
+   it if found.  Only called when mod->dw is already setup but still
+   might need an alternative (dwz multi) debug file.  filename is either
+   the main or debug name from which the Dwarf was created. */
+static void
+find_debug_altlink (Dwfl_Module *mod, const char *filename)
+{
+  assert (mod->dw != NULL);
+
+  const char *altname;
+  const void *build_id;
+  ssize_t build_id_len = INTUSE(dwelf_dwarf_gnu_debugaltlink) (mod->dw,
+							       &altname,
+							       &build_id);
+
+  if (build_id_len > 0)
+    {
+      /* We could store altfile in the module, but don't really need it.  */
+      char *altfile = NULL;
+      mod->alt_fd = (*mod->dwfl->callbacks->find_debuginfo) (MODCB_ARGS (mod),
+							     filename,
+							     altname,
+							     0,
+							     &altfile);
+
+      /* The (internal) callbacks might just set mod->alt_elf directly
+	 because they open the Elf anyway for sanity checking.
+	 Otherwise open either the given file name or use the fd
+	 returned.  */
+      Dwfl_Error error = open_elf_file (&mod->alt_elf, &mod->alt_fd,
+					&altfile);
+      if (error == DWFL_E_NOERROR)
+	{
+	  mod->alt = INTUSE(dwarf_begin_elf) (mod->alt_elf,
+					      DWARF_C_READ, NULL);
+	  if (mod->alt == NULL)
+	    {
+	      elf_end (mod->alt_elf);
+	      mod->alt_elf = NULL;
+	      close (mod->alt_fd);
+	      mod->alt_fd = -1;
+	    }
+	  else
+	    dwarf_setalt (mod->dw, mod->alt);
+	}
+
+      free (altfile); /* See above, we don't really need it.  */
+    }
+}
 
 /* Try to find a symbol table in FILE.
    Returns DWFL_E_NOERROR if a proper one is found.
@@ -562,6 +575,8 @@ load_symtab (struct dwfl_file *file, struct dwfl_file **symfile,
 	switch (shdr->sh_type)
 	  {
 	  case SHT_SYMTAB:
+	    if (shdr->sh_entsize == 0)
+	      break;
 	    symtab = true;
 	    *symscn = scn;
 	    *symfile = file;
@@ -576,6 +591,8 @@ load_symtab (struct dwfl_file *file, struct dwfl_file **symfile,
 	    if (symtab)
 	      break;
 	    /* Use this if need be, but keep looking for SHT_SYMTAB.  */
+	    if (shdr->sh_entsize == 0)
+	      break;
 	    *symscn = scn;
 	    *symfile = file;
 	    *strshndx = shdr->sh_link;
@@ -608,7 +625,7 @@ load_symtab (struct dwfl_file *file, struct dwfl_file **symfile,
 /* Translate addresses into file offsets.
    OFFS[*] start out zero and remain zero if unresolved.  */
 static void
-find_offsets (Elf *elf, size_t phnum, size_t n,
+find_offsets (Elf *elf, GElf_Addr main_bias, size_t phnum, size_t n,
 	      GElf_Addr addrs[n], GElf_Off offs[n])
 {
   size_t unsolved = n;
@@ -619,10 +636,10 @@ find_offsets (Elf *elf, size_t phnum, size_t n,
       if (phdr != NULL && phdr->p_type == PT_LOAD && phdr->p_memsz > 0)
 	for (size_t j = 0; j < n; ++j)
 	  if (offs[j] == 0
-	      && addrs[j] >= phdr->p_vaddr
-	      && addrs[j] - phdr->p_vaddr < phdr->p_filesz)
+	      && addrs[j] >= phdr->p_vaddr + main_bias
+	      && addrs[j] - (phdr->p_vaddr + main_bias) < phdr->p_filesz)
 	    {
-	      offs[j] = addrs[j] - phdr->p_vaddr + phdr->p_offset;
+	      offs[j] = addrs[j] - (phdr->p_vaddr + main_bias) + phdr->p_offset;
 	      if (--unsolved == 0)
 		break;
 	    }
@@ -705,113 +722,133 @@ find_dynsym (Dwfl_Module *mod)
 	      break;
 	    }
 
-	  /* Translate pointers into file offsets.  */
-	  GElf_Off offs[i_max] = { 0, };
-	  find_offsets (mod->main.elf, phnum, i_max, addrs, offs);
+	  /* Translate pointers into file offsets.  ADJUST is either zero
+	     in case the dynamic segment wasn't adjusted or mod->main_bias.  */
+	  void translate_offs (GElf_Addr adjust)
+	  {
+	    GElf_Off offs[i_max] = { 0, };
+	    find_offsets (mod->main.elf, adjust, phnum, i_max, addrs, offs);
 
-	  /* Figure out the size of the symbol table.  */
-	  if (offs[i_hash] != 0)
-	    {
-	      /* In the original format, .hash says the size of .dynsym.  */
-
-	      size_t entsz = SH_ENTSIZE_HASH (ehdr);
-	      data = elf_getdata_rawchunk (mod->main.elf,
-					   offs[i_hash] + entsz, entsz,
-					   entsz == 4 ? ELF_T_WORD
-					   : ELF_T_XWORD);
-	      if (data != NULL)
-		mod->syments = (entsz == 4
-				? *(const GElf_Word *) data->d_buf
-				: *(const GElf_Xword *) data->d_buf);
-	    }
-	  if (offs[i_gnu_hash] != 0 && mod->syments == 0)
-	    {
-	      /* In the new format, we can derive it with some work.  */
-
-	      const struct
+	    /* Figure out the size of the symbol table.  */
+	    if (offs[i_hash] != 0)
 	      {
-		Elf32_Word nbuckets;
-		Elf32_Word symndx;
-		Elf32_Word maskwords;
-		Elf32_Word shift2;
-	      } *header;
+		/* In the original format, .hash says the size of .dynsym.  */
 
-	      data = elf_getdata_rawchunk (mod->main.elf, offs[i_gnu_hash],
-					   sizeof *header, ELF_T_WORD);
-	      if (data != NULL)
+		size_t entsz = SH_ENTSIZE_HASH (ehdr);
+		data = elf_getdata_rawchunk (mod->main.elf,
+					     offs[i_hash] + entsz, entsz,
+					     entsz == 4 ? ELF_T_WORD
+					     : ELF_T_XWORD);
+		if (data != NULL)
+		  mod->syments = (entsz == 4
+				  ? *(const GElf_Word *) data->d_buf
+				  : *(const GElf_Xword *) data->d_buf);
+	      }
+	    if (offs[i_gnu_hash] != 0 && mod->syments == 0)
+	      {
+		/* In the new format, we can derive it with some work.  */
+
+		const struct
 		{
-		  header = data->d_buf;
-		  Elf32_Word nbuckets = header->nbuckets;
-		  Elf32_Word symndx = header->symndx;
-		  GElf_Off buckets_at = (offs[i_gnu_hash] + sizeof *header
-					 + (gelf_getclass (mod->main.elf)
-					    * sizeof (Elf32_Word)
-					    * header->maskwords));
+		  Elf32_Word nbuckets;
+		  Elf32_Word symndx;
+		  Elf32_Word maskwords;
+		  Elf32_Word shift2;
+		} *header;
 
-		  data = elf_getdata_rawchunk (mod->main.elf, buckets_at,
-					       nbuckets * sizeof (Elf32_Word),
-					       ELF_T_WORD);
-		  if (data != NULL && symndx < nbuckets)
-		    {
-		      const Elf32_Word *const buckets = data->d_buf;
-		      Elf32_Word maxndx = symndx;
-		      for (Elf32_Word bucket = 0; bucket < nbuckets; ++bucket)
-			if (buckets[bucket] > maxndx)
-			  maxndx = buckets[bucket];
+		data = elf_getdata_rawchunk (mod->main.elf, offs[i_gnu_hash],
+					     sizeof *header, ELF_T_WORD);
+		if (data != NULL)
+		  {
+		    header = data->d_buf;
+		    Elf32_Word nbuckets = header->nbuckets;
+		    Elf32_Word symndx = header->symndx;
+		    GElf_Off buckets_at = (offs[i_gnu_hash] + sizeof *header
+					   + (gelf_getclass (mod->main.elf)
+					      * sizeof (Elf32_Word)
+					      * header->maskwords));
 
-		      GElf_Off hasharr_at = (buckets_at
-					     + nbuckets * sizeof (Elf32_Word));
-		      hasharr_at += (maxndx - symndx) * sizeof (Elf32_Word);
-		      do
-			{
-			  data = elf_getdata_rawchunk (mod->main.elf,
-						       hasharr_at,
-						       sizeof (Elf32_Word),
-						       ELF_T_WORD);
-			  if (data != NULL
-			      && (*(const Elf32_Word *) data->d_buf & 1u))
-			    {
-			      mod->syments = maxndx + 1;
-			      break;
-			    }
-			  ++maxndx;
-			  hasharr_at += sizeof (Elf32_Word);
-			} while (data != NULL);
-		    }
-		}
-	    }
-	  if (offs[i_strtab] > offs[i_symtab] && mod->syments == 0)
-	    mod->syments = ((offs[i_strtab] - offs[i_symtab])
-			    / gelf_fsize (mod->main.elf,
-					  ELF_T_SYM, 1, EV_CURRENT));
+		    // elf_getdata_rawchunk takes a size_t, make sure it
+		    // doesn't overflow.
+#if SIZE_MAX <= UINT32_MAX
+		    if (nbuckets > SIZE_MAX / sizeof (Elf32_Word))
+		      data = NULL;
+		    else
+#endif
+		      data
+			 = elf_getdata_rawchunk (mod->main.elf, buckets_at,
+						 nbuckets * sizeof (Elf32_Word),
+						 ELF_T_WORD);
+		    if (data != NULL && symndx < nbuckets)
+		      {
+			const Elf32_Word *const buckets = data->d_buf;
+			Elf32_Word maxndx = symndx;
+			for (Elf32_Word bucket = 0; bucket < nbuckets; ++bucket)
+			  if (buckets[bucket] > maxndx)
+			    maxndx = buckets[bucket];
 
-	  if (mod->syments > 0)
-	    {
-	      mod->symdata = elf_getdata_rawchunk (mod->main.elf,
-						   offs[i_symtab],
-						   gelf_fsize (mod->main.elf,
-							       ELF_T_SYM,
-							       mod->syments,
-							       EV_CURRENT),
-						   ELF_T_SYM);
-	      if (mod->symdata != NULL)
-		{
-		  mod->symstrdata = elf_getdata_rawchunk (mod->main.elf,
-							  offs[i_strtab],
-							  strsz,
-							  ELF_T_BYTE);
-		  if (mod->symstrdata == NULL)
-		    mod->symdata = NULL;
-		}
-	      if (mod->symdata == NULL)
-		mod->symerr = DWFL_E (LIBELF, elf_errno ());
-	      else
-		{
-		  mod->symfile = &mod->main;
-		  mod->symerr = DWFL_E_NOERROR;
-		}
-	      return;
-	    }
+			GElf_Off hasharr_at = (buckets_at
+					       + nbuckets * sizeof (Elf32_Word));
+			hasharr_at += (maxndx - symndx) * sizeof (Elf32_Word);
+			do
+			  {
+			    data = elf_getdata_rawchunk (mod->main.elf,
+							 hasharr_at,
+							 sizeof (Elf32_Word),
+							 ELF_T_WORD);
+			    if (data != NULL
+				&& (*(const Elf32_Word *) data->d_buf & 1u))
+			      {
+				mod->syments = maxndx + 1;
+				break;
+			      }
+			    ++maxndx;
+			    hasharr_at += sizeof (Elf32_Word);
+			  } while (data != NULL);
+		      }
+		  }
+	      }
+	    if (offs[i_strtab] > offs[i_symtab] && mod->syments == 0)
+	      mod->syments = ((offs[i_strtab] - offs[i_symtab])
+			      / gelf_fsize (mod->main.elf,
+					    ELF_T_SYM, 1, EV_CURRENT));
+
+	    if (mod->syments > 0)
+	      {
+		mod->symdata = elf_getdata_rawchunk (mod->main.elf,
+						     offs[i_symtab],
+						     gelf_fsize (mod->main.elf,
+								 ELF_T_SYM,
+								 mod->syments,
+								 EV_CURRENT),
+						     ELF_T_SYM);
+		if (mod->symdata != NULL)
+		  {
+		    mod->symstrdata = elf_getdata_rawchunk (mod->main.elf,
+							    offs[i_strtab],
+							    strsz,
+							    ELF_T_BYTE);
+		    if (mod->symstrdata == NULL)
+		      mod->symdata = NULL;
+		  }
+		if (mod->symdata == NULL)
+		  mod->symerr = DWFL_E (LIBELF, elf_errno ());
+		else
+		  {
+		    mod->symfile = &mod->main;
+		    mod->symerr = DWFL_E_NOERROR;
+		  }
+	      }
+	  }
+
+	  /* First try unadjusted, like ELF files from disk, vdso.
+	     Then try for already adjusted dynamic section, like ELF
+	     from remote memory.  */
+	  translate_offs (0);
+	  if (mod->symfile == NULL)
+	    translate_offs (mod->main_bias);
+
+	  return;
 	}
     }
 }
@@ -1047,14 +1084,14 @@ find_symtab (Dwfl_Module *mod)
     {
     elferr:
       mod->symerr = DWFL_E (LIBELF, elf_errno ());
-      goto aux_cleanup;
+      goto aux_cleanup; /* This cleans up some more and tries find_dynsym.  */
     }
 
   /* Cache the data; MOD->syments and MOD->first_global were set above.  */
 
   mod->symstrdata = elf_getdata (elf_getscn (mod->symfile->elf, strshndx),
 				 NULL);
-  if (mod->symstrdata == NULL)
+  if (mod->symstrdata == NULL || mod->symstrdata->d_buf == NULL)
     goto elferr;
 
   if (xndxscn == NULL)
@@ -1062,12 +1099,18 @@ find_symtab (Dwfl_Module *mod)
   else
     {
       mod->symxndxdata = elf_getdata (xndxscn, NULL);
-      if (mod->symxndxdata == NULL)
+      if (mod->symxndxdata == NULL || mod->symxndxdata->d_buf == NULL)
 	goto elferr;
     }
 
   mod->symdata = elf_getdata (symscn, NULL);
-  if (mod->symdata == NULL)
+  if (mod->symdata == NULL || mod->symdata->d_buf == NULL)
+    goto elferr;
+
+  // Sanity check number of symbols.
+  GElf_Shdr shdr_mem, *shdr = gelf_getshdr (symscn, &shdr_mem);
+  if (mod->syments > mod->symdata->d_size / shdr->sh_entsize
+      || (size_t) mod->first_global > mod->syments)
     goto elferr;
 
   /* Cache any auxiliary symbol info, when it fails, just ignore aux_sym.  */
@@ -1081,13 +1124,16 @@ find_symtab (Dwfl_Module *mod)
 	  mod->aux_syments = 0;
 	  elf_end (mod->aux_sym.elf);
 	  mod->aux_sym.elf = NULL;
+	  /* We thought we had something through shdrs, but it failed...
+	     Last ditch, look for dynamic symbols without section headers.  */
+	  find_dynsym (mod);
 	  return;
 	}
 
       mod->aux_symstrdata = elf_getdata (elf_getscn (mod->aux_sym.elf,
 						     aux_strshndx),
 					 NULL);
-      if (mod->aux_symstrdata == NULL)
+      if (mod->aux_symstrdata == NULL || mod->aux_symstrdata->d_buf == NULL)
 	goto aux_cleanup;
 
       if (aux_xndxscn == NULL)
@@ -1095,12 +1141,19 @@ find_symtab (Dwfl_Module *mod)
       else
 	{
 	  mod->aux_symxndxdata = elf_getdata (aux_xndxscn, NULL);
-	  if (mod->aux_symxndxdata == NULL)
+	  if (mod->aux_symxndxdata == NULL
+	      || mod->aux_symxndxdata->d_buf == NULL)
 	    goto aux_cleanup;
 	}
 
       mod->aux_symdata = elf_getdata (aux_symscn, NULL);
-      if (mod->aux_symdata == NULL)
+      if (mod->aux_symdata == NULL || mod->aux_symdata->d_buf == NULL)
+	goto aux_cleanup;
+
+      // Sanity check number of aux symbols.
+      shdr = gelf_getshdr (aux_symscn, &shdr_mem);
+      if (mod->aux_syments > mod->aux_symdata->d_size / shdr->sh_entsize
+	  || (size_t) mod->aux_first_global > mod->aux_syments)
 	goto aux_cleanup;
     }
 }
@@ -1193,6 +1246,11 @@ find_dw (Dwfl_Module *mod)
     case DWFL_E_NOERROR:
       mod->debug.elf = mod->main.elf;
       mod->debug.address_sync = mod->main.address_sync;
+
+      /* The Dwarf might need an alt debug file, find that now after
+	 everything about the debug file has been setup (the
+	 find_debuginfo callback might need it).  */
+      find_debug_altlink (mod, mod->main.name);
       return;
 
     case DWFL_E_NO_DWARF:
@@ -1208,6 +1266,15 @@ find_dw (Dwfl_Module *mod)
     {
     case DWFL_E_NOERROR:
       mod->dwerr = load_dw (mod, &mod->debug);
+      if (mod->dwerr == DWFL_E_NOERROR)
+	{
+	  /* The Dwarf might need an alt debug file, find that now after
+	     everything about the debug file has been setup (the
+	     find_debuginfo callback might need it).  */
+	  find_debug_altlink (mod, mod->debug.name);
+	  return;
+	}
+
       break;
 
     case DWFL_E_CB:		/* The find_debuginfo hook failed.  */

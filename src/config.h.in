@@ -3,9 +3,6 @@
 /* Should ar and ranlib use -D behavior by default? */
 #undef DEFAULT_AR_DETERMINISTIC
 
-/* Defined if libdw should support GNU ref_alt FORM, dwz multi files. */
-#undef ENABLE_DWZ
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -29,6 +26,9 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if <sys/user.h> defines struct user_regs_struct */
+#undef HAVE_SYS_USER_REGS
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H

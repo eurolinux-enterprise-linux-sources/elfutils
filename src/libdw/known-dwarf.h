@@ -14,6 +14,7 @@
   ONE_KNOWN_DW_AT (GNU_call_site_target, DW_AT_GNU_call_site_target) \
   ONE_KNOWN_DW_AT (GNU_call_site_target_clobbered, DW_AT_GNU_call_site_target_clobbered) \
   ONE_KNOWN_DW_AT (GNU_call_site_value, DW_AT_GNU_call_site_value) \
+  ONE_KNOWN_DW_AT (GNU_deleted, DW_AT_GNU_deleted) \
   ONE_KNOWN_DW_AT (GNU_exclusive_locks_required, DW_AT_GNU_exclusive_locks_required) \
   ONE_KNOWN_DW_AT (GNU_guarded, DW_AT_GNU_guarded) \
   ONE_KNOWN_DW_AT (GNU_guarded_by, DW_AT_GNU_guarded_by) \
@@ -111,6 +112,7 @@
   ONE_KNOWN_DW_AT (mutable, DW_AT_mutable) \
   ONE_KNOWN_DW_AT (name, DW_AT_name) \
   ONE_KNOWN_DW_AT (namelist_item, DW_AT_namelist_item) \
+  ONE_KNOWN_DW_AT (noreturn, DW_AT_noreturn) \
   ONE_KNOWN_DW_AT (object_pointer, DW_AT_object_pointer) \
   ONE_KNOWN_DW_AT (ordering, DW_AT_ordering) \
   ONE_KNOWN_DW_AT (picture_string, DW_AT_picture_string) \
@@ -303,9 +305,12 @@
   ONE_KNOWN_DW_LANG_DESC (Ada83, DW_LANG_Ada83, "ISO Ada:1983") \
   ONE_KNOWN_DW_LANG_DESC (Ada95, DW_LANG_Ada95, "ISO Ada:1995") \
   ONE_KNOWN_DW_LANG_DESC (C, DW_LANG_C, "C") \
+  ONE_KNOWN_DW_LANG_DESC (C11, DW_LANG_C11, "ISO C:2011") \
   ONE_KNOWN_DW_LANG_DESC (C89, DW_LANG_C89, "ISO C:1989") \
   ONE_KNOWN_DW_LANG_DESC (C99, DW_LANG_C99, "ISO C:1999") \
   ONE_KNOWN_DW_LANG_DESC (C_plus_plus, DW_LANG_C_plus_plus, "ISO C++:1998") \
+  ONE_KNOWN_DW_LANG_DESC (C_plus_plus_11, DW_LANG_C_plus_plus_11, "ISO C++:2011") \
+  ONE_KNOWN_DW_LANG_DESC (C_plus_plus_14, DW_LANG_C_plus_plus_14, "ISO C++:2014") \
   ONE_KNOWN_DW_LANG_DESC (Cobol74, DW_LANG_Cobol74, "ISO Cobol:1974") \
   ONE_KNOWN_DW_LANG_DESC (Cobol85, DW_LANG_Cobol85, "ISO Cobol:1985") \
   ONE_KNOWN_DW_LANG_DESC (D, DW_LANG_D, "D") \
@@ -577,7 +582,6 @@
   ONE_KNOWN_DW_TAG (lexical_block, DW_TAG_lexical_block) \
   ONE_KNOWN_DW_TAG (member, DW_TAG_member) \
   ONE_KNOWN_DW_TAG (module, DW_TAG_module) \
-  ONE_KNOWN_DW_TAG (mutable_type, DW_TAG_mutable_type) \
   ONE_KNOWN_DW_TAG (namelist, DW_TAG_namelist) \
   ONE_KNOWN_DW_TAG (namelist_item, DW_TAG_namelist_item) \
   ONE_KNOWN_DW_TAG (namespace, DW_TAG_namespace) \

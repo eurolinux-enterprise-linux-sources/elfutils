@@ -1,5 +1,5 @@
 /* Get Dwarf Frame state for target PID or core file.
-   Copyright (C) 2013 Red Hat, Inc.
+   Copyright (C) 2013, 2014 Red Hat, Inc.
    This file is part of elfutils.
 
    This file is free software; you can redistribute it and/or modify
@@ -117,6 +117,7 @@ __libdwfl_process_free (Dwfl_Process *process)
   if (process->ebl_close)
     ebl_closebackend (process->ebl);
   free (process);
+  dwfl->attacherr = DWFL_E_NOERROR;
 }
 
 /* Allocate new Dwfl_Process for DWFL.  */
@@ -134,17 +135,24 @@ bool
 dwfl_attach_state (Dwfl *dwfl, Elf *elf, pid_t pid,
 		   const Dwfl_Thread_Callbacks *thread_callbacks, void *arg)
 {
-  if (thread_callbacks == NULL || thread_callbacks->next_thread == NULL
-      || thread_callbacks->set_initial_registers == NULL)
-    {
-      __libdwfl_seterrno (DWFL_E_INVALID_ARGUMENT);
-      return false;
-    }
   if (dwfl->process != NULL)
     {
       __libdwfl_seterrno (DWFL_E_ATTACH_STATE_CONFLICT);
       return false;
     }
+
+  /* Reset any previous error, we are just going to try again.  */
+  dwfl->attacherr = DWFL_E_NOERROR;
+  if (thread_callbacks == NULL || thread_callbacks->next_thread == NULL
+      || thread_callbacks->set_initial_registers == NULL)
+    {
+      dwfl->attacherr = DWFL_E_INVALID_ARGUMENT;
+    fail:
+      dwfl->attacherr = __libdwfl_canon_error (dwfl->attacherr);
+      __libdwfl_seterrno (dwfl->attacherr);
+      return false;
+    }
+
   Ebl *ebl;
   bool ebl_close;
   if (elf != NULL)
@@ -157,11 +165,17 @@ dwfl_attach_state (Dwfl *dwfl, Elf *elf, pid_t pid,
       ebl = NULL;
       for (Dwfl_Module *mod = dwfl->modulelist; mod != NULL; mod = mod->next)
 	{
-	  /* Reading of the vDSO module may fail as /proc/PID/mem is unreadable
-	     without PTRACE_ATTACH and we may not be PTRACE_ATTACH-ed now.
-	     MOD would not be re-read later to unwind it when we are already
-	     PTRACE_ATTACH-ed to PID.  */
-	  if (strncmp (mod->name, "[vdso: ", 7) == 0)
+	  /* Reading of the vDSO or (deleted) modules may fail as
+	     /proc/PID/mem is unreadable without PTRACE_ATTACH and
+	     we may not be PTRACE_ATTACH-ed now.  MOD would not be
+	     re-read later to unwind it when we are already
+	     PTRACE_ATTACH-ed to PID.  This happens when this function
+	     is called from dwfl_linux_proc_attach with elf == NULL.
+	     __libdwfl_module_getebl will call __libdwfl_getelf which
+	     will call the find_elf callback.  */
+	  if (strncmp (mod->name, "[vdso: ", 7) == 0
+	      || strcmp (strrchr (mod->name, ' ') ?: "",
+			 " (deleted)") == 0)
 	    continue;
 	  Dwfl_Error error = __libdwfl_module_getebl (mod);
 	  if (error != DWFL_E_NOERROR)
@@ -174,8 +188,8 @@ dwfl_attach_state (Dwfl *dwfl, Elf *elf, pid_t pid,
   if (ebl == NULL)
     {
       /* Not identified EBL from any of the modules.  */
-      __libdwfl_seterrno (DWFL_E_PROCESS_NO_ARCH);
-      return false;
+      dwfl->attacherr = DWFL_E_PROCESS_NO_ARCH;
+      goto fail;
     }
   process_alloc (dwfl);
   Dwfl_Process *process = dwfl->process;
@@ -183,8 +197,8 @@ dwfl_attach_state (Dwfl *dwfl, Elf *elf, pid_t pid,
     {
       if (ebl_close)
 	ebl_closebackend (ebl);
-      __libdwfl_seterrno (DWFL_E_NOMEM);
-      return false;
+      dwfl->attacherr = DWFL_E_NOMEM;
+      goto fail;
     }
   process->ebl = ebl;
   process->ebl_close = ebl_close;
@@ -198,6 +212,12 @@ INTDEF(dwfl_attach_state)
 pid_t
 dwfl_pid (Dwfl *dwfl)
 {
+  if (dwfl->attacherr != DWFL_E_NOERROR)
+    {
+      __libdwfl_seterrno (dwfl->attacherr);
+      return -1;
+    }
+
   if (dwfl->process == NULL)
     {
       __libdwfl_seterrno (DWFL_E_NO_ATTACH_STATE);
@@ -232,6 +252,12 @@ int
 dwfl_getthreads (Dwfl *dwfl, int (*callback) (Dwfl_Thread *thread, void *arg),
 		 void *arg)
 {
+  if (dwfl->attacherr != DWFL_E_NOERROR)
+    {
+      __libdwfl_seterrno (dwfl->attacherr);
+      return -1;
+    }
+
   Dwfl_Process *process = dwfl->process;
   if (process == NULL)
     {
@@ -303,6 +329,12 @@ getthread (Dwfl *dwfl, pid_t tid,
 	   int (*callback) (Dwfl_Thread *thread, void *arg),
 	   void *arg)
 {
+  if (dwfl->attacherr != DWFL_E_NOERROR)
+    {
+      __libdwfl_seterrno (dwfl->attacherr);
+      return -1;
+    }
+
   Dwfl_Process *process = dwfl->process;
   if (process == NULL)
     {

@@ -171,10 +171,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
 	    if (result != 0)
 	      return fail (dwfl, result, arg);
 
-	    result = INTUSE(dwfl_linux_proc_attach) (dwfl, atoi (arg), false);
-	    if (result != 0)
-	      /* Non-fatal to not be able to attach to process.  */
-	      failure (dwfl, result, _("cannot attach to process"));
+	    /* Non-fatal to not be able to attach to process, ignore error.  */
+	    INTUSE(dwfl_linux_proc_attach) (dwfl, atoi (arg), false);
+
 	    opt->dwfl = dwfl;
 	  }
 	else
@@ -301,10 +300,8 @@ parse_opt (int key, char *arg, struct argp_state *state)
 		return fail (dwfl, result, opt->core);
 	      }
 
-	    result = INTUSE(dwfl_core_file_attach) (dwfl, core);
-	    if (result < 0)
-	      /* Non-fatal to not be able to attach to core.  */
-	      failure (dwfl, result, _("cannot attach to core"));
+	    /* Non-fatal to not be able to attach to core, ignore error.  */
+	    INTUSE(dwfl_core_file_attach) (dwfl, core);
 
 	    /* From now we leak FD and CORE.  */
 
@@ -365,15 +362,3 @@ dwfl_standard_argp (void)
 {
   return &libdwfl_argp;
 }
-
-#ifdef _MUDFLAP
-/* In the absence of a mudflap wrapper for argp_parse, or a libc compiled
-   with -fmudflap, we'll see spurious errors for using the struct argp_state
-   on argp_parse's stack.  */
-
-void __attribute__ ((constructor))
-__libdwfl_argp_mudflap_options (void)
-{
-  __mf_set_options ("-heur-stack-bound");
-}
-#endif

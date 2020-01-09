@@ -1,5 +1,5 @@
 /* Backend hook signatures internal interface for libebl.
-   Copyright (C) 2000-2011, 2013 Red Hat, Inc.
+   Copyright (C) 2000-2011, 2013, 2014 Red Hat, Inc.
    This file is part of elfutils.
 
    This file is free software; you can redistribute it and/or modify
@@ -105,6 +105,9 @@ bool EBLHOOK(object_note) (const char *, uint32_t, uint32_t, const char *);
 bool EBLHOOK(check_object_attribute) (Ebl *, const char *, int, uint64_t,
 				      const char **, const char **);
 
+/* Check reloc target section type.  */
+bool EBLHOOK(check_reloc_target_type) (Ebl *, Elf64_Word);
+
 /* Describe auxv element type.  */
 int EBLHOOK(auxv_info) (GElf_Xword, const char **, const char **);
 
@@ -129,7 +132,7 @@ bool EBLHOOK(check_special_symbol) (Elf *, GElf_Ehdr *, const GElf_Sym *,
 bool EBLHOOK(check_st_other_bits) (unsigned char st_other);
 
 /* Check if backend uses a bss PLT in this file.  */
-bool EBLHOOK(bss_plt_p) (Elf *, GElf_Ehdr *);
+bool EBLHOOK(bss_plt_p) (Elf *);
 
 /* Return location expression to find return value given the
    DW_AT_type DIE of a DW_TAG_subprogram DIE.  */
@@ -184,7 +187,7 @@ bool EBLHOOK(unwind) (Ebl *ebl, Dwarf_Addr pc, ebl_tid_registers_t *setfunc,
 		      bool *signal_framep);
 
 /* Returns true if the value can be resolved to an address in an
-   allocated section, which will be returned in *SHNDXP.
+   allocated section, which will be returned in *ADDR.
    (e.g. function descriptor resolving)  */
 bool EBLHOOK(resolve_sym_value) (Ebl *ebl, GElf_Addr *addr);
 

@@ -1,5 +1,5 @@
 /* Return symbol table of archive.
-   Copyright (C) 1998-2000, 2002, 2005, 2012 Red Hat, Inc.
+   Copyright (C) 1998-2000, 2002, 2005, 2009, 2012, 2014 Red Hat, Inc.
    This file is part of elfutils.
    Written by Ulrich Drepper <drepper@redhat.com>, 1998.
 
@@ -182,8 +182,12 @@ elf_getarsym (elf, ptr)
       tmpbuf[10] = '\0';
       size_t index_size = atol (tmpbuf);
 
-      if (SARMAG + sizeof (struct ar_hdr) + index_size > elf->maximum_size
-	  || n * w > index_size)
+      if (index_size > elf->maximum_size
+	  || elf->maximum_size - index_size < SARMAG + sizeof (struct ar_hdr)
+#if SIZE_MAX <= 4294967295U
+	  || n >= SIZE_MAX / sizeof (Elf_Arsym)
+#endif
+	  || n > index_size / w)
 	{
 	  /* This index table cannot be right since it does not fit into
 	     the file.  */

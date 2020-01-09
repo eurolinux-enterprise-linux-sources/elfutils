@@ -1,5 +1,5 @@
 /* Generate ELF backend handle.
-   Copyright (C) 2000-2013 Red Hat, Inc.
+   Copyright (C) 2000-2014 Red Hat, Inc.
    This file is part of elfutils.
 
    This file is free software; you can redistribute it and/or modify
@@ -186,7 +186,7 @@ static bool default_check_special_symbol (Elf *elf, GElf_Ehdr *ehdr,
 static bool default_check_st_other_bits (unsigned char st_other);
 static bool default_check_special_section (Ebl *, int,
 					   const GElf_Shdr *, const char *);
-static bool default_bss_plt_p (Elf *elf, GElf_Ehdr *ehdr);
+static bool default_bss_plt_p (Elf *elf);
 static int default_return_value_location (Dwarf_Die *functypedie,
 					  const Dwarf_Op **locops);
 static ssize_t default_register_info (Ebl *ebl,
@@ -200,6 +200,7 @@ static bool default_check_object_attribute (Ebl *ebl, const char *vendor,
 					    int tag, uint64_t value,
 					    const char **tag_name,
 					    const char **value_name);
+static bool default_check_reloc_target_type (Ebl *ebl, Elf64_Word sh_type);
 static int default_abi_cfi (Ebl *ebl, Dwarf_CIE *abi_info);
 
 
@@ -241,6 +242,7 @@ fill_defaults (Ebl *result)
   result->register_info = default_register_info;
   result->syscall_abi = default_syscall_abi;
   result->check_object_attribute = default_check_object_attribute;
+  result->check_reloc_target_type = default_check_reloc_target_type;
   result->disasm = NULL;
   result->abi_cfi = default_abi_cfi;
   result->destr = default_destr;
@@ -691,8 +693,7 @@ default_check_st_other_bits (unsigned char st_other __attribute__ ((unused)))
 
 
 static bool
-default_bss_plt_p (Elf *elf __attribute__ ((unused)),
-		   GElf_Ehdr *ehdr __attribute__ ((unused)))
+default_bss_plt_p (Elf *elf __attribute__ ((unused)))
 {
   return false;
 }
@@ -744,6 +745,13 @@ default_check_object_attribute (Ebl *ebl __attribute__ ((unused)),
 {
   *tag_name = NULL;
   *value_name = NULL;
+  return false;
+}
+
+static bool
+default_check_reloc_target_type (Ebl *ebl __attribute__ ((unused)),
+				 Elf64_Word sh_type __attribute__ ((unused)))
+{
   return false;
 }
 

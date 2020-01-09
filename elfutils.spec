@@ -1,7 +1,7 @@
 Name: elfutils
 Summary: A collection of utilities and DSOs to handle compiled objects
-Version: 0.158
-%global baserelease 3.2
+Version: 0.161
+%global baserelease 3
 URL: https://fedorahosted.org/elfutils/
 %global source_url http://fedorahosted.org/releases/e/l/elfutils/%{version}/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -44,13 +44,11 @@ Group: Development/Tools
 
 Source: %{?source_url}%{name}-%{version}.tar.bz2
 
-Patch1: %{?source_url}elfutils-robustify.patch
-Patch2: %{?source_url}elfutils-portability.patch
+Patch1: %{?source_url}elfutils-portability-%{version}.patch
 
-Patch3: elfutils-0.158-mod-e_type.patch
-Patch4: elfutils-0.158-CVE-2014-0172.patch
-Patch5: elfutils-0.158-unstrip.patch
-Patch6: elfutils-0.158-readelf-nostrings.patch
+Patch2: elfutils-0.161-ar-long-name.patch
+# libdw: fix offset for sig8 lookup in dwarf_formref_die
+Patch3: elfutils-0.161-formref-type.patch
 
 %if !%{compat}
 Release: %{baserelease}%{?dist}
@@ -90,11 +88,11 @@ BuildRequires: xz-devel
 %global _program_prefix eu-
 
 %description
-Elfutils is a collection of utilities, including ld (a linker),
-nm (for listing symbols from object files), size (for listing the
-section sizes of an object or archive file), strip (for discarding
-symbols), readelf (to see the raw ELF file structures), and elflint
-(to check for well-formed ELF files).
+Elfutils is a collection of utilities, including stack (to show
+backtraces), nm (for listing symbols from object files), size
+(for listing the section sizes of an object or archive file),
+strip (for discarding symbols), readelf (to see the raw ELF file
+structures), and elflint (to check for well-formed ELF files).
 
 
 %package libs
@@ -201,10 +199,8 @@ for libelf.
 : 'separate_devel_static=%separate_devel_static'
 : 'scanf_has_m=%scanf_has_m'
 
-%patch1 -p1 -b .robustify
-
 %if %{portability}
-%patch2 -p1 -b .portability
+%patch1 -p1 -b .portability
 sleep 1
 find . \( -name Makefile.in -o -name aclocal.m4 \) -print | xargs touch
 sleep 1
@@ -215,10 +211,8 @@ sed -i.scanf-m -e 's/%m/%a/g' src/addr2line.c tests/line2addr.c
 %endif
 %endif
 
-%patch3 -p1 -b .e_type
-%patch4 -p1 -b .CVE-2014-0172
-%patch5 -p1 -b .unstrip
-%patch6 -p1 -b .readelf-nostrings
+%patch2 -p1 -b .ar_long_name
+%patch3 -p1 -b .formref_type
 
 find . -name \*.sh ! -perm -0100 -print | xargs chmod +x
 
@@ -226,11 +220,12 @@ find . -name \*.sh ! -perm -0100 -print | xargs chmod +x
 # Remove -Wall from default flags.  The makefiles enable enough warnings
 # themselves, and they use -Werror.  Appending -Wall defeats the cases where
 # the makefiles disable some specific warnings for specific code.
-# Also remove -Werror=format-security which doesn't work without
-# -Wformat (enabled by -Wall). We enable -Wformat explicitly for some
-# files later.
-RPM_OPT_FLAGS=${RPM_OPT_FLAGS/-Wall/}
-RPM_OPT_FLAGS=${RPM_OPT_FLAGS/-Werror=format-security/}
+# But add -Wformat explicitly for use with -Werror=format-security which
+# doesn't work without -Wformat (enabled by -Wall).
+RPM_OPT_FLAGS="${RPM_OPT_FLAGS/-Wall/}"
+%if !%{compat}
+RPM_OPT_FLAGS="${RPM_OPT_FLAGS} -Wformat"
+%endif
 
 %if %{compat}
 # Some older glibc headers can run afoul of -Werror all by themselves.
@@ -242,7 +237,7 @@ COMPAT_CONFIG_FLAGS=""
 %endif
 
 trap 'cat config.log' EXIT
-%configure --enable-dwz $COMPAT_CONFIG_FLAGS CFLAGS="$RPM_OPT_FLAGS -fexceptions"
+%configure $COMPAT_CONFIG_FLAGS CFLAGS="$RPM_OPT_FLAGS -fexceptions"
 trap '' EXIT
 make -s %{?_smp_mflags}
 
@@ -276,7 +271,9 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc COPYING COPYING-GPLV2 COPYING-LGPLV3 README TODO CONTRIBUTING
+%{!?_licensedir:%global license %%doc}
+%license COPYING COPYING-GPLV2 COPYING-LGPLV3
+%doc README TODO CONTRIBUTING
 %{_bindir}/eu-addr2line
 %{_bindir}/eu-ar
 %{_bindir}/eu-elfcmp
@@ -296,6 +293,8 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files libs
 %defattr(-,root,root)
+%{!?_licensedir:%global license %%doc}
+%license COPYING-GPLV2 COPYING-LGPLV3
 %{_libdir}/libasm-%{version}.so
 %{_libdir}/libasm.so.*
 %{_libdir}/libdw-%{version}.so
@@ -312,6 +311,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_includedir}/elfutils/libebl.h
 %{_includedir}/elfutils/libdw.h
 %{_includedir}/elfutils/libdwfl.h
+%{_includedir}/elfutils/libdwelf.h
 %{_includedir}/elfutils/version.h
 %{_libdir}/libebl.a
 %{_libdir}/libasm.so
@@ -324,6 +324,8 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files -f %{name}.lang libelf
 %defattr(-,root,root)
+%{!?_licensedir:%global license %%doc}
+%license COPYING-GPLV2 COPYING-LGPLV3
 %{_libdir}/libelf-%{version}.so
 %{_libdir}/libelf.so.*
 
@@ -339,6 +341,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libelf.a
 
 %changelog
+* Thu Feb 05 2015 Mark Wielaard <mjw@redhat.com> - 0.161-3
+- Update to 0.161. (#1167724)
+- Add elfutils-0.161-ar-long-name.patch (#1181525 CVE-2014-9447)
+- Add elfutils-0.161-formref-type.patch
+
 * Wed May 25 2014 Mark Wielaard <mjw@redhat.com> - 0.158-3.2
 - Add elfutils-0.158-unstrip.patch (#806474)
 - Add elfutils-0.158-readelf-nostrings.patch (#1101440)

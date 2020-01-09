@@ -1,7 +1,7 @@
 # -*- rpm-spec-*-
 Summary: A collection of utilities and DSOs to handle compiled objects
 Name: elfutils
-Version: 0.158
+Version: 0.161
 Release: 1
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Group: Development/Tools
@@ -169,6 +169,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_includedir}/elfutils/libebl.h
 %{_includedir}/elfutils/libdw.h
 %{_includedir}/elfutils/libdwfl.h
+%{_includedir}/elfutils/libdwelf.h
 %{_libdir}/libebl.a
 #%{_libdir}/libasm.so
 %{_libdir}/libdw.so
@@ -195,6 +196,49 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libelf.a
 
 %changelog
+* Thu Dec 18 2014 Mark Wielaard <mjw@redhat.com> 0.161-1
+- libdw: New function dwarf_peel_type. dwarf_aggregate_size now uses
+  dwarf_peel_type to also provide the sizes of qualified types.
+  dwarf_getmacros will now serve either of .debug_macro and
+  .debug_macinfo transparently.  New interfaces dwarf_getmacros_off,
+  dwarf_macro_getsrcfiles, dwarf_macro_getparamcnt, and
+  dwarf_macro_param are available for more generalized inspection of
+  macros and their parameters.
+  dwarf.h: Add DW_AT_GNU_deleted, DW_AT_noreturn, DW_LANG_C11,
+  DW_LANG_C_plus_plus_11 and DW_LANG_C_plus_plus_14.
+
+* Mon Aug 25 2014 Mark Wielaard <mjw@redhat.com> 0.160-1
+- libdw: New functions dwarf_cu_getdwarf, dwarf_cu_die.
+  dwarf.h remove non-existing DW_TAG_mutable_type.
+- libdwfl: Handle LZMA .ko.xz compressed kernel modules.
+- unstrip: New option -F, --force to combining files even if some ELF
+  headers don't seem to match.
+- backends: Handle ARM THUMB functions. Add support for ppc64le ELFv2 abi.
+
+* Sat May 17 2014 Mark Wielaard <mjw@redhat.com> 0.159-1
+- stack: New option -d, --debugname to lookup DWARF debuginfo name 
+  for frame.  New option -i, --inlines to show inlined frames 
+  using DWARF debuginfo.
+- libdwelf: New libdwelf.h header for libdw.so DWARF ELF Low-level 
+  Functions.  New function dwelf_elf_gnu_debuglink, 
+  dwelf_dwarf_gnu_debugaltlink, and dwelf_elf_gnu_build_id.
+- libdw: Support for DWZ multifile forms DW_FORM_GNU_ref_alt and      
+  DW_FORM_GNU_strp_alt is now enabled by default and no longer        
+  experimental. Added new functions dwarf_getalt and dwarf_setalt       
+  to get or set the alternative debug file used for the alt FORMs.     
+  The dwfl_linux_proc_find_elf callback will now find ELF from       
+  process memory for (deleted) files if the Dwfl has process state     
+  attached.
+- libdwfl: The dwfl_build_id_find_debuginfo and 
+  dwfl_standard_find_debuginfo functions will now try to 
+  resolve and set the alternative debug file.
+- backends: Add CFI unwinding for arm. Relies on .debug_frame.        
+  Add arm process initial register state compatible mode to AARCH64. 
+  Add aarch64 native and core unwind support.
+- other: All separate elfutils-robustify patches have been merged.    
+  CVE-2014-0172 Check overflow before calling malloc to uncompress 
+  data.
+
 * Fri Jan  3 2014 Mark Wielaard <mjw@redhat.com> 0.158-1
 - libdwfl: dwfl_core_file_report has new parameter executable.
   New functions dwfl_module_getsymtab_first_global,

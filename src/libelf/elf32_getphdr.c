@@ -1,5 +1,5 @@
 /* Get ELF program header table.
-   Copyright (C) 1998-2010 Red Hat, Inc.
+   Copyright (C) 1998-2010, 2014 Red Hat, Inc.
    This file is part of elfutils.
    Written by Ulrich Drepper <drepper@redhat.com>, 1998.
 
@@ -76,15 +76,17 @@ __elfw2(LIBELFBITS,getphdr_wrlock) (elf)
       size_t phnum;
       if (__elf_getphdrnum_rdlock (elf, &phnum) != 0)
 	goto out;
-      if (phnum == 0)
+      if (phnum == 0 || ehdr->e_phoff == 0)
 	{
 	  __libelf_seterrno (ELF_E_NO_PHDR);
 	  goto out;
 	}
 
+      /* Check this doesn't overflow.  */
       size_t size = phnum * sizeof (ElfW2(LIBELFBITS,Phdr));
 
-      if (ehdr->e_phoff > elf->maximum_size
+      if (phnum > SIZE_MAX / sizeof (ElfW2(LIBELFBITS,Phdr))
+	  || ehdr->e_phoff > elf->maximum_size
 	  || elf->maximum_size - ehdr->e_phoff < size)
 	{
 	  __libelf_seterrno (ELF_E_INVALID_DATA);
@@ -93,6 +95,16 @@ __elfw2(LIBELFBITS,getphdr_wrlock) (elf)
 
       if (elf->map_address != NULL)
 	{
+	  /* First see whether the information in the ELF header is
+	     valid and it does not ask for too much.  */
+	  if (unlikely (ehdr->e_phoff >= elf->maximum_size)
+	      || unlikely (elf->maximum_size - ehdr->e_phoff < size))
+	    {
+	      /* Something is wrong.  */
+	      __libelf_seterrno (ELF_E_INVALID_PHDR);
+	      goto out;
+	    }
+
 	  /* All the data is already mapped.  Use it.  */
 	  void *file_phdr = ((char *) elf->map_address
 			     + elf->start_offset + ehdr->e_phoff);
