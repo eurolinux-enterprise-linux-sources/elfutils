@@ -1,5 +1,11 @@
-%global eu_version 0.148
-%global eu_release 1
+Name: elfutils
+Summary: A collection of utilities and DSOs to handle compiled objects
+Version: 0.152
+%global baserelease 1
+URL: https://fedorahosted.org/elfutils/
+%global source_url http://fedorahosted.org/releases/e/l/elfutils/%{version}/
+License: GPLv2 with exceptions
+Group: Development/Tools
 
 %if %{?_with_compat:1}%{!?_with_compat:0}
 %global compat 1
@@ -7,18 +13,25 @@
 %global compat 0
 %endif
 
-%if 0%{?fedora} >= 8
-%global scanf_has_m 1
-%endif
-%if 0%{?rhel} >= 6
-%global scanf_has_m 1
-%endif
+%global portability             %{compat}
+%global scanf_has_m             !%{compat}
+%global separate_devel_static   1
+%global use_zlib                0
+%global use_xz                  0
 
-%if 0%{?fedora} >= 7
-%global separate_devel_static 1
+%if 0%{?rhel}
+%global portability             (%rhel < 6)
+%global scanf_has_m             (%rhel >= 6)
+%global separate_devel_static   (%rhel >= 6)
+%global use_zlib                (%rhel >= 5)
+%global use_xz                  (%rhel >= 6)
 %endif
-%if 0%{?rhel} >= 6
-%global separate_devel_static 1
+%if 0%{?fedora}
+%global portability             (%fedora < 9)
+%global scanf_has_m             (%fedora >= 8)
+%global separate_devel_static   (%fedora >= 7)
+%global use_zlib                (%fedora >= 5)
+%global use_xz                  (%fedora >= 10)
 %endif
 
 %if %{compat} || %{!?rhel:6}%{?rhel} < 6
@@ -29,20 +42,16 @@
 
 %global depsuffix %{?_isa}%{!?_isa:-%{_arch}}
 
-Summary: A collection of utilities and DSOs to handle compiled objects
-Name: elfutils
-Version: %{eu_version}
+Source: %{?source_url}%{name}-%{version}.tar.bz2
+Patch1: %{?source_url}elfutils-robustify.patch
+Patch2: %{?source_url}elfutils-portability.patch
+
 %if !%{compat}
-Release: %{eu_release}%{?dist}
+Release: %{baserelease}%{?dist}
 %else
-Release: 0.%{eu_release}
+Release: 0.%{baserelease}
 %endif
-License: GPLv2 with exceptions
-Group: Development/Tools
-URL: https://fedorahosted.org/elfutils/
-Source: http://fedorahosted.org/releases/e/l/elfutils/%{name}-%{version}.tar.bz2
-Patch1: elfutils-robustify.patch
-Patch2: elfutils-portability.patch
+
 Requires: elfutils-libelf%{depsuffix} = %{version}-%{release}
 Requires: elfutils-libs%{depsuffix} = %{version}-%{release}
 
@@ -60,22 +69,6 @@ BuildRequires: gcc >= 3.4
 BuildRequires: glibc-headers >= 2.3.4-11
 %else
 BuildRequires: gcc >= 3.2
-%endif
-
-%global use_zlib        0
-%if 0%{?fedora} >= 5
-%global use_zlib        1
-%endif
-%if 0%{?rhel} >= 5
-%global use_zlib        1
-%endif
-
-%global use_xz          0
-%if 0%{?fedora} >= 10
-%global use_xz          1
-%endif
-%if 0%{?rhel} >= 6
-%global use_xz          1
 %endif
 
 %if %{use_zlib}
@@ -101,7 +94,7 @@ symbols), readelf (to see the raw ELF file structures), and elflint
 %package libs
 Summary: Libraries to handle compiled objects
 Group: Development/Tools
-%if 0%{!?_isa}
+%if 0%{!?_isa:1}
 Provides: elfutils-libs%{depsuffix} = %{version}-%{release}
 %endif
 Requires: elfutils-libelf%{depsuffix} = %{version}-%{release}
@@ -115,12 +108,12 @@ other programs using these libraries.
 %package devel
 Summary: Development libraries to handle compiled objects
 Group: Development/Tools
-%if 0%{!?_isa}
+%if 0%{!?_isa:1}
 Provides: elfutils-devel%{depsuffix} = %{version}-%{release}
 %endif
 Requires: elfutils-libs%{depsuffix} = %{version}-%{release}
 Requires: elfutils-libelf-devel%{depsuffix} = %{version}-%{release}
-%if !0%{?separate_devel_static}
+%if !%{separate_devel_static}
 Requires: elfutils-devel-static%{depsuffix} = %{version}-%{release}
 %endif
 
@@ -134,7 +127,7 @@ assembler interface.
 %package devel-static
 Summary: Static archives to handle compiled objects
 Group: Development/Tools
-%if 0%{!?_isa}
+%if 0%{!?_isa:1}
 Provides: elfutils-devel-static%{depsuffix} = %{version}-%{release}
 %endif
 Requires: elfutils-devel%{depsuffix} = %{version}-%{release}
@@ -147,7 +140,7 @@ with the code to handle compiled objects.
 %package libelf
 Summary: Library to read and write ELF files
 Group: Development/Tools
-%if 0%{!?_isa}
+%if 0%{!?_isa:1}
 Provides: elfutils-libelf%{depsuffix} = %{version}-%{release}
 %endif
 Obsoletes: libelf <= 0.8.2-2
@@ -161,11 +154,11 @@ elfutils package use it also to generate new ELF files.
 %package libelf-devel
 Summary: Development support for libelf
 Group: Development/Tools
-%if 0%{!?_isa}
+%if 0%{!?_isa:1}
 Provides: elfutils-libelf-devel%{depsuffix} = %{version}-%{release}
 %endif
 Requires: elfutils-libelf%{depsuffix} = %{version}-%{release}
-%if !0%{?separate_devel_static}
+%if !%{separate_devel_static}
 Requires: elfutils-libelf-devel-static%{depsuffix} = %{version}-%{release}
 %endif
 Obsoletes: libelf-devel <= 0.8.2-2
@@ -179,7 +172,7 @@ different sections of an ELF file.
 %package libelf-devel-static
 Summary: Static archive of libelf
 Group: Development/Tools
-%if 0%{!?_isa}
+%if 0%{!?_isa:1}
 Provides: elfutils-libelf-devel-static%{depsuffix} = %{version}-%{release}
 %endif
 Requires: elfutils-libelf-devel%{depsuffix} = %{version}-%{release}
@@ -191,16 +184,21 @@ for libelf.
 %prep
 %setup -q
 
+: 'compat=%compat'
+: 'portability=%portability'
+: 'separate_devel_static=%separate_devel_static'
+: 'scanf_has_m=%scanf_has_m'
+
 %patch1 -p1 -b .robustify
 
-%if %{compat}
+%if %{portability}
 %patch2 -p1 -b .portability
 sleep 1
 find . \( -name Makefile.in -o -name aclocal.m4 \) -print | xargs touch
 sleep 1
 find . \( -name configure -o -name config.h.in \) -print | xargs touch
 %else
-%if !0%{?scanf_has_m}
+%if !%{scanf_has_m}
 sed -i.scanf-m -e 's/%m/%a/g' src/addr2line.c tests/line2addr.c
 %endif
 %endif
@@ -268,7 +266,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_bindir}/eu-size
 %{_bindir}/eu-strings
 %{_bindir}/eu-strip
-#%{_bindir}/eu-ld
+#%%{_bindir}/eu-ld
 %{_bindir}/eu-unstrip
 %{_bindir}/eu-make-debug-archive
 
@@ -317,6 +315,43 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libelf.a
 
 %changelog
+* Tue Feb 15 2011 Roland McGrath <roland@redhat.com> - 0.152-1
+- Update to 0.152
+  - Various build and warning nits fixed for newest GCC and Autoconf.
+  - libdwfl: Yet another prelink-related fix for another regression. (#674465)
+  - eu-elfcmp: New flag --ignore-build-id to ignore differing build ID bits.
+  - eu-elfcmp: New flag -l/--verbose to print all differences.
+
+* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.151-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Wed Jan 12 2011 Roland McGrath <roland@redhat.com> - 0.151-1
+- Update to 0.151
+  - libdwfl: Fix for more prelink cases with separate debug file.
+  - eu-strip: New flag --strip-sections to remove section headers entirely.
+
+* Thu Dec  2 2010 Roland McGrath <roland@redhat.com> - 0.150-2
+- libdwfl: Remove bogus assert. (#658268)
+
+* Tue Nov 23 2010 Roland McGrath <roland@redhat.com> - 0.150-1
+- Update to 0.150
+  - libdw: Fix for handling huge .debug_aranges section. (#638432)
+  - libdwfl: Fix for handling prelinked DSO with separate debug file. (#652857)
+  - findtextrel: Fix diagnostics to work with usual section ordering.
+
+* Wed Sep 29 2010 jkeating - 0.149-2
+- Rebuilt for gcc bug 634757
+
+* Mon Sep 13 2010 Roland McGrath <roland@redhat.com> - 0.149-1
+- Update to 0.149
+  - libdw: Decode new DW_OP_GNU_implicit_pointer operation;
+           new function dwarf_getlocation_implicit_pointer.
+  - libdwfl: New function dwfl_dwarf_line.
+  - eu-addr2line: New flag -F/--flags to print more DWARF line info details.
+  - eu-readelf: better .debug_loc processing (#627729)
+  - eu-strings: Fix non-mmap file reading. (#609468)
+  - eu-strip: -g recognizes .gdb_index as a debugging section. (#631997)
+
 * Mon Jun 28 2010 Roland McGrath <roland@redhat.com> - 0.148-1
 - Update to 0.148
   - libdw: Accept DWARF 4 format: new functions dwarf_next_unit,
