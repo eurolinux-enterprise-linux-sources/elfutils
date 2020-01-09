@@ -45,10 +45,11 @@ noinst_DATA = $(libebl_pic:_pic.a=.so)
 
 libelf = ../libelf/libelf.so
 libdw = ../libdw/libdw.so
+libeu = ../lib/libeu.a
 
 i386_SRCS = i386_init.c i386_symbol.c i386_corenote.c i386_cfi.c \
 	    i386_retval.c i386_regs.c i386_auxv.c i386_syscall.c \
-	    i386_initreg.c
+	    i386_initreg.c i386_unwind.c
 cpu_i386 = ../libcpu/libcpu_i386.a
 libebl_i386_pic_a_SOURCES = $(i386_SRCS)
 am_libebl_i386_pic_a_OBJECTS = $(i386_SRCS:.c=.os)
@@ -59,7 +60,7 @@ am_libebl_sh_pic_a_OBJECTS = $(sh_SRCS:.c=.os)
 
 x86_64_SRCS = x86_64_init.c x86_64_symbol.c x86_64_corenote.c x86_64_cfi.c \
 	      x86_64_retval.c x86_64_regs.c i386_auxv.c x86_64_syscall.c \
-	      x86_64_initreg.c x32_corenote.c
+	      x86_64_initreg.c x86_64_unwind.c x32_corenote.c
 cpu_x86_64 = ../libcpu/libcpu_x86_64.a
 libebl_x86_64_pic_a_SOURCES = $(x86_64_SRCS)
 am_libebl_x86_64_pic_a_OBJECTS = $(x86_64_SRCS:.c=.os)
@@ -80,7 +81,7 @@ am_libebl_arm_pic_a_OBJECTS = $(arm_SRCS:.c=.os)
 
 aarch64_SRCS = aarch64_init.c aarch64_regs.c aarch64_symbol.c	\
 	       aarch64_corenote.c aarch64_retval.c aarch64_cfi.c \
-	       aarch64_initreg.c
+	       aarch64_initreg.c aarch64_unwind.c
 libebl_aarch64_pic_a_SOURCES = $(aarch64_SRCS)
 am_libebl_aarch64_pic_a_OBJECTS = $(aarch64_SRCS:.c=.os)
 
@@ -98,7 +99,7 @@ am_libebl_ppc_pic_a_OBJECTS = $(ppc_SRCS:.c=.os)
 
 ppc64_SRCS = ppc64_init.c ppc64_symbol.c ppc64_retval.c \
 	     ppc64_corenote.c ppc_regs.c ppc_auxv.c ppc_attrs.c ppc_syscall.c \
-	     ppc_cfi.c ppc_initreg.c ppc64_resolve_sym.c
+	     ppc_cfi.c ppc_initreg.c ppc64_unwind.c ppc64_resolve_sym.c
 libebl_ppc64_pic_a_SOURCES = $(ppc64_SRCS)
 am_libebl_ppc64_pic_a_OBJECTS = $(ppc64_SRCS:.c=.os)
 
@@ -119,24 +120,19 @@ libebl_m68k_pic_a_SOURCES = $(m68k_SRCS)
 am_libebl_m68k_pic_a_OBJECTS = $(m68k_SRCS:.c=.os)
 
 bpf_SRCS = bpf_init.c bpf_regs.c
-# The disam hook depends on this if we have linux/bpf.h.
-if HAVE_LINUX_BPF_H
 cpu_bpf = ../libcpu/libcpu_bpf.a
-else
-cpu_bpf = 
-endif
 libebl_bpf_pic_a_SOURCES = $(bpf_SRCS)
 am_libebl_bpf_pic_a_OBJECTS = $(bpf_SRCS:.c=.os)
 
 
-libebl_%.so libebl_%.map: libebl_%_pic.a $(libelf) $(libdw)
+libebl_%.so libebl_%.map: libebl_%_pic.a $(libelf) $(libdw) $(libeu)
 	@rm -f $(@:.so=.map)
 	$(AM_V_at)echo 'ELFUTILS_$(PACKAGE_VERSION) { global: $*_init; local: *; };' \
 	  > $(@:.so=.map)
 	$(AM_V_CCLD)$(LINK) -shared -o $(@:.map=.so) \
 		-Wl,--whole-archive $< $(cpu_$*) -Wl,--no-whole-archive \
-		-Wl,--version-script,$(@:.so=.map) \
-		-Wl,-z,defs -Wl,--as-needed $(libelf) $(libdw)
+		-Wl,--version-script,$(@:.so=.map),--no-undefined \
+		-Wl,-z,defs,-z,relro -Wl,--as-needed $(libelf) $(libdw) $(libeu)
 	@$(textrel_check)
 
 libebl_i386.so: $(cpu_i386)

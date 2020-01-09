@@ -1,3 +1,60 @@
+2017-08-02  Mark Wielaard  <mark@klomp.org>
+
+	* configure.ac: Set version to 0.170.
+	* NEWS: Mention new libdw dwarf_line_file function.
+
+2017-07-26  Mark Wielaard  <mark@klomp.org>
+
+	* NEWS: Mention dwarf_getmacros handling version 5 .debug_macro.
+
+2017-07-26  Mark Wielaard  <mark@klomp.org>
+
+	* NEWS: Mention dwarf_peel_type DWARF5 tags improvement.
+
+2017-07-26  Mark Wielaard  <mark@klomp.org>
+
+	* NEWS: Mention new DWARF5 calling conventions and defaulted member
+	function.
+
+2017-07-26  Mark Wielaard  <mark@klomp.org>
+
+	* NEWS: Mention new dwarf_default_lower_bound function.
+
+2017-07-25  Mark Wielaard  <mark@klomp.org>
+
+	* NEWS: Mention new DWARF5 attributes, tags, character encodings
+	and language codes in dwarf.h.
+
+2017-07-18  Mark Wielaard  <mark@klomp.org>
+
+	* configure.ac: Don't check for linux/bpf.h.
+	* NEWS: Mention always build bpf backend.
+
+2017-07-14  Mark Wielaard  <mark@klomp.org>
+
+	* NEWS: Add 0.170 section and new strip options.
+
+2017-05-05  Mark Wielaard  <mark@klomp.org>
+
+	* configure.ac: Set version to 0.169. Update copyright year.
+	* NEWS: Add 0.169 section.
+
+2017-04-21  Ulf Hermann  <ulf.hermann@qt.io>
+
+	* .gitignore: Add fillfile and peel_type tests.
+
+2017-02-15  Ulf Hermann  <ulf.hermann@qt.io>
+
+	* configure.ac: Add check for mempcpy.
+
+2017-02-09  Mark Wielaard  <mark@klomp.org>
+
+	* configure.ac: Add check for adding -D_FORTIFY_SOURCE=2 to CFLAGS.
+
+2017-01-12  Mark Wielaard  <mark@klomp.org>
+
+	* configure.ac: Define PACKAGE_URL for older autoconf.
+
 2016-12-27  Mark Wielaard  <mark@klomp.org>
 
 	* configure.ac: Set version to 0.168.

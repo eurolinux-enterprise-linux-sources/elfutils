@@ -46,7 +46,9 @@
   DWARF_ONE_KNOWN_DW_AT (MIPS_tail_loop_begin, DW_AT_MIPS_tail_loop_begin) \
   DWARF_ONE_KNOWN_DW_AT (abstract_origin, DW_AT_abstract_origin) \
   DWARF_ONE_KNOWN_DW_AT (accessibility, DW_AT_accessibility) \
+  DWARF_ONE_KNOWN_DW_AT (addr_base, DW_AT_addr_base) \
   DWARF_ONE_KNOWN_DW_AT (address_class, DW_AT_address_class) \
+  DWARF_ONE_KNOWN_DW_AT (alignment, DW_AT_alignment) \
   DWARF_ONE_KNOWN_DW_AT (allocated, DW_AT_allocated) \
   DWARF_ONE_KNOWN_DW_AT (artificial, DW_AT_artificial) \
   DWARF_ONE_KNOWN_DW_AT (associated, DW_AT_associated) \
@@ -59,9 +61,22 @@
   DWARF_ONE_KNOWN_DW_AT (body_end, DW_AT_body_end) \
   DWARF_ONE_KNOWN_DW_AT (byte_size, DW_AT_byte_size) \
   DWARF_ONE_KNOWN_DW_AT (byte_stride, DW_AT_byte_stride) \
+  DWARF_ONE_KNOWN_DW_AT (call_all_calls, DW_AT_call_all_calls) \
+  DWARF_ONE_KNOWN_DW_AT (call_all_source_calls, DW_AT_call_all_source_calls) \
+  DWARF_ONE_KNOWN_DW_AT (call_all_tail_calls, DW_AT_call_all_tail_calls) \
   DWARF_ONE_KNOWN_DW_AT (call_column, DW_AT_call_column) \
+  DWARF_ONE_KNOWN_DW_AT (call_data_location, DW_AT_call_data_location) \
+  DWARF_ONE_KNOWN_DW_AT (call_data_value, DW_AT_call_data_value) \
   DWARF_ONE_KNOWN_DW_AT (call_file, DW_AT_call_file) \
   DWARF_ONE_KNOWN_DW_AT (call_line, DW_AT_call_line) \
+  DWARF_ONE_KNOWN_DW_AT (call_origin, DW_AT_call_origin) \
+  DWARF_ONE_KNOWN_DW_AT (call_parameter, DW_AT_call_parameter) \
+  DWARF_ONE_KNOWN_DW_AT (call_pc, DW_AT_call_pc) \
+  DWARF_ONE_KNOWN_DW_AT (call_return_pc, DW_AT_call_return_pc) \
+  DWARF_ONE_KNOWN_DW_AT (call_tail_call, DW_AT_call_tail_call) \
+  DWARF_ONE_KNOWN_DW_AT (call_target, DW_AT_call_target) \
+  DWARF_ONE_KNOWN_DW_AT (call_target_clobbered, DW_AT_call_target_clobbered) \
+  DWARF_ONE_KNOWN_DW_AT (call_value, DW_AT_call_value) \
   DWARF_ONE_KNOWN_DW_AT (calling_convention, DW_AT_calling_convention) \
   DWARF_ONE_KNOWN_DW_AT (common_reference, DW_AT_common_reference) \
   DWARF_ONE_KNOWN_DW_AT (comp_dir, DW_AT_comp_dir) \
@@ -79,18 +94,21 @@
   DWARF_ONE_KNOWN_DW_AT (decl_line, DW_AT_decl_line) \
   DWARF_ONE_KNOWN_DW_AT (declaration, DW_AT_declaration) \
   DWARF_ONE_KNOWN_DW_AT (default_value, DW_AT_default_value) \
+  DWARF_ONE_KNOWN_DW_AT (defaulted, DW_AT_defaulted) \
+  DWARF_ONE_KNOWN_DW_AT (deleted, DW_AT_deleted) \
   DWARF_ONE_KNOWN_DW_AT (description, DW_AT_description) \
   DWARF_ONE_KNOWN_DW_AT (digit_count, DW_AT_digit_count) \
   DWARF_ONE_KNOWN_DW_AT (discr, DW_AT_discr) \
   DWARF_ONE_KNOWN_DW_AT (discr_list, DW_AT_discr_list) \
   DWARF_ONE_KNOWN_DW_AT (discr_value, DW_AT_discr_value) \
-  DWARF_ONE_KNOWN_DW_AT (element_list, DW_AT_element_list) \
+  DWARF_ONE_KNOWN_DW_AT (dwo_name, DW_AT_dwo_name) \
   DWARF_ONE_KNOWN_DW_AT (elemental, DW_AT_elemental) \
   DWARF_ONE_KNOWN_DW_AT (encoding, DW_AT_encoding) \
   DWARF_ONE_KNOWN_DW_AT (endianity, DW_AT_endianity) \
   DWARF_ONE_KNOWN_DW_AT (entry_pc, DW_AT_entry_pc) \
   DWARF_ONE_KNOWN_DW_AT (enum_class, DW_AT_enum_class) \
   DWARF_ONE_KNOWN_DW_AT (explicit, DW_AT_explicit) \
+  DWARF_ONE_KNOWN_DW_AT (export_symbols, DW_AT_export_symbols) \
   DWARF_ONE_KNOWN_DW_AT (extension, DW_AT_extension) \
   DWARF_ONE_KNOWN_DW_AT (external, DW_AT_external) \
   DWARF_ONE_KNOWN_DW_AT (frame_base, DW_AT_frame_base) \
@@ -103,12 +121,13 @@
   DWARF_ONE_KNOWN_DW_AT (language, DW_AT_language) \
   DWARF_ONE_KNOWN_DW_AT (linkage_name, DW_AT_linkage_name) \
   DWARF_ONE_KNOWN_DW_AT (location, DW_AT_location) \
+  DWARF_ONE_KNOWN_DW_AT (loclists_base, DW_AT_loclists_base) \
   DWARF_ONE_KNOWN_DW_AT (low_pc, DW_AT_low_pc) \
   DWARF_ONE_KNOWN_DW_AT (lower_bound, DW_AT_lower_bound) \
   DWARF_ONE_KNOWN_DW_AT (mac_info, DW_AT_mac_info) \
   DWARF_ONE_KNOWN_DW_AT (macro_info, DW_AT_macro_info) \
+  DWARF_ONE_KNOWN_DW_AT (macros, DW_AT_macros) \
   DWARF_ONE_KNOWN_DW_AT (main_subprogram, DW_AT_main_subprogram) \
-  DWARF_ONE_KNOWN_DW_AT (member, DW_AT_member) \
   DWARF_ONE_KNOWN_DW_AT (mutable, DW_AT_mutable) \
   DWARF_ONE_KNOWN_DW_AT (name, DW_AT_name) \
   DWARF_ONE_KNOWN_DW_AT (namelist_item, DW_AT_namelist_item) \
@@ -121,8 +140,12 @@
   DWARF_ONE_KNOWN_DW_AT (prototyped, DW_AT_prototyped) \
   DWARF_ONE_KNOWN_DW_AT (pure, DW_AT_pure) \
   DWARF_ONE_KNOWN_DW_AT (ranges, DW_AT_ranges) \
+  DWARF_ONE_KNOWN_DW_AT (rank, DW_AT_rank) \
   DWARF_ONE_KNOWN_DW_AT (recursive, DW_AT_recursive) \
+  DWARF_ONE_KNOWN_DW_AT (reference, DW_AT_reference) \
   DWARF_ONE_KNOWN_DW_AT (return_addr, DW_AT_return_addr) \
+  DWARF_ONE_KNOWN_DW_AT (rnglists_base, DW_AT_rnglists_base) \
+  DWARF_ONE_KNOWN_DW_AT (rvalue_reference, DW_AT_rvalue_reference) \
   DWARF_ONE_KNOWN_DW_AT (segment, DW_AT_segment) \
   DWARF_ONE_KNOWN_DW_AT (sf_names, DW_AT_sf_names) \
   DWARF_ONE_KNOWN_DW_AT (sibling, DW_AT_sibling) \
@@ -134,8 +157,10 @@
   DWARF_ONE_KNOWN_DW_AT (start_scope, DW_AT_start_scope) \
   DWARF_ONE_KNOWN_DW_AT (static_link, DW_AT_static_link) \
   DWARF_ONE_KNOWN_DW_AT (stmt_list, DW_AT_stmt_list) \
+  DWARF_ONE_KNOWN_DW_AT (str_offsets_base, DW_AT_str_offsets_base) \
   DWARF_ONE_KNOWN_DW_AT (string_length, DW_AT_string_length) \
-  DWARF_ONE_KNOWN_DW_AT (subscr_data, DW_AT_subscr_data) \
+  DWARF_ONE_KNOWN_DW_AT (string_length_bit_size, DW_AT_string_length_bit_size) \
+  DWARF_ONE_KNOWN_DW_AT (string_length_byte_size, DW_AT_string_length_byte_size) \
   DWARF_ONE_KNOWN_DW_AT (threads_scaled, DW_AT_threads_scaled) \
   DWARF_ONE_KNOWN_DW_AT (trampoline, DW_AT_trampoline) \
   DWARF_ONE_KNOWN_DW_AT (type, DW_AT_type) \
@@ -149,6 +174,8 @@
   /* End of DW_AT_*.  */
 
 #define DWARF_ALL_KNOWN_DW_ATE \
+  DWARF_ONE_KNOWN_DW_ATE (ASCII, DW_ATE_ASCII) \
+  DWARF_ONE_KNOWN_DW_ATE (UCS, DW_ATE_UCS) \
   DWARF_ONE_KNOWN_DW_ATE (UTF, DW_ATE_UTF) \
   DWARF_ONE_KNOWN_DW_ATE (address, DW_ATE_address) \
   DWARF_ONE_KNOWN_DW_ATE (boolean, DW_ATE_boolean) \
@@ -171,6 +198,8 @@
 #define DWARF_ALL_KNOWN_DW_CC \
   DWARF_ONE_KNOWN_DW_CC (nocall, DW_CC_nocall) \
   DWARF_ONE_KNOWN_DW_CC (normal, DW_CC_normal) \
+  DWARF_ONE_KNOWN_DW_CC (pass_by_reference, DW_CC_pass_by_reference) \
+  DWARF_ONE_KNOWN_DW_CC (pass_by_value, DW_CC_pass_by_value) \
   DWARF_ONE_KNOWN_DW_CC (program, DW_CC_program) \
   /* End of DW_CC_*.  */
 
@@ -217,6 +246,12 @@
   DWARF_ONE_KNOWN_DW_CIE_ID (32, DW_CIE_ID_32) \
   DWARF_ONE_KNOWN_DW_CIE_ID (64, DW_CIE_ID_64) \
   /* End of DW_CIE_ID_*.  */
+
+#define DWARF_ALL_KNOWN_DW_DEFAULTED \
+  DWARF_ONE_KNOWN_DW_DEFAULTED (in_class, DW_DEFAULTED_in_class) \
+  DWARF_ONE_KNOWN_DW_DEFAULTED (no, DW_DEFAULTED_no) \
+  DWARF_ONE_KNOWN_DW_DEFAULTED (out_of_class, DW_DEFAULTED_out_of_class) \
+  /* End of DW_DEFAULTED_*.  */
 
 #define DWARF_ALL_KNOWN_DW_DS \
   DWARF_ONE_KNOWN_DW_DS (leading_overpunch, DW_DS_leading_overpunch) \
@@ -304,16 +339,19 @@
 #define DWARF_ALL_KNOWN_DW_LANG \
   DWARF_ONE_KNOWN_DW_LANG (Ada83, DW_LANG_Ada83) \
   DWARF_ONE_KNOWN_DW_LANG (Ada95, DW_LANG_Ada95) \
+  DWARF_ONE_KNOWN_DW_LANG (BLISS, DW_LANG_BLISS) \
   DWARF_ONE_KNOWN_DW_LANG (C, DW_LANG_C) \
   DWARF_ONE_KNOWN_DW_LANG (C11, DW_LANG_C11) \
   DWARF_ONE_KNOWN_DW_LANG (C89, DW_LANG_C89) \
   DWARF_ONE_KNOWN_DW_LANG (C99, DW_LANG_C99) \
   DWARF_ONE_KNOWN_DW_LANG (C_plus_plus, DW_LANG_C_plus_plus) \
+  DWARF_ONE_KNOWN_DW_LANG (C_plus_plus_03, DW_LANG_C_plus_plus_03) \
   DWARF_ONE_KNOWN_DW_LANG (C_plus_plus_11, DW_LANG_C_plus_plus_11) \
   DWARF_ONE_KNOWN_DW_LANG (C_plus_plus_14, DW_LANG_C_plus_plus_14) \
   DWARF_ONE_KNOWN_DW_LANG (Cobol74, DW_LANG_Cobol74) \
   DWARF_ONE_KNOWN_DW_LANG (Cobol85, DW_LANG_Cobol85) \
   DWARF_ONE_KNOWN_DW_LANG (D, DW_LANG_D) \
+  DWARF_ONE_KNOWN_DW_LANG (Dylan, DW_LANG_Dylan) \
   DWARF_ONE_KNOWN_DW_LANG (Fortran03, DW_LANG_Fortran03) \
   DWARF_ONE_KNOWN_DW_LANG (Fortran08, DW_LANG_Fortran08) \
   DWARF_ONE_KNOWN_DW_LANG (Fortran77, DW_LANG_Fortran77) \
@@ -322,13 +360,20 @@
   DWARF_ONE_KNOWN_DW_LANG (Go, DW_LANG_Go) \
   DWARF_ONE_KNOWN_DW_LANG (Haskell, DW_LANG_Haskell) \
   DWARF_ONE_KNOWN_DW_LANG (Java, DW_LANG_Java) \
+  DWARF_ONE_KNOWN_DW_LANG (Julia, DW_LANG_Julia) \
   DWARF_ONE_KNOWN_DW_LANG (Mips_Assembler, DW_LANG_Mips_Assembler) \
   DWARF_ONE_KNOWN_DW_LANG (Modula2, DW_LANG_Modula2) \
+  DWARF_ONE_KNOWN_DW_LANG (Modula3, DW_LANG_Modula3) \
+  DWARF_ONE_KNOWN_DW_LANG (OCaml, DW_LANG_OCaml) \
   DWARF_ONE_KNOWN_DW_LANG (ObjC, DW_LANG_ObjC) \
   DWARF_ONE_KNOWN_DW_LANG (ObjC_plus_plus, DW_LANG_ObjC_plus_plus) \
+  DWARF_ONE_KNOWN_DW_LANG (OpenCL, DW_LANG_OpenCL) \
   DWARF_ONE_KNOWN_DW_LANG (PLI, DW_LANG_PLI) \
   DWARF_ONE_KNOWN_DW_LANG (Pascal83, DW_LANG_Pascal83) \
   DWARF_ONE_KNOWN_DW_LANG (Python, DW_LANG_Python) \
+  DWARF_ONE_KNOWN_DW_LANG (RenderScript, DW_LANG_RenderScript) \
+  DWARF_ONE_KNOWN_DW_LANG (Rust, DW_LANG_Rust) \
+  DWARF_ONE_KNOWN_DW_LANG (Swift, DW_LANG_Swift) \
   DWARF_ONE_KNOWN_DW_LANG (UPC, DW_LANG_UPC) \
   /* End of DW_LANG_*.  */
 
@@ -362,15 +407,20 @@
   DWARF_ONE_KNOWN_DW_MACINFO (vendor_ext, DW_MACINFO_vendor_ext) \
   /* End of DW_MACINFO_*.  */
 
-#define DWARF_ALL_KNOWN_DW_MACRO_GNU \
-  DWARF_ONE_KNOWN_DW_MACRO_GNU (define, DW_MACRO_GNU_define) \
-  DWARF_ONE_KNOWN_DW_MACRO_GNU (define_indirect, DW_MACRO_GNU_define_indirect) \
-  DWARF_ONE_KNOWN_DW_MACRO_GNU (end_file, DW_MACRO_GNU_end_file) \
-  DWARF_ONE_KNOWN_DW_MACRO_GNU (start_file, DW_MACRO_GNU_start_file) \
-  DWARF_ONE_KNOWN_DW_MACRO_GNU (transparent_include, DW_MACRO_GNU_transparent_include) \
-  DWARF_ONE_KNOWN_DW_MACRO_GNU (undef, DW_MACRO_GNU_undef) \
-  DWARF_ONE_KNOWN_DW_MACRO_GNU (undef_indirect, DW_MACRO_GNU_undef_indirect) \
-  /* End of DW_MACRO_GNU_*.  */
+#define DWARF_ALL_KNOWN_DW_MACRO \
+  DWARF_ONE_KNOWN_DW_MACRO (define, DW_MACRO_define) \
+  DWARF_ONE_KNOWN_DW_MACRO (define_strp, DW_MACRO_define_strp) \
+  DWARF_ONE_KNOWN_DW_MACRO (define_strx, DW_MACRO_define_strx) \
+  DWARF_ONE_KNOWN_DW_MACRO (define_sup, DW_MACRO_define_sup) \
+  DWARF_ONE_KNOWN_DW_MACRO (end_file, DW_MACRO_end_file) \
+  DWARF_ONE_KNOWN_DW_MACRO (import, DW_MACRO_import) \
+  DWARF_ONE_KNOWN_DW_MACRO (import_sup, DW_MACRO_import_sup) \
+  DWARF_ONE_KNOWN_DW_MACRO (start_file, DW_MACRO_start_file) \
+  DWARF_ONE_KNOWN_DW_MACRO (undef, DW_MACRO_undef) \
+  DWARF_ONE_KNOWN_DW_MACRO (undef_strp, DW_MACRO_undef_strp) \
+  DWARF_ONE_KNOWN_DW_MACRO (undef_strx, DW_MACRO_undef_strx) \
+  DWARF_ONE_KNOWN_DW_MACRO (undef_sup, DW_MACRO_undef_sup) \
+  /* End of DW_MACRO_*.  */
 
 #define DWARF_ALL_KNOWN_DW_OP \
   DWARF_ONE_KNOWN_DW_OP (GNU_const_type, DW_OP_GNU_const_type) \
@@ -558,9 +608,12 @@
   DWARF_ONE_KNOWN_DW_TAG (array_type, DW_TAG_array_type) \
   DWARF_ONE_KNOWN_DW_TAG (atomic_type, DW_TAG_atomic_type) \
   DWARF_ONE_KNOWN_DW_TAG (base_type, DW_TAG_base_type) \
+  DWARF_ONE_KNOWN_DW_TAG (call_site, DW_TAG_call_site) \
+  DWARF_ONE_KNOWN_DW_TAG (call_site_parameter, DW_TAG_call_site_parameter) \
   DWARF_ONE_KNOWN_DW_TAG (catch_block, DW_TAG_catch_block) \
   DWARF_ONE_KNOWN_DW_TAG (class_template, DW_TAG_class_template) \
   DWARF_ONE_KNOWN_DW_TAG (class_type, DW_TAG_class_type) \
+  DWARF_ONE_KNOWN_DW_TAG (coarray_type, DW_TAG_coarray_type) \
   DWARF_ONE_KNOWN_DW_TAG (common_block, DW_TAG_common_block) \
   DWARF_ONE_KNOWN_DW_TAG (common_inclusion, DW_TAG_common_inclusion) \
   DWARF_ONE_KNOWN_DW_TAG (compile_unit, DW_TAG_compile_unit) \
@@ -568,6 +621,7 @@
   DWARF_ONE_KNOWN_DW_TAG (const_type, DW_TAG_const_type) \
   DWARF_ONE_KNOWN_DW_TAG (constant, DW_TAG_constant) \
   DWARF_ONE_KNOWN_DW_TAG (dwarf_procedure, DW_TAG_dwarf_procedure) \
+  DWARF_ONE_KNOWN_DW_TAG (dynamic_type, DW_TAG_dynamic_type) \
   DWARF_ONE_KNOWN_DW_TAG (entry_point, DW_TAG_entry_point) \
   DWARF_ONE_KNOWN_DW_TAG (enumeration_type, DW_TAG_enumeration_type) \
   DWARF_ONE_KNOWN_DW_TAG (enumerator, DW_TAG_enumerator) \
@@ -576,6 +630,8 @@
   DWARF_ONE_KNOWN_DW_TAG (format_label, DW_TAG_format_label) \
   DWARF_ONE_KNOWN_DW_TAG (friend, DW_TAG_friend) \
   DWARF_ONE_KNOWN_DW_TAG (function_template, DW_TAG_function_template) \
+  DWARF_ONE_KNOWN_DW_TAG (generic_subrange, DW_TAG_generic_subrange) \
+  DWARF_ONE_KNOWN_DW_TAG (immutable_type, DW_TAG_immutable_type) \
   DWARF_ONE_KNOWN_DW_TAG (imported_declaration, DW_TAG_imported_declaration) \
   DWARF_ONE_KNOWN_DW_TAG (imported_module, DW_TAG_imported_module) \
   DWARF_ONE_KNOWN_DW_TAG (imported_unit, DW_TAG_imported_unit) \
@@ -598,6 +654,7 @@
   DWARF_ONE_KNOWN_DW_TAG (rvalue_reference_type, DW_TAG_rvalue_reference_type) \
   DWARF_ONE_KNOWN_DW_TAG (set_type, DW_TAG_set_type) \
   DWARF_ONE_KNOWN_DW_TAG (shared_type, DW_TAG_shared_type) \
+  DWARF_ONE_KNOWN_DW_TAG (skeleton_unit, DW_TAG_skeleton_unit) \
   DWARF_ONE_KNOWN_DW_TAG (string_type, DW_TAG_string_type) \
   DWARF_ONE_KNOWN_DW_TAG (structure_type, DW_TAG_structure_type) \
   DWARF_ONE_KNOWN_DW_TAG (subprogram, DW_TAG_subprogram) \

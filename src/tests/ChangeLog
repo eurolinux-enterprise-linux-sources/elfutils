@@ -1,3 +1,156 @@
+2017-07-26  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf-getmacros.c (mac): Use DW_MACRO names instead of DW_MACRO_GNU.
+
+2016-10-27  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf_default_lower_bound.c: New test.
+	* Makefile.am (check_PROGRAMS): Add dwarf_default_lower_bound.
+	(TESTS): Likewise.
+	(dwarf_default_lower_bound_LDADD): New variable.
+
+2017-07-21  Mark Wielaard  <mark@klomp.org>
+
+	* get-lines.c (main): Add dwarf_line_file test.
+
+2017-07-19  Gustavo Romero <gromero@linux.vnet.ibm.com>
+
+	* run-addrcfi.sh: Update generic SPRs names to HTM SPRs names
+	* run-allregs.sh: Update generic SPRs names to HTM SPRs names
+
+2017-07-20  Mark Wielaard  <mark@klomp.org>
+
+	* run-strip-g.sh: New test.
+	* Makefile.am (TESTS): Add run-strip-g.sh.
+	(EXTRA_DIST): Likewise.
+
+2017-07-18  Mark Wielaard  <mark@klomp.org>
+
+	* Makefile.am (TESTS): Always add run-disasm-bpf.sh if HAVE_LIBASM.
+
+2017-05-04  Ulf Hermann  <ulf.hermann@qt.io>
+
+	* elfshphehdr.c: For writing, use /dev/null rather than /dev/zero.
+
+2017-07-14  Mark Wielaard  <mark@klomp.org>
+
+	* run-strip-remove-keep.sh: New test.
+	* Makefile.am (TESTS): Add run-strip-remove-keep.sh.
+	(EXTRA_DIST): Likewise.
+
+2017-06-07  Mark Wielaard  <mark@klomp.org>
+
+	* run-strip-nothing.sh: New test.
+	* Makefile.am (TESTS): Add run-strip-nothing.sh.
+	(EXTRA_DIST): Likewise.
+
+2017-06-06  Mark Wielaard  <mark@klomp.org>
+
+	* run-strip-test.sh: Test strip -g doesn't introduce extra .shstrtab.
+
+2017-05-30  Mark Wielaard  <mark@klomp.org>
+
+	* run-backtrace-fp-core-ppc64le.sh: New test.
+	* backtrace.ppc64le.fp.core.bz2: New test file.
+	* backtrace.ppc64le.fp.exec.bz2: New testfile.
+	* backtrace-subr.sh (check_backtracegen): Accept '(null)'.
+	* Makefile.am (TESTS): Add run-backtrace-fp-core-ppc64le.sh.
+	(EXTRA_DIST): Add run-backtrace-fp-core-ppc64le.sh,
+	backtrace.ppc64le.fp.core.bz2 and backtrace.ppc64le.fp.exec.bz2.
+
+2017-02-13  Ulf Hermann  <ulf.hermann@qt.io>
+	    Mark Wielaard  <mark@klomp.org>
+
+	* Makefile.am: Add test for unwinding with frame pointers on aarch64
+	* backtrace.aarch64.fp.core.bz2: New file
+	* backtrace.aarch64.fp.exec.bz2: New file
+	* run-backtrace-fp-core-aarch64.sh: New file
+	* backtrace-subr.sh (check_err): Allow Invalid register.
+	* backtrace.c (callback_verify): Allow duplicate_sigusr2 frames.
+
+2017-04-06  Mark Wielaard  <mark@klomp.org>
+
+	* run-backtrace-fp-core-i386.sh: New test.
+	* backtrace.i386.fp.core.bz2: New test file.
+	* backtrace.i386.fp.exec.bz2: New testfile.
+	* Makefile.am (TESTS): Add run-backtrace-fp-core-i386.sh.
+	(EXTRA_DIST): Add run-backtrace-fp-core-i386.sh,
+	backtrace.i386.fp.core.bz2 and backtrace.i386.fp.exec.bz2.
+
+2017-02-09  Ulf Hermann  <ulf.hermann@qt.io>
+
+	* Makefile.am: Add test for unwinding with frame pointers on x86_64
+	* backtrace.x86_64.fp.core.bz2: New file
+	* backtrace.x86_64.fp.exec.bz2: New file
+	* run-backtrace-fp-core-x86_64.sh: New file
+
+2017-04-25  Mark Wielaard  <mark@klomp.org>
+
+	* backtrace-subr.sh (check_backtracegen): New function.
+	(check_core): Add check_backtracegen call.
+	* backtrace.ppc.exec.bz2: Regenerated.
+	* backtrace.ppc.core.bz2: Likewise.
+
+2017-04-24  Mark Wielaard  <mark@klomp.org>
+
+	* backtrace.c: Remove option to allow unknown symbols in the trace.
+	* backtrace-substr.sh: Remove option to allow unknown symbols
+	to check_core() and allow failed symbol lookups in check_err().
+
+2017-04-20  Ulf Hermann <ulf.hermann@qt.io>
+
+	* run-readelf-dwz-multi.sh: Expect readelf to output "yes" for flags
+	that are set.
+	* run-readelf-zdebug-rel.sh: Likewise.
+
+2017-04-20  Ulf Hermann <ulf.hermann@qt.io>
+
+	* backtrace-child.c: Include sys/ptrace.h only on linux.
+	* backtrace-dwarf.c: Likewise.
+
+2017-04-05  Mark Wielaard  <mark@klomp.org>
+
+	* test-subr.sh (testrun_on_self_compressed): New function.
+	* run-elflint-self.sh: Call testrun_on_self_compressed.
+	* run-elflint-test.sh: Add testfile42z and testfile-s390x-hash-bothz.
+
+2017-03-30  Mark Wielaard  <mark@klomp.org>
+
+	* peel_type.c: New file.
+	* run-peel-type.sh: New test.
+	* Makefile.am (check_PROGRAMS): Add peel_type.c.
+	(TESTS): Add run-peel-type.sh.
+	(EXTRA_DIST): Likewise.
+	(peel_type_LDADD): New variable.
+
+2017-03-27  Mark Wielaard  <mark@klomp.org>
+
+	* fillfile.c: New file.
+	* Makefile.am (check_PROGRAMS): Add fillfile.
+	(TESTS): Likewise.
+	(fillfile_LDADD): New variable.
+
+2017-02-15  Mark Wielaard  <mark@klomp.org>
+
+	* Makefile.am (EXTRA_DIST): Add testfileppc64attrs.o.bz2.
+	* run-readelf-A.sh: Add testfileppc64.o test.
+
+2017-02-15  Ulf Hermann  <ulf.hermann@qt.io>
+
+	* elfstrmerge.c: Include system.h.
+
+2017-02-09  Ulf Hermann  <ulf.hermann@qt.io>
+
+	* backtrace.c: Add an option to allow unknown symbols in the trace
+	* backtrace-substr.sh: Add an option to allow unknown symbols
+	to check_core() and allow failed symbol lookups in check_err()
+
+2017-02-09  Ulf Hermann  <ulf.hermann@qt.io>
+
+	* backtrace-data.c: Don't assert that symbols are found.
+	The unwinder is allowed to ask for invalid addresses. We deny
+	such requests, rather than make the test fail.
+
 2016-11-17  Mark Wielaard  <mjw@redhat.com>
 
 	* run-readelf-s.sh: Add --symbols=.dynsym and --symbols=.symtab tests.

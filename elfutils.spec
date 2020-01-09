@@ -1,7 +1,7 @@
 Name: elfutils
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
-Version: 0.168
-%global baserelease 8
+Version: 0.170
+%global baserelease 4
 URL: http://elfutils.org/
 %global source_url ftp://sourceware.org/pub/elfutils/%{version}/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -9,10 +9,10 @@ Group: Development/Tools
 
 Release: %{baserelease}%{?dist}
 
-%global provide_yama_scope	1
+%global provide_yama_scope	0
 
-%if 0%{?fedora}
-%global provide_yama_scope	(%fedora >= 22)
+%if 0%{?fedora} >= 22 || 0%{?rhel} >= 7
+%global provide_yama_scope	1
 %endif
 
 %global depsuffix %{?_isa}%{!?_isa:-%{_arch}}
@@ -20,9 +20,10 @@ Release: %{baserelease}%{?dist}
 Source: %{?source_url}%{name}-%{version}.tar.bz2
 
 # Patches
-Patch1: elfutils-0.168-libasm-truncation.patch
-Patch2: elfutils-0.168-ppc64-attrs.patch
-Patch3: elfutils-0.168-ppc64-fallback-unwinder.patch
+Patch1: elfutils-0.170-dwarf_aggregate_size.patch
+Source1: testfile-sizes3.o.bz2
+
+Patch2: elfutils-0.170-x86_64-backtrace-test-override.patch
 
 Requires: elfutils-libelf%{depsuffix} = %{version}-%{release}
 Requires: elfutils-libs%{depsuffix} = %{version}-%{release}
@@ -157,6 +158,7 @@ License: GPLv2+ or LGPLv3+
 Provides: default-yama-scope
 BuildArch: noarch
 # For the sysctl_apply macro
+%{?systemd_requires}
 BuildRequires: systemd >= 215
 
 %description default-yama-scope
@@ -173,9 +175,12 @@ profiling) of processes.
 %setup -q
 
 # Apply patches
-%patch1 -p1 -b .trunc
-%patch2 -p1 -b .attr
-%patch3 -p1 -b .unwind_ppc64
+%patch1 -p1 -b .aggregate_size
+cp %SOURCE1 tests/
+
+# This is only necessary for the RHEL brew build host, which seems to
+# generate a corrupt core file which we cannot test properly.
+%patch2 -p1 -b .x86_64_override
 
 find . -name \*.sh ! -perm -0100 -print | xargs chmod +x
 
@@ -207,6 +212,9 @@ install -Dm0644 config/10-default-yama-scope.conf ${RPM_BUILD_ROOT}%{_sysctldir}
 %endif
 
 %check
+# Record some build root versions in build.log
+uname -r; rpm -q glibc
+
 make -s %{?_smp_mflags} check || (cat tests/test-suite.log; false)
 
 %clean
@@ -222,7 +230,11 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %if %{provide_yama_scope}
 %post default-yama-scope
+# Due to circular dependencies might not be installed yet, so double check.
+# (systemd -> elfutils-libs -> default-yama-scope -> systemd)
+if [ -x /usr/lib/systemd/systemd-sysctl ] ; then
 %sysctl_apply 10-default-yama-scope.conf
+fi
 %endif
 
 %files
@@ -306,6 +318,20 @@ rm -rf ${RPM_BUILD_ROOT}
 %endif
 
 %changelog
+* Wed Dec 20 2017 Mark Wielaard <mjw@redhat.com> - 0.170-4
+- Add elfutils-0.170-dwarf_aggregate_size.patch (#1527966).
+
+* Wed Nov  8 2017 Mark Wielaard <mjw@redhat.com> - 0.170-3
+- Rely on systemd_requires for sysctl_apply default-yama-scope (#1509861).
+
+* Thu Nov  2 2017 Mark Wielaard <mjw@redhat.com> - 0.170-2
+- Rebuild because of binutils bug (#1508966)
+
+* Mon Oct 16 2017 Mark Wielaard <mjw@redhat.com> - 0.170-1
+- New upstream release. Remove upstreamed patches.
+- Sync provide_yama_scope with fedora.
+- Add elfutils-0.170-x86_64-backtrace-test-override.patch.
+
 * Tue May 30 2017 Mark Wielaard <mjw@redhat.com> - 0.168-8
 - Fix ppc64 fallback unwinder (#1454754)
 
